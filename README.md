@@ -4,7 +4,7 @@
 
 **Course:** Web Programming · Spring 1404  
 **Instructor:** Ali Abrishami  
-**Team:** Foad Kheirabady · Iliya Forsaty · Rayan Hadidy
+**Team:** Foad · Iliya · Rayan
 
 ---
 
@@ -13,7 +13,7 @@
 ```
 SoundWave/
 ├── soundwave-frontend/    ← Next.js 14 (React, TypeScript)
-└── soundwave-backend/     ← Django + Django REST Framework (Phase 2)
+└── backend/     ← Django + Django REST Framework (Phase 2)
 ```
 
 ---
@@ -88,10 +88,10 @@ SoundWave is a Spotify-like music streaming platform. Users can stream music, ma
 
 **Stack:** Next.js 14 · TypeScript · Zustand · React Hook Form · Zod · Howler.js
 
-### Pages
+### Pages & Components
 
-| Page | Path | Owner |
-|------|------|-------|
+| Page / Component | Path | Owner |
+|-----------------|------|-------|
 | Login / Register | `/login` | Foad |
 | Home | `/home` | Rayan |
 | Library / Search | `/library` | Rayan |
@@ -102,6 +102,10 @@ SoundWave is a Spotify-like music streaming platform. Users can stream music, ma
 | Notifications | `/notifications` | Foad |
 | Artist Management | `/manage` | Foad |
 | Support / Admin Dashboard | `/support` | Foad |
+| **Music Player** *(global layout component, not a page)* | `components/player/` | **Iliya** |
+| **AI Song Suggester** *(component embedded on Home)* | `components/suggestions/` | **Iliya** |
+
+> **Note — why Iliya has no standalone pages:** Iliya owns the two most complex components in the project. The Music Player is a persistent bar rendered in the app shell layout (visible on every page), and the Song Suggester is a widget embedded inside the Home page. Neither is a route of its own, but both are independently developed and tested.
 
 ### Bonus Features
 
@@ -226,4 +230,3 @@ A PDF report is required at the end of Phase 2. It must include:
 - One AI-generated code sample from each phase
 - Strengths and weaknesses of AI in frontend vs backend development
 
-> ⚠️ The project grade will not be issued without this report.
