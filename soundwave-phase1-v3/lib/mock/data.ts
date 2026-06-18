@@ -1,0 +1,227 @@
+// ============================================================
+// SOUNDWAVE — MOCK DATA (Phase 1 only)
+// In Phase 2, replace all of this with real API calls.
+// ============================================================
+
+import type { User, Artist, Track, Album, Playlist, Notification } from '@/types';
+
+export const MOCK_USERS: User[] = [
+  {
+    id: 'u1',
+    username: 'sw_ali_r',
+    displayName: 'Ali Rezaei',
+    email: 'ali@example.com',
+    avatarUrl: null,
+    role: 'listener',
+    subscription: 'free',
+    subscriptionExpiresAt: null,
+    birthDate: '1998-05-10',
+    gender: 'male',
+    followersCount: 42,
+    followingCount: 18,
+    dailyStreamsUsed: 12,
+    createdAt: '2024-01-15T10:00:00Z',
+  },
+  {
+    id: 'u2',
+    username: 'sw_sara_k',
+    displayName: 'Sara Karimi',
+    email: 'sara@example.com',
+    avatarUrl: null,
+    role: 'listener',
+    subscription: 'gold',
+    subscriptionExpiresAt: '2025-12-31T00:00:00Z',
+    birthDate: '1995-11-22',
+    gender: 'female',
+    followersCount: 130,
+    followingCount: 75,
+    dailyStreamsUsed: 0,
+    createdAt: '2023-08-01T10:00:00Z',
+  },
+  {
+    id: 'u3',
+    username: 'sw_dariush',
+    displayName: 'Dariush Eghbali',
+    email: 'dariush@example.com',
+    avatarUrl: null,
+    role: 'artist',
+    subscription: 'silver',
+    subscriptionExpiresAt: '2025-09-01T00:00:00Z',
+    birthDate: '1951-03-08',
+    gender: 'male',
+    followersCount: 4200,
+    followingCount: 10,
+    dailyStreamsUsed: 0,
+    createdAt: '2023-01-01T00:00:00Z',
+  },
+  {
+    id: 'u4',
+    username: 'sw_admin',
+    displayName: 'System Admin',
+    email: 'admin@soundwave.ir',
+    avatarUrl: null,
+    role: 'admin',
+    subscription: 'gold',
+    subscriptionExpiresAt: null,
+    birthDate: '1990-01-01',
+    gender: 'other',
+    followersCount: 0,
+    followingCount: 0,
+    dailyStreamsUsed: 0,
+    createdAt: '2023-01-01T00:00:00Z',
+  },
+];
+
+export const MOCK_ARTISTS: Artist[] = [
+  {
+    id: 'a1',
+    userId: 'u3',
+    stageName: 'Dariush',
+    bio: 'یکی از بزرگ‌ترین خوانندگان موسیقی ایرانی.',
+    avatarUrl: null,
+    isVerified: true,
+    status: 'approved',
+    followersCount: 4200,
+    totalStreams: 820000,
+    totalListeners: 310000,
+    createdAt: '2023-01-01T00:00:00Z',
+  },
+  {
+    id: 'a2',
+    userId: 'u5',
+    stageName: 'Googoosh',
+    bio: 'نماد موسیقی و هنر ایران.',
+    avatarUrl: null,
+    isVerified: true,
+    status: 'approved',
+    followersCount: 9800,
+    totalStreams: 1500000,
+    totalListeners: 620000,
+    createdAt: '2023-01-01T00:00:00Z',
+  },
+  {
+    id: 'a3',
+    userId: 'u6',
+    stageName: 'Emerging Artist',
+    bio: 'در انتظار تایید.',
+    avatarUrl: null,
+    isVerified: false,
+    status: 'pending',
+    followersCount: 0,
+    totalStreams: 0,
+    totalListeners: 0,
+    createdAt: '2024-06-01T00:00:00Z',
+  },
+];
+
+export const MOCK_TRACKS: Track[] = [
+  {
+    id: 't1',
+    title: 'Ey Iran',
+    duration: 245,
+    audioUrl: '/mock/audio/ey-iran.mp3',
+    coverUrl: null,
+    lyrics: 'ای ایران، ای مرز پر گهر...',
+    genre: 'Traditional',
+    releaseYear: 1990,
+    albumId: 'al1',
+    albumTitle: 'Classics Vol. 1',
+    artists: [{ id: 'a1', stageName: 'Dariush' }],
+    streamCount: 450000,
+    uniqueListeners: 180000,
+    isEarlyAccess: false,
+    createdAt: '2023-03-10T00:00:00Z',
+  },
+  {
+    id: 't2',
+    title: 'Gharib Ashena',
+    duration: 310,
+    audioUrl: '/mock/audio/gharib-ashena.mp3',
+    coverUrl: null,
+    lyrics: null,
+    genre: 'Pop',
+    releaseYear: 1985,
+    albumId: null,
+    albumTitle: null,
+    artists: [{ id: 'a2', stageName: 'Googoosh' }],
+    streamCount: 780000,
+    uniqueListeners: 320000,
+    isEarlyAccess: false,
+    createdAt: '2023-05-20T00:00:00Z',
+  },
+  {
+    id: 't3',
+    title: 'New Track (Early Access)',
+    duration: 188,
+    audioUrl: '/mock/audio/new-track.mp3',
+    coverUrl: null,
+    lyrics: null,
+    genre: 'Pop',
+    releaseYear: 2025,
+    albumId: null,
+    albumTitle: null,
+    artists: [{ id: 'a1', stageName: 'Dariush' }],
+    streamCount: 1200,
+    uniqueListeners: 900,
+    isEarlyAccess: true,
+    createdAt: '2025-05-01T00:00:00Z',
+  },
+];
+
+export const MOCK_ALBUMS: Album[] = [
+  {
+    id: 'al1',
+    title: 'Classics Vol. 1',
+    coverUrl: null,
+    releaseYear: 1990,
+    genre: 'Traditional',
+    artists: [{ id: 'a1', stageName: 'Dariush' }],
+    tracks: [MOCK_TRACKS[0]],
+    streamCount: 450000,
+    isEarlyAccess: false,
+    createdAt: '2023-03-10T00:00:00Z',
+  },
+];
+
+export const MOCK_PLAYLISTS: Playlist[] = [
+  {
+    id: 'pl1',
+    name: 'My Favorites',
+    coverUrl: null,
+    ownerId: 'u1',
+    tracks: [MOCK_TRACKS[0], MOCK_TRACKS[1]],
+    createdAt: '2024-02-01T00:00:00Z',
+    updatedAt: '2024-02-15T00:00:00Z',
+  },
+];
+
+export const MOCK_NOTIFICATIONS: Notification[] = [
+  {
+    id: 'n1',
+    type: 'subscription_expiry',
+    title: 'اشتراک شما رو به اتمام است',
+    body: 'اشتراک نقره‌ای شما ۷ روز دیگر منقضی می‌شود.',
+    isRead: false,
+    actionUrl: '/settings',
+    createdAt: new Date(Date.now() - 3600000).toISOString(),
+  },
+  {
+    id: 'n2',
+    type: 'new_release',
+    title: 'آهنگ جدید از Dariush',
+    body: 'Dariush آهنگ جدیدی منتشر کرد.',
+    isRead: true,
+    actionUrl: '/artist/a1',
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
+  },
+];
+
+// ── MOCK AUTH ────────────────────────────────────────────────
+// Passwords are 'password123' for all mock users
+
+export const MOCK_CREDENTIALS: Record<string, string> = {
+  'ali@example.com':          'password123',
+  'sara@example.com':         'password123',
+  'dariush@example.com':      'password123',
+  'admin@soundwave.ir':       'password123',
+};
