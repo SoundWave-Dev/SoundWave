@@ -33,7 +33,7 @@ SoundWave/
 ### Frontend
 
 ```bash
-cd frontend
+cd soundwave-frontend
 npm install
 npm run dev        # http://localhost:3000
 npm test           # run tests
@@ -42,7 +42,7 @@ npm test           # run tests
 ### Backend *(Phase 2 — coming soon)*
 
 ```bash
-cd backend
+cd soundwave-backend
 python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
