@@ -12,8 +12,8 @@
 
 ```
 SoundWave/
-├── frontend/    ← Next.js 14 (React, TypeScript)
-└── backend/     ← Django + Django REST Framework (Phase 2)
+├── soundwave-frontend/    ← Next.js 14 (React, TypeScript)
+└── soundwave-backend/     ← Django + Django REST Framework (Phase 2)
 ```
 
 ---
