@@ -6,7 +6,15 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '@/types';
 import { STORAGE_KEYS } from '@/lib/constants';
-import { mockLogin, mockLogout, mockGetCurrentUser } from '@/lib/mock/store';
+import {
+  mockLogin,
+  mockLogout,
+  mockGetCurrentUser,
+  mockRegisterListener,
+  mockRegisterArtist,
+  type RegisterListenerInput,
+  type RegisterArtistInput,
+} from '@/lib/mock/store';
 
 interface AuthStore {
   user: User | null;
@@ -15,6 +23,8 @@ interface AuthStore {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   updateUser: (partial: Partial<User>) => void;
+  registerListener: (input: RegisterListenerInput) => Promise<User>;
+  registerArtist: (input: RegisterArtistInput) => Promise<{ pending: true }>;
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -47,6 +57,24 @@ export const useAuthStore = create<AuthStore>()(
         set((state) => ({
           user: state.user ? { ...state.user, ...partial } : null,
         })),
+
+      registerListener: async (input) => {
+        set({ isLoading: true });
+        await new Promise((r) => setTimeout(r, 600));
+        const user = mockRegisterListener(input);
+        const token = `mock-token-${user.id}`;
+        set({ user, token, isLoading: false });
+        return user;
+      },
+
+      registerArtist: async (input) => {
+        set({ isLoading: true });
+        await new Promise((r) => setTimeout(r, 600));
+        mockRegisterArtist(input);
+        // Artist accounts start in 'pending' review — do not auto-login.
+        set({ isLoading: false });
+        return { pending: true };
+      },
     }),
     {
       name: STORAGE_KEYS.USER,

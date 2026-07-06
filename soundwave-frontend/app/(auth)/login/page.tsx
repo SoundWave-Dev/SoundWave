@@ -1,85 +1,109 @@
+'use client';
+
 // ============================================================
-// SOUNDWAVE — LOGIN PAGE
+// SOUNDWAVE — LOGIN / REGISTER PAGE
 // Owner: Foad
 // ============================================================
-//
-// TODO (Foad): Build login + registration flow:
-//   LOGIN form:
-//     - Email + password fields with validation (zod)
-//     - "Forgot password" link → /forgot-password
-//     - On success: redirect to role-appropriate page
-//       listener/artist → /home
-//       support/admin   → /support
-//     - Handle error states (wrong credentials)
-//
-//   REGISTER form (tab/toggle on same page):
-//     Listener fields:
-//       displayName, email, password, confirmPassword,
-//       birthDate, gender, privacyPolicy checkbox
-//     Artist fields:
-//       email, password, stageName, portfolio (file upload)
-//       → on submit: status = 'pending' (shown to user)
-//
-// Use: useAuthStore (lib/store/authStore.ts)
-// Validation: react-hook-form + zod (lib/validators/)
-// ============================================================
 
-export default function LoginPage() {
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Tabs } from '@/components/ui';
+import { LoginForm } from '@/components/auth/LoginForm';
+import { RegisterListenerForm } from '@/components/auth/RegisterListenerForm';
+import { RegisterArtistForm } from '@/components/auth/RegisterArtistForm';
+
+type PrimaryTab = 'login' | 'register';
+type RegisterTab = 'listener' | 'artist';
+
+function LoginPageContent() {
+  const searchParams = useSearchParams();
+  const [primaryTab, setPrimaryTab] = useState<PrimaryTab>(
+    searchParams.get('tab') === 'register' ? 'register' : 'login'
+  );
+  const [registerTab, setRegisterTab] = useState<RegisterTab>('listener');
+
   return (
-    <div style={{
-      minHeight: '100dvh',
-      background: 'var(--color-bg)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 'var(--space-6)',
-      direction: 'rtl',
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '420px',
-        background: 'var(--color-surface-1)',
-        borderRadius: 'var(--radius-xl)',
-        padding: 'var(--space-8)',
-        border: '1px solid var(--color-border)',
-      }}>
-        {/* Logo */}
-        <div style={{
-          textAlign: 'center',
-          marginBottom: 'var(--space-8)',
-          fontFamily: 'var(--font-display)',
-          fontSize: 'var(--text-2xl)',
-          fontWeight: 700,
-          color: 'var(--color-primary)',
-        }}>
+    <div
+      style={{
+        minHeight: '100dvh',
+        background: 'var(--color-bg)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 'var(--space-6)',
+        direction: 'rtl',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '420px',
+          background: 'var(--color-surface-1)',
+          borderRadius: 'var(--radius-xl)',
+          padding: 'var(--space-8)',
+          border: '1px solid var(--color-border)',
+        }}
+      >
+        <div
+          style={{
+            textAlign: 'center',
+            marginBottom: 'var(--space-8)',
+            fontFamily: 'var(--font-display)',
+            fontSize: 'var(--text-2xl)',
+            fontWeight: 700,
+            color: 'var(--color-primary)',
+          }}
+        >
           🎵 Soundwave
         </div>
 
-        {/* TODO (Foad): Replace this placeholder with the real form */}
-        <div style={{
-          background: 'var(--color-surface-2)',
-          borderRadius: 'var(--radius-lg)',
-          padding: 'var(--space-8)',
-          textAlign: 'center',
-          color: 'var(--color-text-muted)',
-          fontSize: 'var(--text-sm)',
-        }}>
-          🚧 فرم ورود — توسط Foad پیاده‌سازی می‌شود
-        </div>
+        <Tabs
+          tabs={[
+            { key: 'login', label: 'ورود' },
+            { key: 'register', label: 'ثبت‌نام' },
+          ]}
+          activeKey={primaryTab}
+          onChange={(key) => setPrimaryTab(key as PrimaryTab)}
+        />
 
-        {/* Quick login hint for dev */}
-        <div style={{
-          marginTop: 'var(--space-6)',
-          padding: 'var(--space-4)',
-          background: 'var(--color-primary-glow)',
-          borderRadius: 'var(--radius-md)',
-          fontSize: 'var(--text-xs)',
-          color: 'var(--color-primary)',
-          textAlign: 'center',
-        }}>
+        {primaryTab === 'login' ? (
+          <LoginForm onSwitchToRegister={() => setPrimaryTab('register')} />
+        ) : (
+          <>
+            <Tabs
+              tabs={[
+                { key: 'listener', label: 'شنونده' },
+                { key: 'artist', label: 'هنرمند' },
+              ]}
+              activeKey={registerTab}
+              onChange={(key) => setRegisterTab(key as RegisterTab)}
+            />
+            {registerTab === 'listener' ? <RegisterListenerForm /> : <RegisterArtistForm />}
+          </>
+        )}
+
+        <div
+          style={{
+            marginTop: 'var(--space-6)',
+            padding: 'var(--space-4)',
+            background: 'var(--color-primary-glow)',
+            borderRadius: 'var(--radius-md)',
+            fontSize: 'var(--text-xs)',
+            color: 'var(--color-primary)',
+            textAlign: 'center',
+          }}
+        >
           🧪 Dev: هر ایمیل با رمز «password123» کار می‌کند
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
   );
 }
