@@ -3,7 +3,7 @@
 // In Phase 2, replace all of this with real API calls.
 // ============================================================
 
-import type { User, Artist, Track, Album, Playlist, Notification } from '@/types';
+import type { User, Artist, Track, Album, Playlist, Notification, Ticket, ArtistPayoutRecord } from '@/types';
 
 export const MOCK_USERS: User[] = [
   {
@@ -64,6 +64,22 @@ export const MOCK_USERS: User[] = [
     subscription: 'gold',
     subscriptionExpiresAt: null,
     birthDate: '1990-01-01',
+    gender: 'other',
+    followersCount: 0,
+    followingCount: 0,
+    dailyStreamsUsed: 0,
+    createdAt: '2023-01-01T00:00:00Z',
+  },
+  {
+    id: 'u5',
+    username: 'sw_support',
+    displayName: 'Support Agent',
+    email: 'support@soundwave.ir',
+    avatarUrl: null,
+    role: 'support',
+    subscription: 'gold',
+    subscriptionExpiresAt: null,
+    birthDate: '1992-01-01',
     gender: 'other',
     followersCount: 0,
     followingCount: 0,
@@ -224,4 +240,110 @@ export const MOCK_CREDENTIALS: Record<string, string> = {
   'sara@example.com':         'password123',
   'dariush@example.com':      'password123',
   'admin@soundwave.ir':       'password123',
+  'support@soundwave.ir':     'password123',
 };
+
+// ── MOCK SUPPORT TICKETS ─────────────────────────────────────
+
+export const MOCK_TICKETS: Ticket[] = [
+  {
+    id: 'tk1',
+    userId: 'u1',
+    userDisplayName: 'Ali Rezaei',
+    subject: 'مشکل در پرداخت اشتراک',
+    status: 'open',
+    messages: [
+      {
+        id: 'tkm1',
+        ticketId: 'tk1',
+        senderId: 'u1',
+        senderRole: 'listener',
+        body: 'سلام، پرداخت من برای اشتراک طلایی انجام نشد ولی مبلغ از حسابم کسر شد.',
+        createdAt: '2025-06-01T09:00:00Z',
+      },
+    ],
+    createdAt: '2025-06-01T09:00:00Z',
+    updatedAt: '2025-06-01T09:00:00Z',
+  },
+  {
+    id: 'tk2',
+    userId: 'u2',
+    userDisplayName: 'Sara Karimi',
+    subject: 'عدم نمایش پلی‌لیست‌ها',
+    status: 'replied',
+    messages: [
+      {
+        id: 'tkm2',
+        ticketId: 'tk2',
+        senderId: 'u2',
+        senderRole: 'listener',
+        body: 'پلی‌لیست‌های من بعد از ورود دیده نمی‌شوند.',
+        createdAt: '2025-05-28T12:00:00Z',
+      },
+      {
+        id: 'tkm3',
+        ticketId: 'tk2',
+        senderId: 'u5',
+        senderRole: 'support',
+        body: 'سلام، لطفاً یک بار مرورگر خود را رفرش کنید و نتیجه را اطلاع دهید.',
+        createdAt: '2025-05-28T13:30:00Z',
+      },
+    ],
+    createdAt: '2025-05-28T12:00:00Z',
+    updatedAt: '2025-05-28T13:30:00Z',
+  },
+  {
+    id: 'tk3',
+    userId: 'u1',
+    userDisplayName: 'Ali Rezaei',
+    subject: 'درخواست حذف حساب کاربری',
+    status: 'closed',
+    messages: [
+      {
+        id: 'tkm4',
+        ticketId: 'tk3',
+        senderId: 'u1',
+        senderRole: 'listener',
+        body: 'لطفاً حساب من را حذف کنید.',
+        createdAt: '2025-04-10T08:00:00Z',
+      },
+      {
+        id: 'tkm5',
+        ticketId: 'tk3',
+        senderId: 'u5',
+        senderRole: 'support',
+        body: 'حساب شما با موفقیت حذف شد.',
+        createdAt: '2025-04-10T10:00:00Z',
+      },
+    ],
+    createdAt: '2025-04-10T08:00:00Z',
+    updatedAt: '2025-04-10T10:00:00Z',
+  },
+];
+
+// ── MOCK ARTIST PAYOUTS ──────────────────────────────────────
+
+export const MOCK_PAYOUTS: ArtistPayoutRecord[] = [
+  {
+    id: 'py1',
+    artistId: 'a1',
+    artistName: 'Dariush',
+    month: '2025-06',
+    uniqueListeners: 310000,
+    totalStreams: 820000,
+    amount: 41000000,
+    isPaid: false,
+    paidAt: null,
+  },
+  {
+    id: 'py2',
+    artistId: 'a2',
+    artistName: 'Googoosh',
+    month: '2025-06',
+    uniqueListeners: 620000,
+    totalStreams: 1500000,
+    amount: 75000000,
+    isPaid: true,
+    paidAt: '2025-06-05T00:00:00Z',
+  },
+];

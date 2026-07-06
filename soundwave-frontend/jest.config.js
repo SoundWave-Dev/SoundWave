@@ -13,7 +13,7 @@ const config: Config = {
   testMatch: ['**/__tests__/**/*.test.(ts|tsx)'],
 
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: { jsx: 'react' } }],
+    '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: { jsx: 'react-jsx' } }],
   },
 };
 

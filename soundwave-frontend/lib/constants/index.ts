@@ -62,18 +62,28 @@ export const ROUTES = {
   LIBRARY:        '/library',
   ARTIST_MANAGE:  '/manage',
   SUPPORT:        '/support',
+  SUPPORT_TICKETS: '/support/tickets',
+  SUPPORT_TICKET: (id: string) => `/support/tickets/${id}`,
   PAYMENT:        '/payment',
 } as const;
 
 // ── LOCAL STORAGE KEYS ───────────────────────────────────────
 
 export const STORAGE_KEYS = {
-  AUTH_TOKEN:     'sw_auth_token',
-  USER:           'sw_user',
-  PLAYER_STATE:   'sw_player_state',
-  USER_SETTINGS:  'sw_user_settings',
-  PLAYLISTS:      'sw_playlists',
-  MOCK_DB:        'sw_mock_db',
+  AUTH_TOKEN:            'sw_auth_token',
+  USER:                  'sw_user',
+  PLAYER_STATE:          'sw_player_state',
+  USER_SETTINGS:         'sw_user_settings',
+  PLAYLISTS:             'sw_playlists',
+  MOCK_DB:               'sw_mock_db',
+  NOTIFICATIONS:         'sw_notifications',
+  USERS:                 'sw_users',
+  ARTISTS:               'sw_artists',
+  TRACKS:                'sw_tracks',
+  CREDENTIALS:           'sw_credentials',
+  TICKETS:               'sw_tickets',
+  PAYOUTS:               'sw_payouts',
+  SUBSCRIPTION_PRICES:   'sw_subscription_prices',
 } as const;
 
 // ── PLAYER ───────────────────────────────────────────────────
