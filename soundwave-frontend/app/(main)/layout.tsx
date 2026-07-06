@@ -6,6 +6,8 @@
 // TODO (Rayan): Replace the placeholder sidebar with <Sidebar />
 // TODO (Rayan): Replace the placeholder player with <Player />
 
+import { PWAInstallPrompt } from '@/components/pwa/PWAInstallPrompt';
+
 export default function MainLayout({
   children,
 }: {
@@ -58,6 +60,55 @@ export default function MainLayout({
         </div>
       </footer>
 
+      <PWAInstallPrompt />
+
+      <style>{`
+        .app-shell {
+          display: grid;
+          grid-template-columns: var(--sidebar-width) 1fr;
+          grid-template-rows: 1fr var(--player-height);
+          grid-template-areas:
+            "sidebar main"
+            "player  player";
+          height: 100dvh;
+          overflow: hidden;
+          direction: rtl;
+        }
+
+        .app-sidebar {
+          grid-area: sidebar;
+          overflow-y: auto;
+        }
+
+        .app-main {
+          grid-area: main;
+          overflow-y: auto;
+          background: var(--color-bg);
+          padding: var(--space-6);
+        }
+
+        .app-player {
+          grid-area: player;
+          position: sticky;
+          bottom: 0;
+          z-index: 50;
+        }
+
+        /* Mobile: stack layout */
+        @media (max-width: 768px) {
+          .app-shell {
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr var(--player-height);
+            grid-template-areas:
+              "main"
+              "player";
+          }
+
+          .app-sidebar {
+            display: none; /* TODO: mobile nav drawer */
+          }
+        }
+      `}</style>
     </div>
   );
 }

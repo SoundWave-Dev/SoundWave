@@ -1,3 +1,5 @@
+'use client';
+
 // ============================================================
 // SOUNDWAVE — OFFLINE PAGE
 // Shown by the service worker when user is offline and the
