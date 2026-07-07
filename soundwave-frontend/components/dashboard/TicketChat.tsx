@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import type { Ticket } from '@/types';
 import { useAuthStore } from '@/lib/store/authStore';
 import { mockGetTicketById, mockAddTicketMessage } from '@/lib/mock/store';
+import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
 import { timeAgo } from '@/lib/utils';
 import { Button, Textarea } from '@/components/ui';
 
@@ -16,7 +17,11 @@ interface TicketChatProps {
 }
 
 export function TicketChat({ ticketId }: TicketChatProps) {
-  const user = useAuthStore((s) => s.user);
+  const authUser = useAuthStore((s) => s.user);
+  // TEMP (testing only): fall back to a mock support agent so replying is
+  // testable without logging in. Remove this fallback (go back to
+  // `const user = authUser`) before shipping/committing.
+  const user = authUser ?? MOCK_USERS[4];
   const [ticket, setTicket] = useState<Ticket | null | undefined>(undefined);
   const [reply, setReply] = useState('');
 
