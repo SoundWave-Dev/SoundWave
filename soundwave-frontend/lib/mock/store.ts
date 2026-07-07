@@ -191,6 +191,35 @@ export function mockDeletePlaylist(playlistId: string): void {
   save(STORAGE_KEYS.PLAYLISTS, all.filter((p) => p.id !== playlistId));
 }
 
+export function mockGetPlaylistById(playlistId: string): Playlist | null {
+  const all = load<Playlist[]>(STORAGE_KEYS.PLAYLISTS, MOCK_PLAYLISTS);
+  return all.find((p) => p.id === playlistId) ?? null;
+}
+
+export function mockRenamePlaylist(playlistId: string, name: string): Playlist | null {
+  const all = load<Playlist[]>(STORAGE_KEYS.PLAYLISTS, MOCK_PLAYLISTS);
+  const idx = all.findIndex((p) => p.id === playlistId);
+  if (idx === -1) return null;
+  const updated: Playlist = { ...all[idx], name, updatedAt: new Date().toISOString() };
+  all[idx] = updated;
+  save(STORAGE_KEYS.PLAYLISTS, all);
+  return updated;
+}
+
+export function mockRemoveTrackFromPlaylist(playlistId: string, trackId: string): Playlist | null {
+  const all = load<Playlist[]>(STORAGE_KEYS.PLAYLISTS, MOCK_PLAYLISTS);
+  const idx = all.findIndex((p) => p.id === playlistId);
+  if (idx === -1) return null;
+  const updated: Playlist = {
+    ...all[idx],
+    tracks: all[idx].tracks.filter((t) => t.id !== trackId),
+    updatedAt: new Date().toISOString(),
+  };
+  all[idx] = updated;
+  save(STORAGE_KEYS.PLAYLISTS, all);
+  return updated;
+}
+
 export function mockAddTrackToPlaylist(playlistId: string, track: Track): Playlist | null {
   const all = load<Playlist[]>(STORAGE_KEYS.PLAYLISTS, MOCK_PLAYLISTS);
   const idx = all.findIndex((p) => p.id === playlistId);
@@ -243,6 +272,78 @@ export function mockGetArtistById(id: string): Artist | null {
 
 export function mockGetTrackById(id: string): Track | null {
   return MOCK_TRACKS.find((t) => t.id === id) ?? null;
+}
+
+export function mockGetAlbumById(id: string): Album | null {
+  return MOCK_ALBUMS.find((a) => a.id === id) ?? null;
+}
+
+export function mockGetUserByUsername(username: string): User | null {
+  return mockGetUsers().find((u) => u.username === username) ?? null;
+}
+
+// ── FOLLOWING (listener → artist / listener → listener) ────────
+// Phase 1: tracked client-side only, per browser, keyed by the
+// current user's id. Followers counts on the target entity are
+// bumped/dropped locally so the UI reflects the change immediately.
+
+interface FollowState {
+  artistIds: string[];
+  userIds: string[];
+}
+
+function followKey(byUserId: string): string {
+  return `sw_follows_${byUserId}`;
+}
+
+function loadFollowState(byUserId: string): FollowState {
+  return load<FollowState>(followKey(byUserId), { artistIds: [], userIds: [] });
+}
+
+function saveFollowState(byUserId: string, state: FollowState): void {
+  save(followKey(byUserId), state);
+}
+
+export function mockIsFollowingArtist(byUserId: string, artistId: string): boolean {
+  return loadFollowState(byUserId).artistIds.includes(artistId);
+}
+
+export function mockToggleFollowArtist(byUserId: string, artistId: string): boolean {
+  const state = loadFollowState(byUserId);
+  const isFollowing = state.artistIds.includes(artistId);
+  const nextArtistIds = isFollowing
+    ? state.artistIds.filter((id) => id !== artistId)
+    : [...state.artistIds, artistId];
+  saveFollowState(byUserId, { ...state, artistIds: nextArtistIds });
+
+  const all = mockGetAllArtists();
+  const idx = all.findIndex((a) => a.id === artistId);
+  if (idx !== -1) {
+    all[idx] = { ...all[idx], followersCount: all[idx].followersCount + (isFollowing ? -1 : 1) };
+    save(STORAGE_KEYS.ARTISTS, all);
+  }
+  return !isFollowing;
+}
+
+export function mockIsFollowingUser(byUserId: string, targetUserId: string): boolean {
+  return loadFollowState(byUserId).userIds.includes(targetUserId);
+}
+
+export function mockToggleFollowUser(byUserId: string, targetUserId: string): boolean {
+  const state = loadFollowState(byUserId);
+  const isFollowing = state.userIds.includes(targetUserId);
+  const nextUserIds = isFollowing
+    ? state.userIds.filter((id) => id !== targetUserId)
+    : [...state.userIds, targetUserId];
+  saveFollowState(byUserId, { ...state, userIds: nextUserIds });
+
+  const all = mockGetUsers();
+  const idx = all.findIndex((u) => u.id === targetUserId);
+  if (idx !== -1) {
+    all[idx] = { ...all[idx], followersCount: all[idx].followersCount + (isFollowing ? -1 : 1) };
+    saveUsers(all);
+  }
+  return !isFollowing;
 }
 
 // ── ARTIST OWN WORKS (artist management panel) ─────────────────
@@ -401,6 +502,36 @@ export function mockConfirmSettlement(payoutId: string): ArtistPayoutRecord | nu
   all[idx] = updated;
   save(STORAGE_KEYS.PAYOUTS, all);
   return updated;
+}
+
+// ── USER SETTINGS (notification prefs, volume, language) ───────
+
+export interface UserSettings {
+  notifyNewRelease: boolean;
+  notifySubscription: boolean;
+  notifyAccountStatus: boolean;
+  notifySystem: boolean;
+  volume: number;
+  language: 'fa' | 'en';
+}
+
+export const DEFAULT_USER_SETTINGS: UserSettings = {
+  notifyNewRelease: true,
+  notifySubscription: true,
+  notifyAccountStatus: true,
+  notifySystem: true,
+  volume: 80,
+  language: 'fa',
+};
+
+export function mockGetUserSettings(): UserSettings {
+  return load<UserSettings>(STORAGE_KEYS.USER_SETTINGS, DEFAULT_USER_SETTINGS);
+}
+
+export function mockUpdateUserSettings(partial: Partial<UserSettings>): UserSettings {
+  const merged = { ...mockGetUserSettings(), ...partial };
+  save(STORAGE_KEYS.USER_SETTINGS, merged);
+  return merged;
 }
 
 // ── SUBSCRIPTION PRICING (admin) ───────────────────────────────
