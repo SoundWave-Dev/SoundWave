@@ -6,108 +6,71 @@ import {
   mockGetPlaylists,
   mockCreatePlaylist,
   mockDeletePlaylist,
+  mockRenamePlaylist,
 } from '@/lib/mock/store';
-import {
-  getPlaylistLimit,
-  hasReachedPlaylistLimit,
-} from '@/lib/utils';
+import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
+import { getPlaylistLimit } from '@/lib/utils';
+import { Modal, Button } from '@/components/ui';
+import { PlaylistList } from '@/components/playlist/PlaylistList';
+import { CreatePlaylistModal } from '@/components/playlist/CreatePlaylistModal';
+import type { Playlist } from '@/types';
 
 export default function PlaylistsPage() {
-  const user = useAuthStore((s) => s.user);
+  const authUser = useAuthStore((s) => s.user);
+  // TEMP (testing only): fall back to a mock user so the page is viewable
+  // without logging in. Remove this fallback (go back to
+  // `const user = authUser` + the early return) before shipping/committing.
+  const user = authUser ?? MOCK_USERS[1];
+  const [playlists, setPlaylists] = useState<Playlist[]>(() => (user ? mockGetPlaylists(user.id) : []));
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<Playlist | null>(null);
 
   if (!user) return <h2>ابتدا وارد شوید.</h2>;
 
-  const [playlists, setPlaylists] = useState(mockGetPlaylists(user.id));
-  const [name, setName] = useState('');
-
   const limit = getPlaylistLimit(user.subscription);
-  const reached = hasReachedPlaylistLimit(user, playlists.length);
 
-  function createPlaylist() {
-    if (!name.trim()) return;
-
+  const handleCreate = (name: string) => {
     const p = mockCreatePlaylist(user.id, name);
+    setPlaylists((prev) => [...prev, p]);
+  };
 
-    setPlaylists([...playlists, p]);
-    setName('');
-  }
+  const handleRename = (id: string, name: string) => {
+    mockRenamePlaylist(id, name);
+    setPlaylists((prev) => prev.map((p) => (p.id === id ? { ...p, name } : p)));
+  };
 
-  function remove(id: string) {
-    mockDeletePlaylist(id);
-    setPlaylists(playlists.filter((p) => p.id !== id));
-  }
+  const handleConfirmDelete = () => {
+    if (!pendingDelete) return;
+    mockDeletePlaylist(pendingDelete.id);
+    setPlaylists((prev) => prev.filter((p) => p.id !== pendingDelete.id));
+    setPendingDelete(null);
+  };
 
   return (
-    <div style={{ display: 'grid', gap: 24 }}>
-      <h1>Playlists</h1>
+    <div>
+      <PlaylistList
+        playlists={playlists}
+        limit={limit}
+        onCreateClick={() => setIsCreateOpen(true)}
+        onRename={handleRename}
+        onDeleteRequest={setPendingDelete}
+      />
 
-      <div>
-        تعداد پلی‌لیست:
-        {' '}
-        {playlists.length}
-        {' / '}
-        {limit ?? '∞'}
-      </div>
+      <CreatePlaylistModal
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        onCreate={handleCreate}
+      />
 
-      <div style={{ display: 'flex', gap: 10 }}>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Playlist name"
-          style={{
-            padding: 10,
-            borderRadius: 8,
-            background: '#222',
-            color: 'white',
-          }}
-        />
-
-        <button
-          disabled={reached}
-          title={reached ? 'Playlist limit reached' : ''}
-          onClick={createPlaylist}
-          style={{
-            padding: '10px 18px',
-            background: reached ? '#555' : '#1DB954',
-            borderRadius: 8,
-            color: 'white',
-          }}
-        >
-          Create Playlist
-        </button>
-      </div>
-
-      {playlists.length === 0 ? (
-        <div>هیچ پلی‌لیستی وجود ندارد.</div>
-      ) : (
-        playlists.map((p) => (
-          <div
-            key={p.id}
-            style={{
-              background: '#222',
-              padding: 18,
-              borderRadius: 10,
-            }}
-          >
-            <h3>{p.name}</h3>
-
-            <p>{p.tracks.length} Tracks</p>
-
-            <button
-              onClick={() => remove(p.id)}
-              style={{
-                marginTop: 10,
-                background: '#c62828',
-                color: 'white',
-                padding: '8px 14px',
-                borderRadius: 8,
-              }}
-            >
-              Delete
-            </button>
-          </div>
-        ))
-      )}
+      <Modal isOpen={pendingDelete !== null} onClose={() => setPendingDelete(null)} title="حذف پلی‌لیست">
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
+          آیا از حذف پلی‌لیست «{pendingDelete?.name}» مطمئن هستید؟ این عمل قابل بازگشت نیست.
+        </p>
+        <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end' }}>
+          <Button variant="secondary" onClick={() => setPendingDelete(null)}>انصراف</Button>
+          <Button variant="danger" onClick={handleConfirmDelete}>حذف</Button>
+        </div>
+      </Modal>
     </div>
   );
 }
