@@ -6,6 +6,9 @@ import { create } from 'zustand';
 import type { Track, RepeatMode } from '@/types';
 import { DEFAULT_VOLUME } from '@/lib/constants';
 
+const RESTART_THRESHOLD_SECONDS = 3;
+const MAX_HISTORY = 20;
+
 interface PlayerStore {
   currentTrack: Track | null;
   queue: Track[];
@@ -15,6 +18,7 @@ interface PlayerStore {
   isMuted: boolean;
   repeatMode: RepeatMode;
   isShuffled: boolean;
+  history: string[];       // recently played track ids, most recent first
 
   // Actions
   play: (track: Track, queue?: Track[]) => void;
@@ -40,16 +44,23 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   isMuted: false,
   repeatMode: 'none',
   isShuffled: false,
+  history: [],
 
   play: (track, queue = []) =>
-    set({ currentTrack: track, queue, isPlaying: true, progress: 0 }),
+    set((s) => ({
+      currentTrack: track,
+      queue,
+      isPlaying: true,
+      progress: 0,
+      history: [track.id, ...s.history.filter((id) => id !== track.id)].slice(0, MAX_HISTORY),
+    })),
 
   pause: () => set({ isPlaying: false }),
 
   resume: () => set({ isPlaying: true }),
 
   next: () => {
-    const { queue, currentTrack, repeatMode, isShuffled } = get();
+    const { queue, currentTrack, repeatMode, isShuffled, history } = get();
     if (!queue.length || !currentTrack) return;
     const idx = queue.findIndex((t) => t.id === currentTrack.id);
     let nextIdx: number;
@@ -61,20 +72,33 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     } else {
       nextIdx = idx + 1;
     }
-    set({ currentTrack: queue[nextIdx], isPlaying: true, progress: 0 });
+    const nextTrack = queue[nextIdx];
+    set({
+      currentTrack: nextTrack,
+      isPlaying: true,
+      progress: 0,
+      history: [nextTrack.id, ...history.filter((id) => id !== nextTrack.id)].slice(0, MAX_HISTORY),
+    });
   },
 
   prev: () => {
-    const { queue, currentTrack, progress } = get();
-    // If more than 3s in, restart current track
-    if (progress > 0.05) {
+    const { queue, currentTrack, progress, history } = get();
+    // If more than RESTART_THRESHOLD_SECONDS in, restart current track instead of going back
+    const elapsedSeconds = progress * (currentTrack?.duration ?? 0);
+    if (elapsedSeconds >= RESTART_THRESHOLD_SECONDS) {
       set({ progress: 0 });
       return;
     }
     if (!queue.length || !currentTrack) return;
     const idx = queue.findIndex((t) => t.id === currentTrack.id);
     if (idx > 0) {
-      set({ currentTrack: queue[idx - 1], isPlaying: true, progress: 0 });
+      const prevTrack = queue[idx - 1];
+      set({
+        currentTrack: prevTrack,
+        isPlaying: true,
+        progress: 0,
+        history: [prevTrack.id, ...history.filter((id) => id !== prevTrack.id)].slice(0, MAX_HISTORY),
+      });
     }
   },
 

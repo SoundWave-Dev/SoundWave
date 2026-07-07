@@ -133,7 +133,7 @@ function SuggestionCard({ track, reason, onPlay }: SuggestionCardProps) {
 
 export function SongSuggestions() {
   const { user } = useAuthStore();
-  const { play } = usePlayerStore();
+  const { play, history } = usePlayerStore();
   const { suggestions, isLoading, error, fetchSuggestions } = useSongSuggestions();
 
   const [selectedMood, setSelectedMood] = useState<string>('');
@@ -149,7 +149,7 @@ export function SongSuggestions() {
   const handleGetSuggestions = () => {
     setHasRequested(true);
     fetchSuggestions({
-      recentlyPlayedIds: [],      // TODO: pull from player history store
+      recentlyPlayedIds: history,
       likedGenres: selectedGenres,
       mood: selectedMood || undefined,
     });

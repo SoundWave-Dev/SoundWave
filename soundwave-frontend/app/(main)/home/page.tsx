@@ -10,6 +10,7 @@ import {
   getInitials,
   canAccessEarlyContent,
 } from '@/lib/utils';
+import { SongSuggestions } from '@/components/suggestions/SongSuggestions';
 
 export default function HomePage() {
   const user = useAuthStore((s) => s.user);
@@ -63,6 +64,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <SongSuggestions />
 
       <section>
         <h2>Recently Played</h2>
