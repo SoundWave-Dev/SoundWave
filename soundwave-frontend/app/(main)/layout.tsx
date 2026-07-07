@@ -4,9 +4,9 @@
 // ============================================================
 
 // TODO (Rayan): Replace the placeholder sidebar with <Sidebar />
-// TODO (Rayan): Replace the placeholder player with <Player />
 
 import { PWAInstallPrompt } from '@/components/pwa/PWAInstallPrompt';
+import { Player } from '@/components/player/Player';
 
 export default function MainLayout({
   children,
@@ -45,19 +45,7 @@ export default function MainLayout({
 
       {/* Player Bar — Iliya owns this component */}
       <footer className="app-player">
-        {/* TODO: <Player /> */}
-        <div style={{
-          height: 'var(--player-height)',
-          background: 'var(--color-surface-1)',
-          borderTop: '1px solid var(--color-border)',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 var(--space-6)',
-          color: 'var(--color-text-muted)',
-          fontSize: 'var(--text-sm)',
-        }}>
-          🎵 Player — coming soon (Iliya)
-        </div>
+        <Player />
       </footer>
 
       <PWAInstallPrompt />

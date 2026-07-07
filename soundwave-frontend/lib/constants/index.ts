@@ -56,6 +56,7 @@ export const ROUTES = {
   REGISTER:       '/register',
   PROFILE:        (username: string) => `/profile/${username}`,
   ARTIST:         (id: string) => `/artist/${id}`,
+  ALBUM:          (id: string) => `/album/${id}`,
   SETTINGS:       '/settings',
   NOTIFICATIONS:  '/notifications',
   PLAYLISTS:      '/playlists',
