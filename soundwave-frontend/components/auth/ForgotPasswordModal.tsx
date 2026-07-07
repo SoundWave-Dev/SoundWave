@@ -31,7 +31,7 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="بازیابی رمز عبور">
       {sent ? (
-        <div style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>
+        <div className="sw-fade-in-up" style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>
           اگر حسابی با ایمیل «{email}» وجود داشته باشد، لینک بازیابی رمز عبور برای آن ارسال شد.
         </div>
       ) : (

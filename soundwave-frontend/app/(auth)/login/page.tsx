@@ -35,6 +35,7 @@ function LoginPageContent() {
       }}
     >
       <div
+        className="sw-fade-in-up"
         style={{
           width: '100%',
           maxWidth: '420px',
