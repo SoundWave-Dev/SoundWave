@@ -1,30 +1,34 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import type { Track } from '@/types';
+import type { Playlist, Track } from '@/types';
 import { formatDuration, formatCount } from '@/lib/utils';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { ROUTES } from '@/lib/constants';
+import { AddToPlaylistMenu } from './AddToPlaylistMenu';
 
-interface TrackListItemProps {
+interface TrackCardProps {
   track: Track;
-  queue?: Track[];
+  queue: Track[];
+  playlists: Playlist[];
+  limitReached: boolean;
+  onAddToPlaylist: (playlistId: string, track: Track) => void;
+  onCreatePlaylist: () => void;
 }
 
-export default function TrackListItem({ track, queue }: TrackListItemProps) {
+export function TrackCard({ track, queue, playlists, limitReached, onAddToPlaylist, onCreatePlaylist }: TrackCardProps) {
   const router = useRouter();
   const play = usePlayerStore((s) => s.play);
   const currentTrackId = usePlayerStore((s) => s.currentTrack?.id);
-  const isPlaying = usePlayerStore((s) => s.isPlaying);
   const isCurrent = currentTrackId === track.id;
 
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={() => play(track, queue ?? [track])}
-      onKeyDown={(e) => { if (e.key === 'Enter') play(track, queue ?? [track]); }}
-      className="sw-track-row"
+      onClick={() => play(track, queue)}
+      onKeyDown={(e) => { if (e.key === 'Enter') play(track, queue); }}
+      className="sw-track-card"
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -41,18 +45,9 @@ export default function TrackListItem({ track, queue }: TrackListItemProps) {
         width: 56,
         height: 56,
         borderRadius: 'var(--radius-sm)',
-        background: track.coverUrl
-          ? `url(${track.coverUrl}) center/cover`
-          : 'linear-gradient(135deg, var(--color-primary), #0d5c2a)',
+        background: track.coverUrl ? `url(${track.coverUrl}) center/cover` : 'linear-gradient(135deg, var(--color-primary), #0d5c2a)',
         flexShrink: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: 18,
-        color: '#000',
-      }}>
-        {isCurrent && isPlaying ? '🔊' : ''}
-      </div>
+      }} />
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
@@ -65,14 +60,7 @@ export default function TrackListItem({ track, queue }: TrackListItemProps) {
         }}>
           {track.title}
         </div>
-
-        <div style={{
-          fontSize: 'var(--text-sm)',
-          color: 'var(--color-text-secondary)',
-          display: 'flex',
-          gap: 4,
-          flexWrap: 'wrap',
-        }}>
+        <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', display: 'flex', gap: 4, flexWrap: 'wrap' }}>
           {track.artists.map((a, i) => (
             <span
               key={a.id}
@@ -84,21 +72,42 @@ export default function TrackListItem({ track, queue }: TrackListItemProps) {
               {a.stageName}{i < track.artists.length - 1 ? ',' : ''}
             </span>
           ))}
+          {track.albumId && track.albumTitle && (
+            <>
+              <span>·</span>
+              <span
+                onClick={(e) => { e.stopPropagation(); router.push(ROUTES.ALBUM(track.albumId as string)); }}
+                style={{ cursor: 'pointer' }}
+                onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+                onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+              >
+                {track.albumTitle}
+              </span>
+            </>
+          )}
         </div>
       </div>
 
       <div style={{ textAlign: 'right', minWidth: 90, flexShrink: 0 }}>
         <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
-          {formatCount(track.streamCount)} استریم
+          {formatCount(track.uniqueListeners)} شنونده
         </div>
         <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
           {formatDuration(track.duration)}
         </div>
       </div>
 
-      <style>{`
-        .sw-track-row:hover { border-color: var(--color-primary); }
-      `}</style>
+      <div onClick={(e) => e.stopPropagation()}>
+        <AddToPlaylistMenu
+          track={track}
+          playlists={playlists}
+          limitReached={limitReached}
+          onAdd={onAddToPlaylist}
+          onCreateNew={onCreatePlaylist}
+        />
+      </div>
+
+      <style>{`.sw-track-card:hover { border-color: var(--color-primary); }`}</style>
     </div>
   );
 }

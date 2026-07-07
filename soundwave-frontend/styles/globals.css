@@ -215,4 +215,81 @@ img {
   .app-sidebar {
     display: none;
   }
+
+  .app-main {
+    padding-bottom: calc(var(--space-6) + 56px);
+  }
+}
+
+/* ── SHARED ANIMATIONS ───────────────────────────────────────
+   One signature easing curve used everywhere (a soft "ease-out",
+   the same family Apple's marketing pages use) so every transition
+   in the app feels like part of the same system. Small UI feedback
+   (errors, focus) is quick; entrances are a little slower so they
+   read as deliberate instead of a flicker. */
+
+:root {
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes sw-fade-in-down {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sw-fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sw-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.sw-fade-in-down {
+  animation: sw-fade-in-down 200ms var(--ease-smooth) both;
+}
+
+.sw-fade-in-up {
+  animation: sw-fade-in-up 600ms var(--ease-smooth) both;
+}
+
+.sw-fade-in {
+  animation: sw-fade-in 400ms var(--ease-smooth) both;
+}
+
+/* Scroll-triggered reveal (see components/marketing/ScrollReveal.tsx).
+   Starts hidden; JS adds .is-visible once the element enters the
+   viewport, which is what actually plays the transition. */
+.sw-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 800ms var(--ease-smooth), transform 800ms var(--ease-smooth);
+}
+
+.sw-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sw-fade-in-down, .sw-fade-in-up, .sw-fade-in, .sw-reveal {
+    animation: none;
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.sw-btn:not(:disabled) {
+  transition: filter 150ms var(--ease-smooth), transform 150ms var(--ease-smooth), opacity 150ms var(--ease-smooth);
+}
+
+.sw-btn:not(:disabled):hover {
+  filter: brightness(1.08);
+}
+
+.sw-btn:not(:disabled):active {
+  transform: scale(0.97);
 }

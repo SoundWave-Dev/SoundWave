@@ -27,7 +27,11 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) });
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
+  });
 
   const onSubmit = async (values: LoginFormValues) => {
     setServerError(null);
@@ -63,8 +67,10 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
       {serverError && (
         <div
+          className="sw-fade-in-down"
           style={{
             background: 'rgba(233, 71, 90, 0.1)',
+            border: '1px solid var(--color-error)',
             color: 'var(--color-error)',
             borderRadius: 'var(--radius-md)',
             padding: 'var(--space-3) var(--space-4)',

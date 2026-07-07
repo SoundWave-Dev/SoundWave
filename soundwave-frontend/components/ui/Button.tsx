@@ -42,13 +42,14 @@ export function Button({ variant = 'primary', size = 'md', style, disabled, chil
   return (
     <button
       disabled={disabled}
+      className="sw-btn"
       style={{
         borderRadius: 'var(--radius-full)',
         fontWeight: 600,
         fontFamily: 'var(--font-sans)',
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.5 : 1,
-        transition: 'opacity var(--transition-fast), filter var(--transition-fast)',
+        transition: 'opacity var(--transition-fast), filter var(--transition-fast), transform var(--transition-fast)',
         whiteSpace: 'nowrap',
         ...VARIANT_STYLES[variant],
         ...SIZE_STYLES[size],

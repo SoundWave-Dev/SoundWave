@@ -51,7 +51,8 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionTier, SubscriptionPlan> = {
 // ── ROUTES ───────────────────────────────────────────────────
 
 export const ROUTES = {
-  HOME:           '/',
+  LANDING:        '/',
+  HOME:           '/home',
   LOGIN:          '/login',
   REGISTER:       '/register',
   PROFILE:        (username: string) => `/profile/${username}`,

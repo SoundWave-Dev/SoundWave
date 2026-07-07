@@ -79,6 +79,12 @@ export const useAuthStore = create<AuthStore>()(
     {
       name: STORAGE_KEYS.USER,
       partialize: (state) => ({ user: state.user, token: state.token }),
+      // Auto-hydrates from localStorage as soon as this module loads on the
+      // client — before React's first render even runs. That means `user`
+      // can already differ from the server's (always-null) render, so any
+      // component that conditionally renders based on `user` must not trust
+      // it until after mount (see the `mounted` pattern in RequireRole /
+      // LandingHeader) to avoid a hydration mismatch.
     }
   )
 );

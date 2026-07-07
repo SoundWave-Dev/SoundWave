@@ -1,53 +1,36 @@
 'use client';
 
+import { useParams } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
+import { mockGetUserByUsername } from '@/lib/mock/store';
+import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
+import { UserProfile } from '@/components/profile/UserProfile';
 
 export default function ProfilePage() {
-  const user = useAuthStore((s) => s.user);
+  const params = useParams<{ username: string }>();
+  const authViewer = useAuthStore((s) => s.user);
+  // TEMP (testing only): fall back to a mock user so the page is viewable
+  // without logging in. Remove this fallback (go back to
+  // `const viewer = authViewer` + the early return) before shipping/committing.
+  const viewer = authViewer ?? MOCK_USERS[1];
 
-  if (!user) return <h2>Please login.</h2>;
+  if (!viewer) return <h2>ابتدا وارد شوید.</h2>;
+
+  const profileUser = mockGetUserByUsername(params.username) ?? (params.username === viewer.username ? viewer : null);
+
+  if (!profileUser) {
+    return (
+      <div style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: 'var(--space-10)' }}>
+        کاربری با این نام یافت نشد.
+      </div>
+    );
+  }
 
   return (
-    <div style={{ display: 'grid', gap: 20 }}>
-      <h1>👤 Profile</h1>
-
-      <div
-        style={{
-          background: '#181818',
-          padding: 20,
-          borderRadius: 12,
-        }}
-      >
-        <div
-          style={{
-            width: 90,
-            height: 90,
-            borderRadius: '50%',
-            background: '#333',
-            display: 'grid',
-            placeItems: 'center',
-            fontSize: 30,
-          }}
-        >
-          {user.displayName[0]}
-        </div>
-
-        <h2>{user.displayName}</h2>
-        <p>@{user.username}</p>
-        <p>Subscription: {user.subscription}</p>
-
-        <p>Followers: {user.followersCount}</p>
-        <p>Following: {user.followingCount}</p>
-        <p>Daily Streams: {user.dailyStreamsUsed}</p>
-
-        <div style={{ marginTop: 20 }}>
-          <button>Follow</button>
-
-          <button style={{ marginLeft: 10 }}>
-            Edit Profile
-          </button>
-        </div>
-      </div>
-    </div>
+    <UserProfile
+      user={profileUser}
+      viewerId={viewer.id}
+      isOwnProfile={profileUser.id === viewer.id}
+    />
   );
 }

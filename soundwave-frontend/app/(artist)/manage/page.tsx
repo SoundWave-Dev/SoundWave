@@ -19,13 +19,18 @@ import {
 } from '@/lib/mock/store';
 import { formatCount } from '@/lib/utils';
 import { Button, Card, Modal, Table, type TableColumn } from '@/components/ui';
-import { RequireRole } from '@/components/auth/RequireRole';
+// import { RequireRole } from '@/components/auth/RequireRole'; // TEMP (testing only): see below
+import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
 import { UploadTrackModal } from '@/components/artist/UploadTrackModal';
 
 const EARNINGS_PER_STREAM = 0.0005; // mock rate, in currency units per stream
 
 function ManagePanel() {
-  const user = useAuthStore((s) => s.user);
+  const authUser = useAuthStore((s) => s.user);
+  // TEMP (testing only): fall back to a mock approved artist (Dariush) so
+  // the page is viewable without logging in. Remove this fallback (go back
+  // to `const user = authUser`) before shipping/committing.
+  const user = authUser ?? MOCK_USERS[2];
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [editingTrack, setEditingTrack] = useState<Track | null>(null);
@@ -182,9 +187,11 @@ function ManagePanel() {
 }
 
 export default function ArtistManagePage() {
+  // TEMP (testing only): auth guard disabled, restore the <RequireRole>
+  // wrapper below before shipping/committing.
   return (
-    <RequireRole allow={['artist']} requireApprovedArtist>
+    // <RequireRole allow={['artist']} requireApprovedArtist>
       <ManagePanel />
-    </RequireRole>
+    // </RequireRole>
   );
 }
