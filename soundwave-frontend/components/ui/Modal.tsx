@@ -4,7 +4,7 @@
 // SOUNDWAVE — UI PRIMITIVE: Modal
 // ============================================================
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -13,7 +13,23 @@ interface ModalProps {
   children: ReactNode;
 }
 
+const TRANSITION_MS = 240;
+
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+  const [shouldRender, setShouldRender] = useState(isOpen);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setShouldRender(true);
+      const raf = requestAnimationFrame(() => setIsVisible(true));
+      return () => cancelAnimationFrame(raf);
+    }
+    setIsVisible(false);
+    const timeout = setTimeout(() => setShouldRender(false), TRANSITION_MS);
+    return () => clearTimeout(timeout);
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => {
@@ -27,7 +43,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   return (
     <div
@@ -42,6 +58,8 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         zIndex: 500,
         padding: 'var(--space-6)',
         direction: 'rtl',
+        opacity: isVisible ? 1 : 0,
+        transition: `opacity ${TRANSITION_MS}ms var(--ease-smooth)`,
       }}
     >
       <div
@@ -56,6 +74,9 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
           maxHeight: '90vh',
           overflowY: 'auto',
           boxShadow: 'var(--shadow-lg)',
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? 'translateY(0)' : 'translateY(12px)',
+          transition: `opacity ${TRANSITION_MS}ms var(--ease-smooth), transform ${TRANSITION_MS}ms var(--ease-smooth)`,
         }}
       >
         {title && (
@@ -74,7 +95,14 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             <button
               onClick={onClose}
               aria-label="بستن"
-              style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-xl)', lineHeight: 1 }}
+              style={{
+                color: 'var(--color-text-muted)',
+                fontSize: 'var(--text-xl)',
+                lineHeight: 1,
+                transition: 'color var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text-primary)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)'; }}
             >
               ×
             </button>
