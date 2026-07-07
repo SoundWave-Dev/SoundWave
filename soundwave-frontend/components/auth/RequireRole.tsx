@@ -4,8 +4,15 @@
 // SOUNDWAVE — ROLE-BASED ROUTE GUARD
 // Client-side guard: auth state lives in Zustand + localStorage
 // (no auth cookie yet), so we gate here rather than in middleware.
-// Waits for the persisted authStore to hydrate before deciding,
-// to avoid flashing a redirect before localStorage is read.
+//
+// authStore's persist middleware hydrates from localStorage as
+// soon as the module loads on the client — before React's first
+// render. So `user` may already be correct on the very first
+// client render, while the server always rendered it as null.
+// Rendering based on `user` immediately would be a hydration
+// mismatch. Instead we always render null until this component
+// has mounted (which matches the server's null output), then
+// re-render with the real, by-then-accurate `user` value.
 // ============================================================
 
 import { ReactNode, useEffect, useState } from 'react';
@@ -24,16 +31,9 @@ interface RequireRoleProps {
 export function RequireRole({ allow, requireApprovedArtist, children }: RequireRoleProps) {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  // `persist` is only meaningful in the browser — during SSR/static
-  // generation there is no localStorage to hydrate from.
-  const [hasHydrated, setHasHydrated] = useState(
-    () => typeof window !== 'undefined' && (useAuthStore.persist?.hasHydrated() ?? false)
-  );
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    if (hasHydrated) return;
-    return useAuthStore.persist?.onFinishHydration(() => setHasHydrated(true));
-  }, [hasHydrated]);
+  useEffect(() => setMounted(true), []);
 
   const isAuthorized =
     !!user &&
@@ -41,15 +41,15 @@ export function RequireRole({ allow, requireApprovedArtist, children }: RequireR
     (!requireApprovedArtist || mockGetArtistByUserId(user.id)?.status === 'approved');
 
   useEffect(() => {
-    if (!hasHydrated) return;
+    if (!mounted) return;
     if (!user) {
       router.replace('/login');
     } else if (!isAuthorized) {
       router.replace('/home');
     }
-  }, [hasHydrated, user, isAuthorized, router]);
+  }, [mounted, user, isAuthorized, router]);
 
-  if (!hasHydrated || !isAuthorized) return null;
+  if (!mounted || !isAuthorized) return null;
 
   return <>{children}</>;
 }
