@@ -13,7 +13,8 @@
 ```
 SoundWave/
 ├── soundwave-frontend/    ← Next.js 14 (React, TypeScript)
-└── backend/     ← Django + Django REST Framework (Phase 2)
+├── soundwave-backend/     ← Django + Django REST Framework (Phase 2)
+└── docker-compose.yml     ← optional bonus: `docker compose up` runs both
 ```
 
 ---
@@ -22,9 +23,13 @@ SoundWave/
 
 | Name | Phase 1 (Frontend) | Phase 2 (Backend) |
 |------|-------------------|-------------------|
-| **Foad** | Auth, Notifications, Artist Panel, Dashboard, PWA | Auth endpoints, Dashboard APIs |
-| **Iliya** | Music Player, AI Song Suggester | — |
-| **Rayan** | Home, Sidebar, Profiles, Library, Playlists | — |
+| **Foad** | Auth, Notifications, Artist Panel, Dashboard, PWA | `accounts`, `billing`, `support`, `notifications` |
+| **Iliya** | Music Player, AI Song Suggester | `music`, `playback` |
+| **Rayan** | Home, Sidebar, Profiles, Library, Playlists | `playlists`, `social` |
+
+Backend app ownership mirrors each person's Phase 1 area — whoever built the frontend
+page/component owns the Django app(s) it talks to. Detailed per-app checklists are in
+each person's `TASKS_*.md` (Phase 2 section).
 
 ---
 
@@ -39,18 +44,23 @@ npm run dev        # http://localhost:3000
 npm test           # run tests
 ```
 
-### Backend *(Phase 2 — coming soon)*
+### Backend
 
 ```bash
 cd soundwave-backend
 python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env       # then point DB_* at a running Postgres instance
 python manage.py migrate
 python manage.py runserver  # http://localhost:8000
 ```
 
-### Full Stack with Docker *(Phase 2 — optional bonus)*
+Base project structure, models, and URL routing already exist — see `apps/`
+below. Views/serializers are stubbed with `TODO(<owner>)` comments for each
+person to fill in.
+
+### Full Stack with Docker *(optional bonus — see Docker section below)*
 
 ```bash
 docker compose up
@@ -130,29 +140,38 @@ All colors, spacing, and typography are defined as CSS variables in `frontend/st
 
 **Stack:** Django · Django REST Framework · PostgreSQL · Redis · Celery *(planned)*
 
-### Core Models *(planned)*
+### App Structure
 
-- `User` — custom user model with roles and subscription
-- `Track` — audio file, metadata, lyrics
-- `Album` — collection of tracks
-- `Playlist` — user-owned track list
-- `Subscription` — tier, expiry, payment history
-- `ArtistProfile` — verification status, payout records
-- `Ticket` — support ticket with messages
-- `Notification` — per-user notification feed
+`soundwave-backend/apps/` is split by domain, not by person, but ownership
+tracks Phase 1 areas (see team table above):
+
+| App | Models | Owner |
+|-----|--------|-------|
+| `accounts` | `User`, `ArtistProfile` | Foad |
+| `billing` | `SubscriptionPlan`, `Subscription`, `PaymentTransaction`, `Payout` | Foad |
+| `support` | `Ticket`, `TicketMessage` | Foad |
+| `notifications` | `Notification` | Foad |
+| `music` | `Album`, `Track`, `StreamEvent` | Iliya |
+| `playback` | `UserPreference` (play history reuses `music.StreamEvent`) | Iliya |
+| `playlists` | `Playlist`, `PlaylistTrack` | Rayan |
+| `social` | `Follow` | Rayan |
+
+Pricing and tier limits (daily stream cap, playlist cap, etc.) live in the
+`SubscriptionPlan` table, editable from the admin dashboard — never hard-coded,
+so the admin can change them without a deploy (per course spec §3.2).
 
 ### API Design
 
-- REST endpoints following standard CRUD conventions
-- JWT authentication
-- Role-based and subscription-based permission classes
-- Aggregated reporting endpoints (no raw data dumps to frontend)
-- File upload handling for audio and images
+- REST endpoints under `/api/v1/<app>/...`, one router per app (see each app's `urls.py`)
+- JWT authentication (`djangorestframework-simplejwt`)
+- Role-based (`apps.accounts.permissions`) and subscription-based permission classes
+- Aggregated reporting endpoints only — no raw data dumps to the frontend
+- File upload handling for audio (`mp3`/`wav`/`flac`) and cover/avatar images via `MEDIA_ROOT`
 
 ### Payment Gateway
 
-Integration with one of: Zarinpal · AqayePardakht · PayPing · SizPay  
-Subscription durations: 1 / 3 / 6 / 12 months
+Integration with one of: Zarinpal · AqayePardakht · PayPing · SizPay
+(see `apps/billing/gateways.py`). Subscription durations: 1 / 3 / 6 / 12 months.
 
 ---
 
@@ -200,10 +219,10 @@ docs(readme): update setup instructions
 
 ```bash
 # Frontend
-cd frontend && npm test
+cd soundwave-frontend && npm test
 
-# Backend (Phase 2)
-cd backend && python manage.py test
+# Backend
+cd soundwave-backend && python manage.py test
 ```
 
 ---

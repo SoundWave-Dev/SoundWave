@@ -165,3 +165,41 @@ __tests__/components/
 - PWA setup → **Foad**
 - Music player → **Iliya**
 - AI song suggester → **Iliya**
+
+---
+
+# ✅ Rayan — Task Checklist (Phase 2: Backend)
+
+> Base project structure, models, and URL routing are already scaffolded in
+> `soundwave-backend/apps/{playlists,social}/`. Every `views.py`/`serializers.py`
+> stub has a `# TODO(Rayan): ...` comment marking exactly what's left.
+
+---
+
+## 🎵 `apps/playlists` — Playlist CRUD & Limits (spec §2.7, §3.2)
+
+- [ ] `PlaylistViewSet.perform_create` — enforce the tier's `playlist_limit`
+      (from `apps.billing.SubscriptionPlan`, free=6/silver=100/gold=∞) with a clear
+      error message (frontend shows this as a disabled button + tooltip)
+- [ ] `add_track` / `remove_track` actions — manage `PlaylistTrack` rows, keep `position` ordering intact
+- [ ] Confirm a user can only see/edit/delete their **own** playlists (`IsOwner` permission already wired)
+
+## 👥 `apps/social` — Follow/Unfollow & Profile Stats (spec §2.3, §2.4)
+
+- [ ] `FollowStatsView` — follower_count, following_count, is_following for a given user id
+- [ ] `FollowToggleView.post` — `get_or_create`, reject following yourself
+- [ ] `FollowToggleView.delete` — remove the `Follow` row
+- [ ] Wire the profile page's Follow/Unfollow button and follower/following counts to these two endpoints
+
+## 🧪 Tests — Rayan's minimum: contribute to the 15-test Phase 2 minimum
+
+- [ ] Free-tier user blocked from creating a 7th playlist; Gold-tier user has no limit
+- [ ] A user cannot view/edit another user's playlist
+- [ ] Adding then removing a track updates `track_count` correctly
+- [ ] Follow then follow-stats reflects the new counts; unfollow reverses it
+- [ ] A user cannot follow themselves, and following twice doesn't create duplicate rows
+
+## 🚫 NOT Rayan's Backend Responsibility
+
+- `accounts`, `billing`, `support`, `notifications` apps → **Foad**
+- `music`, `playback` apps → **Iliya**
