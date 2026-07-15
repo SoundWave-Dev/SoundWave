@@ -165,3 +165,46 @@ __tests__/hooks/
 - Library / search → **Rayan**
 - Playlist pages → **Rayan**
 - User / Artist profiles → **Rayan**
+
+---
+
+# ✅ Iliya — Task Checklist (Phase 2: Backend)
+
+> Base project structure, models, and URL routing are already scaffolded in
+> `soundwave-backend/apps/{music,playback}/`. Every `views.py`/`serializers.py`
+> stub has a `# TODO(Iliya): ...` comment marking exactly what's left.
+
+---
+
+## 🎵 `apps/music` — Album/Track Catalog (spec §2.8, §2.10, §3.1, §3.4) — highest-value backend section
+
+- [ ] `AlbumViewSet`/`TrackViewSet.perform_create` / `perform_update` — restrict to the
+      owning artist via `request.user.artist_profile` (an approved artist only, per `IsApprovedArtist`)
+- [ ] File upload handling for audio (`mp3`/`wav`/`flac`) and cover images — validate
+      extension in `TrackSerializer.validate_audio_file`, store under `MEDIA_ROOT` (spec §3.4)
+- [ ] `TrackSerializer.get_stream_count` / `get_unique_listeners` — derive from `StreamEvent`;
+      only expose `unique_listeners` to Gold subscribers (spec §2.9)
+- [ ] `TrackViewSet.stream` action — check the user's remaining daily stream limit
+      (from `apps.billing.SubscriptionPlan`, spec §2.4 table) before logging a `StreamEvent`
+- [ ] Search by track title or artist name (`search_fields` already set) — verify it covers both
+- [ ] Sort by "Most listeners" and "Release date" — add a `listener_count` annotation for the former
+
+## 🔊 `apps/playback` — Preferences Sync & AI Suggester Feed (spec §3.5, §5.2)
+
+- [ ] `MyPreferencesView` — confirm get-or-create works for a first-time user (volume, language, notification toggles)
+- [ ] `RecentlyPlayedView` — distinct track ids from `apps.music.StreamEvent`, most recent first
+- [ ] Wire `lib/hooks/useSongSuggestions.ts` on the frontend to call `GET /api/v1/playback/recently-played/`
+      instead of always passing an empty array to `recentlyPlayedIds` (closes the loop from your Phase 1 TODO)
+
+## 🧪 Tests — Iliya's minimum: contribute to the 15-test Phase 2 minimum
+
+- [ ] Only an approved artist can create/edit their own album/track (pending artist → 403, other artist's work → 403)
+- [ ] `/tracks/{id}/stream/` increments stream count and counts unique listeners once per user
+- [ ] A Free-tier user is blocked once their daily stream limit is hit
+- [ ] `recently-played/` returns distinct, most-recent-first track ids
+- [ ] Preferences persist across two separate requests ("devices")
+
+## 🚫 NOT Iliya's Backend Responsibility
+
+- `accounts`, `billing`, `support`, `notifications` apps → **Foad**
+- `playlists`, `social` apps → **Rayan**
