@@ -7,6 +7,8 @@ import { mockGetUserSettings, mockUpdateUserSettings, DEFAULT_USER_SETTINGS, typ
 import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
 import { SUBSCRIPTION_PLANS, ROUTES } from '@/lib/constants';
 import { Card, Checkbox, Select, Button, Modal } from '@/components/ui';
+import { ProfileForm } from '@/components/settings/ProfileForm';
+import { ChangePasswordForm } from '@/components/settings/ChangePasswordForm';
 
 const TIER_LABEL: Record<string, string> = { free: 'رایگان', silver: 'نقره‌ای', gold: 'طلایی' };
 
@@ -48,10 +50,24 @@ export default function SettingsPage() {
   };
 
   return (
-    <div style={{ maxWidth: 720, display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--color-text-primary)' }}>
         تنظیمات
       </h1>
+
+      <Card>
+        <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 'var(--space-4)' }}>
+          پروفایل
+        </h3>
+        <ProfileForm user={user} />
+      </Card>
+
+      <Card>
+        <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 'var(--space-4)' }}>
+          تغییر رمز عبور
+        </h3>
+        <ChangePasswordForm email={user.email} />
+      </Card>
 
       <Card>
         <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 'var(--space-4)' }}>
