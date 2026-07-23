@@ -282,6 +282,26 @@ export function mockGetUserByUsername(username: string): User | null {
   return mockGetUsers().find((u) => u.username === username) ?? null;
 }
 
+export function mockUpdateUserProfile(userId: string, partial: Pick<User, 'displayName'>): User | null {
+  const all = mockGetUsers();
+  const idx = all.findIndex((u) => u.id === userId);
+  if (idx === -1) return null;
+  const updated: User = { ...all[idx], ...partial };
+  all[idx] = updated;
+  saveUsers(all);
+
+  const current = mockGetCurrentUser();
+  if (current && current.id === userId) save(STORAGE_KEYS.USER, updated);
+
+  return updated;
+}
+
+export function mockChangePassword(email: string, currentPassword: string, newPassword: string): boolean {
+  if (getCredentials()[email] !== currentPassword) return false;
+  addCredential(email, newPassword);
+  return true;
+}
+
 // ── FOLLOWING (listener → artist / listener → listener) ────────
 // Phase 1: tracked client-side only, per browser, keyed by the
 // current user's id. Followers counts on the target entity are
