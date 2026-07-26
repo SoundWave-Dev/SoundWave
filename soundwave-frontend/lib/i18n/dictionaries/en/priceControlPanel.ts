@@ -1,0 +1,16 @@
+export const priceControlPanel = {
+  tierFree: 'Free',
+  tierSilver: 'Silver',
+  tierGold: 'Gold',
+  freeUsers: 'Free users',
+  silverUsers: 'Silver users',
+  goldUsers: 'Gold users',
+  monthlyRevenue: 'Revenue this month',
+  currencyToman: 'toman',
+  distributionTitle: 'User distribution by subscription tier',
+  pricingTitle: 'Set subscription prices',
+  silverPriceLabel: 'Silver subscription price (toman)',
+  goldPriceLabel: 'Gold subscription price (toman)',
+  updatePrices: 'Update prices',
+  savedMessage: 'Prices saved.',
+} as const;

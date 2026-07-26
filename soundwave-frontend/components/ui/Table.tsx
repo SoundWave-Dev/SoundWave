@@ -1,9 +1,12 @@
+'use client';
+
 // ============================================================
 // SOUNDWAVE — UI PRIMITIVE: Table
 // Generic typed data table. Pass columns + rows, get a styled table.
 // ============================================================
 
 import { ReactNode } from 'react';
+import { useLocaleStore } from '@/lib/store/localeStore';
 
 export interface TableColumn<T> {
   key: string;
@@ -20,7 +23,10 @@ interface TableProps<T> {
   onRowClick?: (row: T) => void;
 }
 
-export function Table<T>({ columns, rows, rowKey, emptyMessage = 'موردی یافت نشد', onRowClick }: TableProps<T>) {
+export function Table<T>({ columns, rows, rowKey, emptyMessage, onRowClick }: TableProps<T>) {
+  const language = useLocaleStore((s) => s.language);
+  const resolvedEmptyMessage = emptyMessage ?? (language === 'en' ? 'No items found' : 'موردی یافت نشد');
+
   if (rows.length === 0) {
     return (
       <div
@@ -31,7 +37,7 @@ export function Table<T>({ columns, rows, rowKey, emptyMessage = 'موردی ی�
           fontSize: 'var(--text-sm)',
         }}
       >
-        {emptyMessage}
+        {resolvedEmptyMessage}
       </div>
     );
   }

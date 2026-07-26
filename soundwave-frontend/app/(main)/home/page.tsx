@@ -10,6 +10,7 @@ import {
 } from '@/lib/mock/store';
 import { canAccessEarlyContent } from '@/lib/utils';
 import { ROUTES } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 import { SongSuggestions } from '@/components/suggestions/SongSuggestions';
 import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
 import GreetingHeader from '@/components/home/GreetingHeader';
@@ -20,6 +21,7 @@ import type { Playlist } from '@/types';
 
 function PlaylistMiniCard({ playlist }: { playlist: Playlist }) {
   const router = useRouter();
+  const { t } = useTranslation('homePage');
   return (
     <div
       role="button"
@@ -66,7 +68,7 @@ function PlaylistMiniCard({ playlist }: { playlist: Playlist }) {
         {playlist.name}
       </h3>
       <span style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-xs)' }}>
-        {playlist.tracks.length} آهنگ
+        {playlist.tracks.length} {t('trackCountSuffix')}
       </span>
 
       <style>{`.sw-playlist-mini-card:hover { border-color: var(--color-primary); transform: translateY(-2px); }`}</style>
@@ -76,13 +78,14 @@ function PlaylistMiniCard({ playlist }: { playlist: Playlist }) {
 
 export default function HomePage() {
   const authUser = useAuthStore((s) => s.user);
+  const { t } = useTranslation('homePage');
   // TEMP (testing only): fall back to a mock gold user so the page is
   // viewable without logging in. Remove this fallback (go back to
   // `const user = authUser` + the early return) before shipping/committing.
   const user = authUser ?? MOCK_USERS[1];
 
   if (!user) {
-    return <h2>ابتدا وارد شوید.</h2>;
+    return <h2>{t('loginFirst')}</h2>;
   }
 
   const playlists = mockGetPlaylists(user.id);
@@ -102,7 +105,7 @@ export default function HomePage() {
       <SongSuggestions />
 
       {playlists.length > 0 && (
-        <SectionRow title="پلی‌لیست‌های شما">
+        <SectionRow title={t('yourPlaylists')}>
           {playlists.map((p) => (
             <PlaylistMiniCard key={p.id} playlist={p} />
           ))}
@@ -110,7 +113,7 @@ export default function HomePage() {
       )}
 
       {albums.length > 0 && (
-        <SectionRow title="آلبوم‌های تازه" subtitle="آخرین آلبوم‌های منتشرشده روی Soundwave">
+        <SectionRow title={t('newAlbums')} subtitle={t('newAlbumsSubtitle')}>
           {albums.map((a) => (
             <AlbumCard key={a.id} album={a} />
           ))}
@@ -125,7 +128,7 @@ export default function HomePage() {
           color: 'var(--color-text-primary)',
           marginBottom: 'var(--space-4)',
         }}>
-          پرطرفدارترین آهنگ‌ها
+          {t('topTracks')}
         </h2>
         {topTracks.map((t) => (
           <TrackListItem key={t.id} track={t} queue={topTracks} />
@@ -147,7 +150,7 @@ export default function HomePage() {
               fontWeight: 700,
               color: 'var(--color-primary)',
             }}>
-              دسترسی زودهنگام
+              {t('earlyAccess')}
             </h2>
             <span style={{
               padding: '2px var(--space-2)',
@@ -157,7 +160,7 @@ export default function HomePage() {
               fontSize: 'var(--text-xs)',
               fontWeight: 700,
             }}>
-              GOLD
+              {t('goldBadge')}
             </span>
           </div>
           {earlyTracks.map((t) => (
@@ -180,7 +183,7 @@ export default function HomePage() {
             textAlign: 'center',
           }}
         >
-          🔒 با ارتقا به اشتراک طلایی، به آهنگ‌های پیش از انتشار دسترسی پیدا کنید.
+          {t('upgradeCta')}
         </Link>
       )}
     </div>

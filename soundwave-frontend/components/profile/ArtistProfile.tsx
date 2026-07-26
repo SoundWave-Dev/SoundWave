@@ -7,6 +7,7 @@ import { mockIsFollowingArtist, mockToggleFollowArtist } from '@/lib/mock/store'
 import { Button } from '@/components/ui';
 import AlbumCard from '@/components/home/AlbumCard';
 import TrackListItem from '@/components/home/TrackListItem';
+import { useTranslation } from '@/lib/i18n';
 
 interface ArtistProfileProps {
   artist: Artist;
@@ -17,6 +18,7 @@ interface ArtistProfileProps {
 }
 
 export function ArtistProfile({ artist, albums, singles, viewerId, viewerSubscription }: ArtistProfileProps) {
+  const { t } = useTranslation('artistProfile');
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(artist.followersCount);
 
@@ -76,7 +78,7 @@ export function ArtistProfile({ artist, albums, singles, viewerId, viewerSubscri
               {artist.stageName}
             </h1>
             {artist.isVerified && (
-              <span title="هنرمند تایید شده" style={{
+              <span title={t('verifiedArtistTitle')} style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 2,
@@ -87,7 +89,7 @@ export function ArtistProfile({ artist, albums, singles, viewerId, viewerSubscri
                 fontSize: 'var(--text-xs)',
                 fontWeight: 700,
               }}>
-                ✓ تایید شده
+                {t('verifiedBadge')}
               </span>
             )}
           </div>
@@ -100,12 +102,12 @@ export function ArtistProfile({ artist, albums, singles, viewerId, viewerSubscri
             <div style={{ fontWeight: 700, fontSize: 'var(--text-lg)', color: 'var(--color-text-primary)' }}>
               {formatCount(followersCount)}
             </div>
-            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>دنبال‌کننده</div>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>{t('followersLabel')}</div>
           </div>
         </div>
 
         <Button variant={isFollowing ? 'secondary' : 'primary'} onClick={handleToggleFollow} style={{ alignSelf: 'flex-start' }}>
-          {isFollowing ? 'دنبال‌شده' : 'دنبال کردن'}
+          {isFollowing ? t('following') : t('follow')}
         </Button>
       </div>
 
@@ -118,7 +120,7 @@ export function ArtistProfile({ artist, albums, singles, viewerId, viewerSubscri
         }}>
           <div style={{ background: 'var(--color-surface-1)', border: '1px solid var(--color-gold)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5)' }}>
             <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-gold)', marginBottom: 'var(--space-2)' }}>
-              🔒 مجموع استریم‌ها (ویژه طلایی)
+              {t('totalStreamsGoldOnly')}
             </div>
             <div style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--color-text-primary)' }}>
               {formatCount(artist.totalStreams)}
@@ -126,7 +128,7 @@ export function ArtistProfile({ artist, albums, singles, viewerId, viewerSubscri
           </div>
           <div style={{ background: 'var(--color-surface-1)', border: '1px solid var(--color-gold)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5)' }}>
             <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-gold)', marginBottom: 'var(--space-2)' }}>
-              🔒 شنوندگان یکتا (ویژه طلایی)
+              {t('uniqueListenersGoldOnly')}
             </div>
             <div style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--color-text-primary)' }}>
               {formatCount(artist.totalListeners)}
@@ -138,7 +140,7 @@ export function ArtistProfile({ artist, albums, singles, viewerId, viewerSubscri
       {albums.length > 0 && (
         <section style={{ marginTop: 'var(--space-8)' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 'var(--space-4)' }}>
-            آلبوم‌ها
+            {t('albumsHeading')}
           </h2>
           <div style={{ display: 'flex', gap: 'var(--space-4)', overflowX: 'auto', paddingBottom: 'var(--space-2)' }}>
             {albums.map((album) => (
@@ -151,7 +153,7 @@ export function ArtistProfile({ artist, albums, singles, viewerId, viewerSubscri
       {singles.length > 0 && (
         <section style={{ marginTop: 'var(--space-8)' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 'var(--space-4)' }}>
-            تک‌آهنگ‌ها
+            {t('singlesHeading')}
           </h2>
           {singles.map((track) => (
             <TrackListItem key={track.id} track={track} queue={singles} />
@@ -161,7 +163,7 @@ export function ArtistProfile({ artist, albums, singles, viewerId, viewerSubscri
 
       {albums.length === 0 && singles.length === 0 && (
         <div style={{ marginTop: 'var(--space-8)', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
-          هنوز اثری منتشر نشده است.
+          {t('noContentYet')}
         </div>
       )}
     </div>

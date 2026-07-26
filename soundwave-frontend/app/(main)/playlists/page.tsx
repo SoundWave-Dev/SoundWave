@@ -14,8 +14,10 @@ import { Modal, Button } from '@/components/ui';
 import { PlaylistList } from '@/components/playlist/PlaylistList';
 import { CreatePlaylistModal } from '@/components/playlist/CreatePlaylistModal';
 import type { Playlist } from '@/types';
+import { useTranslation } from '@/lib/i18n';
 
 export default function PlaylistsPage() {
+  const { t } = useTranslation('playlistsPage');
   const authUser = useAuthStore((s) => s.user);
   // TEMP (testing only): fall back to a mock user so the page is viewable
   // without logging in. Remove this fallback (go back to
@@ -25,7 +27,7 @@ export default function PlaylistsPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Playlist | null>(null);
 
-  if (!user) return <h2>ابتدا وارد شوید.</h2>;
+  if (!user) return <h2>{t('loginFirst')}</h2>;
 
   const limit = getPlaylistLimit(user.subscription);
 
@@ -62,13 +64,13 @@ export default function PlaylistsPage() {
         onCreate={handleCreate}
       />
 
-      <Modal isOpen={pendingDelete !== null} onClose={() => setPendingDelete(null)} title="حذف پلی‌لیست">
+      <Modal isOpen={pendingDelete !== null} onClose={() => setPendingDelete(null)} title={t('deletePlaylistTitle')}>
         <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-5)' }}>
-          آیا از حذف پلی‌لیست «{pendingDelete?.name}» مطمئن هستید؟ این عمل قابل بازگشت نیست.
+          {t('deleteConfirmPrefix')}{pendingDelete?.name}{t('deleteConfirmSuffix')}
         </p>
         <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end' }}>
-          <Button variant="secondary" onClick={() => setPendingDelete(null)}>انصراف</Button>
-          <Button variant="danger" onClick={handleConfirmDelete}>حذف</Button>
+          <Button variant="secondary" onClick={() => setPendingDelete(null)}>{t('cancel')}</Button>
+          <Button variant="danger" onClick={handleConfirmDelete}>{t('delete')}</Button>
         </div>
       </Modal>
     </div>

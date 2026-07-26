@@ -1,0 +1,20 @@
+export const landingPage = {
+  heroTitleLine1: 'Music, uninterrupted',
+  heroTitleLine2: 'right beside you',
+  heroSubtitle:
+    'Soundwave is an Iranian music streaming service — a place to listen, discover, and, if you are an artist, share your work.',
+  ctaStartFree: 'Start for free',
+  ctaLogin: 'Log in',
+  feature1Title: 'An endless library of Iranian music',
+  feature1Body: 'From timeless classics to the latest releases — search, discover, and listen without interruption.',
+  feature2Title: 'A player that knows it all',
+  feature2Body: 'Playback queue, repeat and shuffle, lyrics display, and full audio control — exactly the way it should be.',
+  feature3Title: 'Smart AI-powered recommendations',
+  feature3Body: 'Based on your taste and mood, we find your next songs — before you even ask for them.',
+  feature4Title: 'A complete toolkit for artists',
+  feature4Body: 'Release your work, track streaming and listener stats, and manage your monthly earnings.',
+  feature5Title: 'Available everywhere',
+  feature5Body: 'Install it as an app and access the Soundwave experience even without an internet connection.',
+  finalCtaTitle: 'Get started right now',
+  finalCtaButton: 'Create a free account',
+} as const;

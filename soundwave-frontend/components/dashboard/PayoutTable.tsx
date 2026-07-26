@@ -9,12 +9,14 @@ import type { ArtistPayoutRecord } from '@/types';
 import { mockGetPayouts, mockConfirmSettlement } from '@/lib/mock/store';
 import { formatCount } from '@/lib/utils';
 import { Badge, Button, Table, type TableColumn } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface PayoutTableProps {
   isAdmin: boolean;
 }
 
 export function PayoutTable({ isAdmin }: PayoutTableProps) {
+  const { t } = useTranslation('payoutTable');
   const [payouts, setPayouts] = useState<ArtistPayoutRecord[]>([]);
 
   const refresh = () => setPayouts(mockGetPayouts());
@@ -29,15 +31,15 @@ export function PayoutTable({ isAdmin }: PayoutTableProps) {
   };
 
   const columns: TableColumn<ArtistPayoutRecord>[] = [
-    { key: 'name', header: 'نام هنرمند', render: (p) => p.artistName },
-    { key: 'listeners', header: 'شنوندگان منحصربه‌فرد', render: (p) => formatCount(p.uniqueListeners) },
-    { key: 'streams', header: 'کل استریم‌ها', render: (p) => formatCount(p.totalStreams) },
-    { key: 'amount', header: 'مبلغ پرداختی', render: (p) => `${formatCount(p.amount)} تومان` },
+    { key: 'name', header: t('colArtistName'), render: (p) => p.artistName },
+    { key: 'listeners', header: t('colListeners'), render: (p) => formatCount(p.uniqueListeners) },
+    { key: 'streams', header: t('colStreams'), render: (p) => formatCount(p.totalStreams) },
+    { key: 'amount', header: t('colAmount'), render: (p) => `${formatCount(p.amount)} ${t('currencyToman')}` },
     {
       key: 'status',
-      header: 'وضعیت پرداخت',
+      header: t('colStatus'),
       render: (p) =>
-        p.isPaid ? <Badge tone="success">تسویه‌شده</Badge> : <Badge tone="warning">در انتظار پرداخت</Badge>,
+        p.isPaid ? <Badge tone="success">{t('statusPaid')}</Badge> : <Badge tone="warning">{t('statusPending')}</Badge>,
     },
     ...(isAdmin
       ? [
@@ -47,7 +49,7 @@ export function PayoutTable({ isAdmin }: PayoutTableProps) {
             render: (p: ArtistPayoutRecord) =>
               !p.isPaid && (
                 <Button size="sm" onClick={() => handleConfirm(p.id)}>
-                  تایید تسویه
+                  {t('confirmSettlement')}
                 </Button>
               ),
           } as TableColumn<ArtistPayoutRecord>,
@@ -55,5 +57,5 @@ export function PayoutTable({ isAdmin }: PayoutTableProps) {
       : []),
   ];
 
-  return <Table columns={columns} rows={payouts} rowKey={(p) => p.id} emptyMessage="رکوردی برای این ماه ثبت نشده" />;
+  return <Table columns={columns} rows={payouts} rowKey={(p) => p.id} emptyMessage={t('emptyMessage')} />;
 }

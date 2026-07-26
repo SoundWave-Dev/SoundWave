@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Modal, Input, Button } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface CreatePlaylistModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface CreatePlaylistModalProps {
 }
 
 export function CreatePlaylistModal({ isOpen, onClose, onCreate }: CreatePlaylistModalProps) {
+  const { t } = useTranslation('createPlaylistModal');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
 
@@ -23,7 +25,7 @@ export function CreatePlaylistModal({ isOpen, onClose, onCreate }: CreatePlaylis
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) {
-      setError('نام پلی‌لیست را وارد کنید.');
+      setError(t('nameRequired'));
       return;
     }
     onCreate(trimmed);
@@ -31,19 +33,19 @@ export function CreatePlaylistModal({ isOpen, onClose, onCreate }: CreatePlaylis
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="ساخت پلی‌لیست جدید">
+    <Modal isOpen={isOpen} onClose={handleClose} title={t('modalTitle')}>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
         <Input
-          label="نام پلی‌لیست"
+          label={t('nameLabel')}
           autoFocus
           value={name}
           onChange={(e) => { setName(e.target.value); setError(''); }}
           error={error}
-          placeholder="مثلاً: آهنگ‌های مورد علاقه من"
+          placeholder={t('namePlaceholder')}
         />
         <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end' }}>
-          <Button type="button" variant="secondary" onClick={handleClose}>انصراف</Button>
-          <Button type="submit" variant="primary">ساخت پلی‌لیست</Button>
+          <Button type="button" variant="secondary" onClick={handleClose}>{t('cancel')}</Button>
+          <Button type="submit" variant="primary">{t('create')}</Button>
         </div>
       </form>
     </Modal>

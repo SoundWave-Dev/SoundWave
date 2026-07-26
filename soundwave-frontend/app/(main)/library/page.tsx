@@ -11,8 +11,10 @@ import AlbumCard from '@/components/library/AlbumCard';
 import { TrackCard } from '@/components/library/TrackCard';
 import { CreatePlaylistModal } from '@/components/playlist/CreatePlaylistModal';
 import type { Playlist, Track } from '@/types';
+import { useTranslation } from '@/lib/i18n';
 
 export default function LibraryPage() {
+  const { t } = useTranslation('libraryPage');
   const authUser = useAuthStore((s) => s.user);
   // TEMP (testing only): fall back to a mock user so the page is viewable
   // without logging in. Remove this fallback (go back to
@@ -47,7 +49,7 @@ export default function LibraryPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  if (!user) return <h2>ابتدا وارد شوید.</h2>;
+  if (!user) return <h2>{t('loginFirst')}</h2>;
 
   const limit = getPlaylistLimit(user.subscription);
   const limitReached = limit !== null && playlists.length >= limit;
@@ -65,7 +67,7 @@ export default function LibraryPage() {
   return (
     <div>
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 'var(--space-6)' }}>
-        کتابخانه
+        {t('title')}
       </h1>
 
       <div style={{ display: 'flex', gap: 'var(--space-4)', marginBottom: 'var(--space-8)', flexWrap: 'wrap' }}>
@@ -76,7 +78,7 @@ export default function LibraryPage() {
       {albums.length > 0 && (
         <section style={{ marginBottom: 'var(--space-10)' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 'var(--space-4)' }}>
-            آلبوم‌ها
+            {t('albumsHeading')}
           </h2>
           <div style={{ display: 'flex', gap: 'var(--space-4)', overflowX: 'auto', paddingBottom: 'var(--space-2)' }}>
             {albums.map((album) => (
@@ -88,12 +90,12 @@ export default function LibraryPage() {
 
       <section>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 'var(--space-4)' }}>
-          آهنگ‌ها
+          {t('tracksHeading')}
         </h2>
 
         {tracks.length === 0 && albums.length === 0 ? (
           <div style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: 'var(--space-10)' }}>
-            نتیجه‌ای برای «{search}» یافت نشد.
+            {t('noResultsPrefix')}{search}{t('noResultsSuffix')}
           </div>
         ) : (
           tracks.map((track) => (

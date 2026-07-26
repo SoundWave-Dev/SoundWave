@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import type { Notification } from '@/types';
 import { timeAgo } from '@/lib/utils';
 import { Button } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface NotificationCardProps {
   notification: Notification;
@@ -18,6 +19,7 @@ interface NotificationCardProps {
 export function NotificationCard({ notification, onMarkAsRead, onDelete }: NotificationCardProps) {
   const router = useRouter();
   const { id, title, body, isRead, actionUrl, createdAt } = notification;
+  const { t } = useTranslation('notificationCard');
 
   const handleClick = () => {
     if (actionUrl) router.push(actionUrl);
@@ -67,7 +69,7 @@ export function NotificationCard({ notification, onMarkAsRead, onDelete }: Notif
               onMarkAsRead(id);
             }}
           >
-            علامت‌گذاری به عنوان خوانده‌شده
+            {t('markAsRead')}
           </Button>
         )}
         <Button
@@ -79,7 +81,7 @@ export function NotificationCard({ notification, onMarkAsRead, onDelete }: Notif
             onDelete(id);
           }}
         >
-          حذف
+          {t('delete')}
         </Button>
       </div>
     </div>

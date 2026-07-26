@@ -1,0 +1,16 @@
+export const artistApprovalTable = {
+  colStageName: 'نام هنری',
+  colEmail: 'ایمیل',
+  colDate: 'تاریخ ثبت‌نام',
+  colStatus: 'وضعیت',
+  statusPending: 'در انتظار تایید',
+  viewPortfolio: 'مشاهده نمونه‌کار',
+  approve: 'تایید',
+  reject: 'رد درخواست',
+  emptyMessage: 'درخواست هنرمندی در انتظار بررسی وجود ندارد',
+  portfolioModalTitle: 'نمونه‌کار هنرمند',
+  portfolioBody: 'نمونه‌کار ارسالی «{name}» — بارگذاری فایل واقعی در فاز دوم پیاده‌سازی می‌شود.',
+  rejectModalTitle: 'رد درخواست هنرمندی',
+  rejectReasonLabel: 'دلیل رد درخواست «{name}»',
+  rejectReasonPlaceholder: 'دلیل رد درخواست را بنویسید',
+} as const;

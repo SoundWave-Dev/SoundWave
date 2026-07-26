@@ -13,12 +13,14 @@ import { profileSchema, type ProfileFormValues } from '@/lib/validators/profileS
 import { mockUpdateUserProfile } from '@/lib/mock/store';
 import { useAuthStore } from '@/lib/store/authStore';
 import { Button, Input } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface ProfileFormProps {
   user: User;
 }
 
 export function ProfileForm({ user }: ProfileFormProps) {
+  const { t } = useTranslation('profileForm');
   const updateUser = useAuthStore((s) => s.updateUser);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -43,20 +45,20 @@ export function ProfileForm({ user }: ProfileFormProps) {
     if (updated) {
       updateUser({ displayName: updated.displayName });
       reset({ displayName: updated.displayName });
-      setSuccessMessage('نام نمایشی با موفقیت به‌روزرسانی شد.');
+      setSuccessMessage(t('updateSuccess'));
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-      <Input label="نام کاربری" value={user.username} disabled readOnly />
+      <Input label={t('usernameLabel')} value={user.username} disabled readOnly />
       <Input
-        label="نام نمایشی"
-        placeholder="نام نمایشی شما"
+        label={t('displayNameLabel')}
+        placeholder={t('displayNamePlaceholder')}
         error={errors.displayName?.message}
         {...register('displayName')}
       />
-      <Input label="ایمیل" value={user.email} disabled readOnly />
+      <Input label={t('emailLabel')} value={user.email} disabled readOnly />
 
       {successMessage && (
         <div
@@ -75,7 +77,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
       )}
 
       <Button type="submit" disabled={isSubmitting || !isDirty} style={{ alignSelf: 'flex-start' }}>
-        {isSubmitting ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
+        {isSubmitting ? t('saving') : t('save')}
       </Button>
     </form>
   );

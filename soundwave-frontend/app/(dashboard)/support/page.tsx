@@ -15,10 +15,12 @@ import { ArtistApprovalTable } from '@/components/dashboard/ArtistApprovalTable'
 import { TicketList } from '@/components/dashboard/TicketList';
 import { PayoutTable } from '@/components/dashboard/PayoutTable';
 import { PriceControlPanel } from '@/components/dashboard/PriceControlPanel';
+import { useTranslation } from '@/lib/i18n';
 
 type DashboardTab = 'verification' | 'tickets' | 'accounting' | 'subscriptions';
 
 function DashboardContent() {
+  const { t } = useTranslation('supportPage');
   const authUser = useAuthStore((s) => s.user);
   // TEMP (testing only): fall back to a mock admin user so the page (and
   // its admin-only tabs) is viewable without logging in. Remove this
@@ -28,16 +30,16 @@ function DashboardContent() {
   const [tab, setTab] = useState<DashboardTab>('verification');
 
   const tabs = [
-    { key: 'verification', label: 'تایید هنرمندان' },
-    { key: 'tickets', label: 'تیکت‌های پشتیبانی' },
-    ...(isAdmin ? [{ key: 'accounting', label: 'حسابرسی' }] : []),
-    ...(isAdmin ? [{ key: 'subscriptions', label: 'مدیریت اشتراک‌ها' }] : []),
+    { key: 'verification', label: t('tabVerification') },
+    { key: 'tickets', label: t('tabTickets') },
+    ...(isAdmin ? [{ key: 'accounting', label: t('tabAccounting') }] : []),
+    ...(isAdmin ? [{ key: 'subscriptions', label: t('tabSubscriptions') }] : []),
   ];
 
   return (
     <div style={{ padding: 'var(--space-8)', maxWidth: '1100px', margin: '0 auto' }}>
       <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 'var(--space-6)' }}>
-        داشبورد پشتیبانی و مدیریت
+        {t('title')}
       </h1>
 
       <Tabs tabs={tabs} activeKey={tab} onChange={(key) => setTab(key as DashboardTab)} />

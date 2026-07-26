@@ -1,3 +1,5 @@
+'use client';
+
 // ============================================================
 // SOUNDWAVE — PLAYER: Fullscreen Player (mobile slide-up overlay)
 // Large cover art + all desktop controls + close button.
@@ -6,6 +8,7 @@
 import { useRouter } from 'next/navigation';
 import type { RepeatMode, Track } from '@/types';
 import { ROUTES } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 import { ProgressBar } from './ProgressBar';
 import { VolumeControl } from './VolumeControl';
 import { RepeatButton } from './RepeatButton';
@@ -55,11 +58,12 @@ export function FullscreenPlayer({
   onOpenLyrics,
 }: FullscreenPlayerProps) {
   const router = useRouter();
+  const { t } = useTranslation('fullscreenPlayer');
 
   return (
     <div
       role="dialog"
-      aria-label="پخش‌کننده تمام‌صفحه"
+      aria-label={t('dialogAriaLabel')}
       aria-hidden={!isOpen}
       style={{
         position: 'fixed',
@@ -77,7 +81,7 @@ export function FullscreenPlayer({
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button
           type="button"
-          aria-label="بستن پخش‌کننده"
+          aria-label={t('close')}
           onClick={onClose}
           style={{ background: 'transparent', border: 'none', color: 'var(--color-text-secondary)', fontSize: 'var(--text-2xl)', cursor: 'pointer' }}
         >
@@ -147,7 +151,7 @@ export function FullscreenPlayer({
           <ShuffleButton isShuffled={isShuffled} onClick={onToggleShuffle} />
           <button
             type="button"
-            aria-label="آهنگ قبلی"
+            aria-label={t('previousTrack')}
             onClick={onPrev}
             style={{ background: 'transparent', border: 'none', color: 'var(--color-text-primary)', fontSize: 'var(--text-2xl)', cursor: 'pointer' }}
           >
@@ -155,7 +159,7 @@ export function FullscreenPlayer({
           </button>
           <button
             type="button"
-            aria-label={isPlaying ? 'توقف' : 'پخش'}
+            aria-label={isPlaying ? t('pause') : t('play')}
             onClick={onTogglePlay}
             style={{
               width: 64,
@@ -172,7 +176,7 @@ export function FullscreenPlayer({
           </button>
           <button
             type="button"
-            aria-label="آهنگ بعدی"
+            aria-label={t('nextTrack')}
             onClick={onNext}
             style={{ background: 'transparent', border: 'none', color: 'var(--color-text-primary)', fontSize: 'var(--text-2xl)', cursor: 'pointer' }}
           >
@@ -186,7 +190,7 @@ export function FullscreenPlayer({
           <div style={{ display: 'flex', gap: 'var(--space-4)' }}>
             <button
               type="button"
-              aria-label="باز کردن صف پخش"
+              aria-label={t('openQueue')}
               onClick={onOpenQueue}
               style={{ background: 'transparent', border: 'none', color: 'var(--color-text-secondary)', fontSize: 'var(--text-lg)', cursor: 'pointer' }}
             >
@@ -195,7 +199,7 @@ export function FullscreenPlayer({
             {track.lyrics !== null && (
               <button
                 type="button"
-                aria-label="باز کردن متن آهنگ"
+                aria-label={t('openLyrics')}
                 onClick={onOpenLyrics}
                 style={{ background: 'transparent', border: 'none', color: 'var(--color-text-secondary)', fontSize: 'var(--text-lg)', cursor: 'pointer' }}
               >

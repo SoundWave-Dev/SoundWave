@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Playlist, Track } from '@/types';
+import { useTranslation } from '@/lib/i18n';
 
 interface AddToPlaylistMenuProps {
   track: Track;
@@ -12,13 +13,14 @@ interface AddToPlaylistMenuProps {
 }
 
 export function AddToPlaylistMenu({ track, playlists, limitReached, onAdd, onCreateNew }: AddToPlaylistMenuProps) {
+  const { t } = useTranslation('addToPlaylistMenu');
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div style={{ position: 'relative' }}>
       <button
         type="button"
-        aria-label="افزودن به پلی‌لیست"
+        aria-label={t('addToPlaylistAriaLabel')}
         onClick={(e) => { e.stopPropagation(); setIsOpen((v) => !v); }}
         style={{
           width: 32,
@@ -56,12 +58,12 @@ export function AddToPlaylistMenu({ track, playlists, limitReached, onAdd, onCre
             }}
           >
             <div style={{ padding: 'var(--space-3) var(--space-4)', fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', borderBottom: '1px solid var(--color-border)' }}>
-              افزودن «{track.title}» به:
+              {t('addTrackPrefix')}{track.title}{t('addTrackSuffix')}
             </div>
 
             {playlists.length === 0 && (
               <div style={{ padding: 'var(--space-4)', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
-                هنوز پلی‌لیستی ندارید.
+                {t('noPlaylistsYet')}
               </div>
             )}
 
@@ -93,7 +95,7 @@ export function AddToPlaylistMenu({ track, playlists, limitReached, onAdd, onCre
             <button
               type="button"
               disabled={limitReached}
-              title={limitReached ? 'به سقف مجاز پلی‌لیست‌های اشتراک فعلی رسیده‌اید.' : undefined}
+              title={limitReached ? t('limitReachedTooltip') : undefined}
               onClick={() => { onCreateNew(); setIsOpen(false); }}
               style={{
                 display: 'block',
@@ -109,7 +111,7 @@ export function AddToPlaylistMenu({ track, playlists, limitReached, onAdd, onCre
                 cursor: limitReached ? 'not-allowed' : 'pointer',
               }}
             >
-              + پلی‌لیست جدید {limitReached && '🔒'}
+              {t('newPlaylist')} {limitReached && '🔒'}
             </button>
           </div>
         </>

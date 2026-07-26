@@ -6,7 +6,10 @@
 // requested page is not cached.
 // ============================================================
 
+import { useTranslation } from '@/lib/i18n';
+
 export default function OfflinePage() {
+  const { t } = useTranslation('offlinePage');
   return (
     <div style={{
       minHeight: '100dvh',
@@ -30,7 +33,7 @@ export default function OfflinePage() {
           color: 'var(--color-text-primary)',
           marginBottom: 'var(--space-3)',
         }}>
-          اتصال اینترنت ندارید
+          {t('title')}
         </h1>
         <p style={{
           color: 'var(--color-text-secondary)',
@@ -38,8 +41,7 @@ export default function OfflinePage() {
           maxWidth: 300,
           lineHeight: 1.8,
         }}>
-          Soundwave برای پخش موسیقی به اینترنت نیاز دارد.
-          لطفاً اتصال خود را بررسی کنید.
+          {t('description')}
         </p>
       </div>
 
@@ -56,7 +58,7 @@ export default function OfflinePage() {
           border: 'none',
         }}
       >
-        تلاش مجدد
+        {t('retry')}
       </button>
     </div>
   );

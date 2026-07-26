@@ -1,6 +1,7 @@
 'use client';
 
 import { Search } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 interface SearchBarProps {
   value: string;
@@ -8,6 +9,7 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ value, onChange }: SearchBarProps) {
+  const { t } = useTranslation('searchBar');
   return (
     <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
       <Search
@@ -17,7 +19,7 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="جستجوی آهنگ یا هنرمند..."
+        placeholder={t('placeholder')}
         style={{
           width: '100%',
           padding: 'var(--space-3) var(--space-4) var(--space-3) var(--space-10)',

@@ -22,10 +22,12 @@ import { Button, Card, Modal, Table, type TableColumn } from '@/components/ui';
 // import { RequireRole } from '@/components/auth/RequireRole'; // TEMP (testing only): see below
 import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
 import { UploadTrackModal } from '@/components/artist/UploadTrackModal';
+import { useTranslation } from '@/lib/i18n';
 
 const EARNINGS_PER_STREAM = 0.0005; // mock rate, in currency units per stream
 
 function ManagePanel() {
+  const { t } = useTranslation('artistManagePage');
   const authUser = useAuthStore((s) => s.user);
   // TEMP (testing only): fall back to a mock approved artist (Dariush) so
   // the page is viewable without logging in. Remove this fallback (go back
@@ -88,32 +90,32 @@ function ManagePanel() {
   };
 
   const columns: TableColumn<Track>[] = [
-    { key: 'title', header: 'عنوان', render: (t) => t.title },
-    { key: 'type', header: 'نوع', render: (t) => (t.albumId ? 'آلبوم' : 'تک‌آهنگ') },
-    { key: 'listeners', header: 'شنونده', render: (t) => formatCount(t.uniqueListeners) },
-    { key: 'streams', header: 'استریم', render: (t) => formatCount(t.streamCount) },
+    { key: 'title', header: t('colTitle'), render: (row) => row.title },
+    { key: 'type', header: t('colType'), render: (row) => (row.albumId ? t('typeAlbum') : t('typeSingle')) },
+    { key: 'listeners', header: t('colListeners'), render: (row) => formatCount(row.uniqueListeners) },
+    { key: 'streams', header: t('colStreams'), render: (row) => formatCount(row.streamCount) },
     {
       key: 'earnings',
-      header: 'درآمد تخمینی',
-      render: (t) => `${formatCount(Math.round(t.streamCount * EARNINGS_PER_STREAM))} تومان`,
+      header: t('colEarnings'),
+      render: (row) => `${formatCount(Math.round(row.streamCount * EARNINGS_PER_STREAM))} ${t('currencyToman')}`,
     },
     {
       key: 'actions',
       header: '',
-      render: (t) => (
+      render: (row) => (
         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
           <Button
             variant="secondary"
             size="sm"
             onClick={() => {
-              setEditingTrack(t);
+              setEditingTrack(row);
               setIsUploadOpen(true);
             }}
           >
-            ویرایش
+            {t('edit')}
           </Button>
-          <Button variant="danger" size="sm" onClick={() => setDeletingTrack(t)}>
-            حذف
+          <Button variant="danger" size="sm" onClick={() => setDeletingTrack(row)}>
+            {t('delete')}
           </Button>
         </div>
       ),
@@ -124,7 +126,7 @@ function ManagePanel() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-          مدیریت آثار — {artist.stageName}
+          {t('pageTitle').replace('{name}', artist.stageName)}
         </h1>
         <Button
           onClick={() => {
@@ -132,12 +134,12 @@ function ManagePanel() {
             setIsUploadOpen(true);
           }}
         >
-          آپلود اثر جدید
+          {t('uploadNew')}
         </Button>
       </div>
 
       <Card style={{ padding: 0 }}>
-        <Table columns={columns} rows={tracks} rowKey={(t) => t.id} emptyMessage="هنوز اثری منتشر نکرده‌اید" />
+        <Table columns={columns} rows={tracks} rowKey={(row) => row.id} emptyMessage={t('emptyMessage')} />
       </Card>
 
       <UploadTrackModal
@@ -167,17 +169,17 @@ function ManagePanel() {
         }
       />
 
-      <Modal isOpen={!!deletingTrack} onClose={() => setDeletingTrack(null)} title="حذف اثر">
+      <Modal isOpen={!!deletingTrack} onClose={() => setDeletingTrack(null)} title={t('deleteModalTitle')}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>
-            آیا از حذف «{deletingTrack?.title}» مطمئن هستید؟ این عملیات غیرقابل بازگشت است.
+            {t('deleteConfirmText').replace('{title}', deletingTrack?.title ?? '')}
           </p>
           <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
             <Button variant="danger" onClick={handleDelete} style={{ flex: 1 }}>
-              حذف
+              {t('delete')}
             </Button>
             <Button variant="secondary" onClick={() => setDeletingTrack(null)} style={{ flex: 1 }}>
-              انصراف
+              {t('cancel')}
             </Button>
           </div>
         </div>

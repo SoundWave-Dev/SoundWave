@@ -9,23 +9,24 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, ListMusic, Library, Settings, Bell } from 'lucide-react';
+import { Home, ListMusic, Library, Settings, Bell, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { mockGetNotifications } from '@/lib/mock/store';
 import { getInitials } from '@/lib/utils';
 import { ROUTES } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 
 const NAV_LINKS = [
-  { href: ROUTES.HOME, label: 'خانه', icon: Home },
-  { href: ROUTES.PLAYLISTS, label: 'پلی‌لیست‌ها', icon: ListMusic },
-  { href: ROUTES.LIBRARY, label: 'کتابخانه', icon: Library },
-  { href: ROUTES.SETTINGS, label: 'تنظیمات', icon: Settings },
-];
+  { href: ROUTES.HOME, labelKey: 'navHome', icon: Home },
+  { href: ROUTES.PLAYLISTS, labelKey: 'navPlaylists', icon: ListMusic },
+  { href: ROUTES.LIBRARY, labelKey: 'navLibrary', icon: Library },
+  { href: ROUTES.SETTINGS, labelKey: 'navSettings', icon: Settings },
+] as const;
 
-const TIER_BADGE: Record<string, { label: string; color: string }> = {
-  free: { label: 'رایگان', color: 'var(--color-text-muted)' },
-  silver: { label: 'نقره‌ای', color: 'var(--color-silver)' },
-  gold: { label: 'طلایی', color: 'var(--color-gold)' },
+const TIER_BADGE_KEY: Record<string, { key: 'tierFree' | 'tierSilver' | 'tierGold'; color: string }> = {
+  free: { key: 'tierFree', color: 'var(--color-text-muted)' },
+  silver: { key: 'tierSilver', color: 'var(--color-silver)' },
+  gold: { key: 'tierGold', color: 'var(--color-gold)' },
 };
 
 function isActive(pathname: string, href: string): boolean {
@@ -36,13 +37,20 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { t } = useTranslation('sidebar');
+
+  const handleLogout = () => {
+    logout();
+    router.push(ROUTES.LOGIN);
+  };
 
   useEffect(() => {
     setUnreadCount(mockGetNotifications().filter((n) => !n.isRead).length);
   }, [pathname]);
 
-  const tierBadge = user ? TIER_BADGE[user.subscription] : null;
+  const tierBadge = user ? TIER_BADGE_KEY[user.subscription] : null;
 
   return (
     <>
@@ -72,7 +80,7 @@ export default function Sidebar() {
 
           <button
             type="button"
-            aria-label="اعلانات"
+            aria-label={t('notificationsAriaLabel')}
             onClick={() => router.push(ROUTES.NOTIFICATIONS)}
             style={{
               position: 'relative',
@@ -108,7 +116,7 @@ export default function Sidebar() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)', flex: 1 }}>
-          {NAV_LINKS.map(({ href, label, icon: Icon }) => {
+          {NAV_LINKS.map(({ href, labelKey, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
               <Link
@@ -128,21 +136,26 @@ export default function Sidebar() {
                 }}
               >
                 <Icon size={18} />
-                {label}
+                {t(labelKey)}
               </Link>
             );
           })}
         </div>
 
         {user && (
+          <div style={{
+            paddingTop: 'var(--space-4)',
+            borderTop: '1px solid var(--color-border)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--space-3)',
+          }}>
           <Link
             href={ROUTES.PROFILE(user.username)}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: 'var(--space-3)',
-              paddingTop: 'var(--space-4)',
-              borderTop: '1px solid var(--color-border)',
               color: 'inherit',
             }}
           >
@@ -182,11 +195,31 @@ export default function Sidebar() {
               </div>
               {tierBadge && (
                 <span style={{ fontSize: 'var(--text-xs)', color: tierBadge.color, fontWeight: 600 }}>
-                  {tierBadge.label}
+                  {t(tierBadge.key)}
                 </span>
               )}
             </div>
           </Link>
+          <button
+            type="button"
+            onClick={handleLogout}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-3)',
+              padding: 'var(--space-2) var(--space-1)',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--color-text-secondary)',
+              fontSize: 'var(--text-sm)',
+              fontWeight: 500,
+            }}
+          >
+            <LogOut size={18} />
+            {t('logout')}
+          </button>
+          </div>
         )}
       </nav>
 
@@ -204,7 +237,7 @@ export default function Sidebar() {
         justifyContent: 'space-around',
         padding: 'var(--space-2) 0',
       }}>
-        {NAV_LINKS.map(({ href, label, icon: Icon }) => {
+        {NAV_LINKS.map(({ href, labelKey, icon: Icon }) => {
           const active = isActive(pathname, href);
           return (
             <Link
@@ -221,13 +254,13 @@ export default function Sidebar() {
               }}
             >
               <Icon size={20} />
-              {label}
+              {t(labelKey)}
             </Link>
           );
         })}
         <button
           type="button"
-          aria-label="اعلانات"
+          aria-label={t('notificationsAriaLabel')}
           onClick={() => router.push(ROUTES.NOTIFICATIONS)}
           style={{
             position: 'relative',
@@ -254,7 +287,7 @@ export default function Sidebar() {
               background: 'var(--color-error)',
             }} />
           )}
-          اعلانات
+          {t('notificationsAriaLabel')}
         </button>
       </nav>
 

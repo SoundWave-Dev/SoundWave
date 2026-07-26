@@ -5,8 +5,10 @@ import { mockGetArtistById, mockGetAlbums, mockGetTracks } from '@/lib/mock/stor
 import { useAuthStore } from '@/lib/store/authStore';
 import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
 import { ArtistProfile } from '@/components/profile/ArtistProfile';
+import { useTranslation } from '@/lib/i18n';
 
 export default function ArtistPage() {
+  const { t } = useTranslation('artistPage');
   const params = useParams<{ id: string }>();
   const authViewer = useAuthStore((s) => s.user);
   // TEMP (testing only): fall back to a mock gold user so follow/stats are
@@ -19,7 +21,7 @@ export default function ArtistPage() {
   if (!artist) {
     return (
       <div style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: 'var(--space-10)' }}>
-        هنرمندی با این شناسه یافت نشد.
+        {t('notFound')}
       </div>
     );
   }

@@ -8,8 +8,10 @@ import { ROUTES } from '@/lib/constants';
 import { Button } from '@/components/ui';
 import TrackListItem from '@/components/home/TrackListItem';
 import type { Playlist } from '@/types';
+import { useTranslation } from '@/lib/i18n';
 
 export default function PlaylistDetailPage() {
+  const { t } = useTranslation('playlistDetailPage');
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const play = usePlayerStore((s) => s.play);
@@ -18,7 +20,7 @@ export default function PlaylistDetailPage() {
   if (!playlist) {
     return (
       <div style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: 'var(--space-10)' }}>
-        پلی‌لیستی با این شناسه یافت نشد.
+        {t('notFound')}
       </div>
     );
   }
@@ -35,7 +37,7 @@ export default function PlaylistDetailPage() {
         onClick={() => router.push(ROUTES.PLAYLISTS)}
         style={{ background: 'transparent', border: 'none', color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)', cursor: 'pointer', marginBottom: 'var(--space-4)' }}
       >
-        ← بازگشت به پلی‌لیست‌ها
+        {t('backToPlaylists')}
       </button>
 
       <div style={{
@@ -64,18 +66,18 @@ export default function PlaylistDetailPage() {
 
         <div style={{ flex: 1, minWidth: 200 }}>
           <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-2)' }}>
-            پلی‌لیست
+            {t('playlistLabel')}
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-3xl)', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 'var(--space-3)' }}>
             {playlist.name}
           </h1>
           <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-4)' }}>
-            {playlist.tracks.length} آهنگ
+            {playlist.tracks.length} {t('trackCountSuffix')}
           </div>
 
           {playlist.tracks.length > 0 && (
             <Button variant="primary" onClick={() => play(playlist.tracks[0], playlist.tracks)}>
-              ▶ پخش همه
+              {t('playAll')}
             </Button>
           )}
         </div>
@@ -90,7 +92,7 @@ export default function PlaylistDetailPage() {
           borderRadius: 'var(--radius-xl)',
           border: '1px dashed var(--color-border)',
         }}>
-          این پلی‌لیست هنوز آهنگی ندارد. از صفحه‌ی کتابخانه آهنگ اضافه کنید.
+          {t('emptyPlaylist')}
         </div>
       ) : (
         <section>
@@ -101,7 +103,7 @@ export default function PlaylistDetailPage() {
               </div>
               <button
                 type="button"
-                aria-label="حذف از پلی‌لیست"
+                aria-label={t('removeFromPlaylistAriaLabel')}
                 onClick={() => handleRemoveTrack(track.id)}
                 style={{
                   background: 'transparent',

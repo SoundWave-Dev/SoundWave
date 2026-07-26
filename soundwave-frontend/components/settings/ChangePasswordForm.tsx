@@ -10,12 +10,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { changePasswordSchema, type ChangePasswordFormValues } from '@/lib/validators/changePasswordSchema';
 import { mockChangePassword } from '@/lib/mock/store';
 import { Button, Input } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface ChangePasswordFormProps {
   email: string;
 }
 
 export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
+  const { t } = useTranslation('changePasswordForm');
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -34,31 +36,31 @@ export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
     setSuccessMessage(null);
     const success = mockChangePassword(email, values.currentPassword, values.newPassword);
     if (!success) {
-      setServerError('رمز عبور فعلی اشتباه است.');
+      setServerError(t('incorrectCurrentPassword'));
       return;
     }
     reset();
-    setSuccessMessage('رمز عبور با موفقیت تغییر کرد.');
+    setSuccessMessage(t('updateSuccess'));
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
       <Input
-        label="رمز عبور فعلی"
+        label={t('currentPasswordLabel')}
         type="password"
         placeholder="••••••••"
         error={errors.currentPassword?.message}
         {...register('currentPassword')}
       />
       <Input
-        label="رمز عبور جدید"
+        label={t('newPasswordLabel')}
         type="password"
         placeholder="••••••••"
         error={errors.newPassword?.message}
         {...register('newPassword')}
       />
       <Input
-        label="تکرار رمز عبور جدید"
+        label={t('confirmNewPasswordLabel')}
         type="password"
         placeholder="••••••••"
         error={errors.confirmNewPassword?.message}
@@ -98,7 +100,7 @@ export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
       )}
 
       <Button type="submit" disabled={isSubmitting} style={{ alignSelf: 'flex-start' }}>
-        {isSubmitting ? 'در حال ذخیره...' : 'تغییر رمز عبور'}
+        {isSubmitting ? t('saving') : t('submit')}
       </Button>
     </form>
   );

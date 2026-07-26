@@ -1,3 +1,5 @@
+'use client';
+
 // ============================================================
 // SOUNDWAVE — LANDING PAGE
 // Public marketing page. Not gated by auth — RequireRole only
@@ -10,36 +12,19 @@ import Link from 'next/link';
 import { LandingHeader } from '@/components/marketing/LandingHeader';
 import { ScrollReveal } from '@/components/marketing/ScrollReveal';
 import { ROUTES } from '@/lib/constants';
-
-const FEATURES = [
-  {
-    icon: '🎧',
-    title: 'کتابخانه‌ای بی‌پایان از موسیقی ایرانی',
-    body: 'از کلاسیک‌های ماندگار تا تازه‌ترین انتشارها؛ جست‌وجو کنید، کشف کنید و بی‌وقفه گوش دهید.',
-  },
-  {
-    icon: '🎚️',
-    title: 'پخش‌کننده‌ای که همه‌چیز را بلد است',
-    body: 'صف پخش، تکرار و پخش تصادفی، نمایش متن آهنگ و کنترل کامل صدا؛ دقیقاً همان‌طور که باید باشد.',
-  },
-  {
-    icon: '✨',
-    title: 'پیشنهاد هوشمند با هوش مصنوعی',
-    body: 'بر اساس سلیقه و حال‌وهوای شما، آهنگ‌های بعدی را پیدا می‌کنیم — پیش از آنکه خودتان بخواهید.',
-  },
-  {
-    icon: '🎤',
-    title: 'ابزاری کامل برای هنرمندان',
-    body: 'آثار خود را منتشر کنید، آمار استریم و شنوندگان را دنبال کنید و درآمد ماهانه خود را مدیریت نمایید.',
-  },
-  {
-    icon: '📱',
-    title: 'همه‌جا در دسترس',
-    body: 'به‌عنوان یک اپلیکیشن نصب کنید و حتی بدون اینترنت به تجربه‌ی Soundwave دسترسی داشته باشید.',
-  },
-];
+import { useTranslation } from '@/lib/i18n';
 
 export default function LandingPage() {
+  const { t } = useTranslation('landingPage');
+
+  const FEATURES = [
+    { icon: '🎧', title: t('feature1Title'), body: t('feature1Body') },
+    { icon: '🎚️', title: t('feature2Title'), body: t('feature2Body') },
+    { icon: '✨', title: t('feature3Title'), body: t('feature3Body') },
+    { icon: '🎤', title: t('feature4Title'), body: t('feature4Body') },
+    { icon: '📱', title: t('feature5Title'), body: t('feature5Body') },
+  ];
+
   return (
     <div style={{ background: 'var(--color-bg)', direction: 'rtl', overflowX: 'hidden' }}>
       <LandingHeader />
@@ -78,8 +63,8 @@ export default function LandingPage() {
               marginBottom: 'var(--space-6)',
             }}
           >
-            موسیقی، بی‌وقفه<br />
-            <span style={{ color: 'var(--color-primary)' }}>همراه شما</span>
+            {t('heroTitleLine1')}<br />
+            <span style={{ color: 'var(--color-primary)' }}>{t('heroTitleLine2')}</span>
           </h1>
 
           <p
@@ -91,8 +76,7 @@ export default function LandingPage() {
               lineHeight: 1.8,
             }}
           >
-            Soundwave سرویس استریم موسیقی ایرانی است؛ جایی برای شنیدن، کشف کردن
-            و اگر هنرمندید — به اشتراک گذاشتن آثارتان.
+            {t('heroSubtitle')}
           </p>
 
           <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -109,7 +93,7 @@ export default function LandingPage() {
                 boxShadow: 'var(--shadow-glow)',
               }}
             >
-              شروع رایگان
+              {t('ctaStartFree')}
             </Link>
             <Link
               href={ROUTES.LOGIN}
@@ -124,7 +108,7 @@ export default function LandingPage() {
                 fontSize: 'var(--text-base)',
               }}
             >
-              ورود
+              {t('ctaLogin')}
             </Link>
           </div>
         </div>
@@ -200,7 +184,7 @@ export default function LandingPage() {
               marginBottom: 'var(--space-6)',
             }}
           >
-            همین حالا شروع کنید
+            {t('finalCtaTitle')}
           </h2>
           <Link
             href={ROUTES.REGISTER}
@@ -216,7 +200,7 @@ export default function LandingPage() {
               boxShadow: 'var(--shadow-glow)',
             }}
           >
-            ساخت حساب رایگان
+            {t('finalCtaButton')}
           </Link>
         </section>
       </ScrollReveal>

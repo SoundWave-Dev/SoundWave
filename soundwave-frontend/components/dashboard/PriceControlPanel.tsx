@@ -11,6 +11,7 @@ import type { SubscriptionTier } from '@/types';
 import { mockGetUsers, mockGetSubscriptionPrices, mockUpdateSubscriptionPrices } from '@/lib/mock/store';
 import { formatCount } from '@/lib/utils';
 import { Button, Card, Input } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
   free: 'var(--color-text-muted)',
@@ -18,13 +19,13 @@ const TIER_COLORS: Record<SubscriptionTier, string> = {
   gold: 'var(--color-gold)',
 };
 
-const TIER_LABELS: Record<SubscriptionTier, string> = {
-  free: 'رایگان',
-  silver: 'نقره‌ای',
-  gold: 'طلایی',
-};
-
 export function PriceControlPanel() {
+  const { t } = useTranslation('priceControlPanel');
+  const TIER_LABELS: Record<SubscriptionTier, string> = {
+    free: t('tierFree'),
+    silver: t('tierSilver'),
+    gold: t('tierGold'),
+  };
   const [silver, setSilver] = useState(0);
   const [gold, setGold] = useState(0);
   const [saved, setSaved] = useState(false);
@@ -52,41 +53,41 @@ export function PriceControlPanel() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-4)' }}>
-        <SummaryCard label="کاربران رایگان" value={formatCount(counts.free)} />
-        <SummaryCard label="کاربران نقره‌ای" value={formatCount(counts.silver)} />
-        <SummaryCard label="کاربران طلایی" value={formatCount(counts.gold)} />
-        <SummaryCard label="درآمد این ماه" value={`${formatCount(revenue)} تومان`} highlight />
+        <SummaryCard label={t('freeUsers')} value={formatCount(counts.free)} />
+        <SummaryCard label={t('silverUsers')} value={formatCount(counts.silver)} />
+        <SummaryCard label={t('goldUsers')} value={formatCount(counts.gold)} />
+        <SummaryCard label={t('monthlyRevenue')} value={`${formatCount(revenue)} ${t('currencyToman')}`} highlight />
       </div>
 
       <div style={{ display: 'flex', gap: 'var(--space-6)', flexWrap: 'wrap' }}>
         <Card style={{ flex: '1 1 260px' }}>
           <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 700, marginBottom: 'var(--space-4)', color: 'var(--color-text-primary)' }}>
-            توزیع کاربران بر اساس نوع اشتراک
+            {t('distributionTitle')}
           </h3>
-          <SubscriptionPieChart counts={counts} total={total} />
+          <SubscriptionPieChart counts={counts} total={total} labels={TIER_LABELS} />
         </Card>
 
         <Card style={{ flex: '1 1 260px' }}>
           <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 700, marginBottom: 'var(--space-4)', color: 'var(--color-text-primary)' }}>
-            تنظیم قیمت اشتراک‌ها
+            {t('pricingTitle')}
           </h3>
           <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             <Input
-              label="قیمت اشتراک نقره‌ای (تومان)"
+              label={t('silverPriceLabel')}
               type="number"
               min={0}
               value={silver}
               onChange={(e) => setSilver(Number(e.target.value))}
             />
             <Input
-              label="قیمت اشتراک طلایی (تومان)"
+              label={t('goldPriceLabel')}
               type="number"
               min={0}
               value={gold}
               onChange={(e) => setGold(Number(e.target.value))}
             />
-            <Button type="submit">به‌روزرسانی قیمت‌ها</Button>
-            {saved && <span style={{ color: 'var(--color-primary)', fontSize: 'var(--text-xs)' }}>قیمت‌ها ذخیره شد.</span>}
+            <Button type="submit">{t('updatePrices')}</Button>
+            {saved && <span style={{ color: 'var(--color-primary)', fontSize: 'var(--text-xs)' }}>{t('savedMessage')}</span>}
           </form>
         </Card>
       </div>
@@ -107,7 +108,15 @@ function SummaryCard({ label, value, highlight }: { label: string; value: string
   );
 }
 
-function SubscriptionPieChart({ counts, total }: { counts: Record<SubscriptionTier, number>; total: number }) {
+function SubscriptionPieChart({
+  counts,
+  total,
+  labels,
+}: {
+  counts: Record<SubscriptionTier, number>;
+  total: number;
+  labels: Record<SubscriptionTier, string>;
+}) {
   const radius = 60;
   const circumference = 2 * Math.PI * radius;
   const tiers: SubscriptionTier[] = ['free', 'silver', 'gold'];
@@ -143,7 +152,7 @@ function SubscriptionPieChart({ counts, total }: { counts: Record<SubscriptionTi
           <div key={tier} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 'var(--text-sm)' }}>
             <span style={{ width: 10, height: 10, borderRadius: '50%', background: TIER_COLORS[tier] }} />
             <span style={{ color: 'var(--color-text-secondary)' }}>
-              {TIER_LABELS[tier]} ({counts[tier]})
+              {labels[tier]} ({counts[tier]})
             </span>
           </div>
         ))}

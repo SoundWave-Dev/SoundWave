@@ -1,9 +1,12 @@
+'use client';
+
 // ============================================================
 // SOUNDWAVE — PLAYER: Repeat Button
 // Cycles none → all → one, with a distinct icon per mode.
 // ============================================================
 
 import type { RepeatMode } from '@/types';
+import { useTranslation } from '@/lib/i18n';
 
 interface RepeatButtonProps {
   repeatMode: RepeatMode;
@@ -16,20 +19,16 @@ const ICONS: Record<RepeatMode, string> = {
   one: '🔂',
 };
 
-const LABELS: Record<RepeatMode, string> = {
-  none: 'تکرار خاموش است',
-  all: 'تکرار همه فعال است',
-  one: 'تکرار آهنگ فعلی فعال است',
-};
-
 export function RepeatButton({ repeatMode, onClick }: RepeatButtonProps) {
   const isActive = repeatMode !== 'none';
+  const { t } = useTranslation('repeatButton');
+  const label = t(repeatMode);
 
   return (
     <button
       type="button"
-      aria-label={LABELS[repeatMode]}
-      title={LABELS[repeatMode]}
+      aria-label={label}
+      title={label}
       onClick={onClick}
       style={{
         background: 'transparent',

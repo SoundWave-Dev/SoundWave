@@ -13,10 +13,12 @@ import {
   mockDeleteNotification,
 } from '@/lib/mock/store';
 import { Button } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 import { NotificationCard } from './NotificationCard';
 
 export function NotificationList() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { t } = useTranslation('notificationList');
 
   useEffect(() => {
     setNotifications(mockGetNotifications());
@@ -50,7 +52,7 @@ export function NotificationList() {
         }}
       >
         <div style={{ fontSize: 'var(--text-4xl)', marginBottom: 'var(--space-4)' }}>🔔</div>
-        اعلانی برای نمایش وجود ندارد
+        {t('empty')}
       </div>
     );
   }
@@ -59,11 +61,11 @@ export function NotificationList() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-          اعلانات {unreadCount > 0 && `(${unreadCount})`}
+          {t('title')} {unreadCount > 0 && `(${unreadCount})`}
         </h1>
         {unreadCount > 0 && (
           <Button variant="secondary" size="sm" onClick={handleMarkAllAsRead}>
-            علامت‌گذاری همه به عنوان خوانده‌شده
+            {t('markAllAsRead')}
           </Button>
         )}
       </div>

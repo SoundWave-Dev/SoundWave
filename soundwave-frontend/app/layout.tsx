@@ -4,6 +4,7 @@
 
 import type { Metadata, Viewport } from 'next';
 import '@/styles/globals.css';
+import { HtmlLangSync } from '@/components/i18n/HtmlLangSync';
 
 export const metadata: Metadata = {
   title: 'Soundwave',
@@ -48,6 +49,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body>
+        <HtmlLangSync />
         {children}
       </body>
     </html>

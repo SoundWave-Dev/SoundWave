@@ -1,7 +1,11 @@
+'use client';
+
 // ============================================================
 // SOUNDWAVE — PLAYER: Volume Control
 // Mute toggle + 0–100 slider.
 // ============================================================
+
+import { useTranslation } from '@/lib/i18n';
 
 interface VolumeControlProps {
   volume: number;    // 0–1
@@ -12,12 +16,13 @@ interface VolumeControlProps {
 
 export function VolumeControl({ volume, isMuted, onVolumeChange, onToggleMute }: VolumeControlProps) {
   const icon = isMuted || volume === 0 ? '🔇' : volume < 0.5 ? '🔉' : '🔊';
+  const { t } = useTranslation('volumeControl');
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
       <button
         type="button"
-        aria-label={isMuted ? 'باز کردن صدا' : 'قطع صدا'}
+        aria-label={isMuted ? t('unmute') : t('mute')}
         onClick={onToggleMute}
         style={{
           background: 'transparent',
@@ -31,7 +36,7 @@ export function VolumeControl({ volume, isMuted, onVolumeChange, onToggleMute }:
       </button>
       <input
         type="range"
-        aria-label="میزان صدا"
+        aria-label={t('volumeLevel')}
         min={0}
         max={100}
         step={1}
