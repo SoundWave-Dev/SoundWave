@@ -1,9 +1,12 @@
+'use client';
+
 // ============================================================
 // SOUNDWAVE — PLAYER: Mini Player (mobile collapsed bar)
 // Tapping the bar expands to the fullscreen player.
 // ============================================================
 
 import type { Track } from '@/types';
+import { useTranslation } from '@/lib/i18n';
 
 interface MiniPlayerProps {
   track: Track;
@@ -13,11 +16,13 @@ interface MiniPlayerProps {
 }
 
 export function MiniPlayer({ track, isPlaying, onTogglePlay, onExpand }: MiniPlayerProps) {
+  const { t } = useTranslation('miniPlayer');
+
   return (
     <div
       role="button"
       tabIndex={0}
-      aria-label="باز کردن پخش‌کننده تمام‌صفحه"
+      aria-label={t('expandAriaLabel')}
       onClick={onExpand}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onExpand(); }}
       style={{
@@ -77,7 +82,7 @@ export function MiniPlayer({ track, isPlaying, onTogglePlay, onExpand }: MiniPla
 
       <button
         type="button"
-        aria-label={isPlaying ? 'توقف' : 'پخش'}
+        aria-label={isPlaying ? t('pause') : t('play')}
         onClick={(e) => { e.stopPropagation(); onTogglePlay(); }}
         style={{
           width: 36,

@@ -11,11 +11,13 @@ import { Tabs } from '@/components/ui';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { RegisterListenerForm } from '@/components/auth/RegisterListenerForm';
 import { RegisterArtistForm } from '@/components/auth/RegisterArtistForm';
+import { useTranslation } from '@/lib/i18n';
 
 type PrimaryTab = 'login' | 'register';
 type RegisterTab = 'listener' | 'artist';
 
 function LoginPageContent() {
+  const { t } = useTranslation('loginPage');
   const searchParams = useSearchParams();
   const [primaryTab, setPrimaryTab] = useState<PrimaryTab>(
     searchParams.get('tab') === 'register' ? 'register' : 'login'
@@ -60,8 +62,8 @@ function LoginPageContent() {
 
         <Tabs
           tabs={[
-            { key: 'login', label: 'ورود' },
-            { key: 'register', label: 'ثبت‌نام' },
+            { key: 'login', label: t('loginTab') },
+            { key: 'register', label: t('registerTab') },
           ]}
           activeKey={primaryTab}
           onChange={(key) => setPrimaryTab(key as PrimaryTab)}
@@ -73,8 +75,8 @@ function LoginPageContent() {
           <>
             <Tabs
               tabs={[
-                { key: 'listener', label: 'شنونده' },
-                { key: 'artist', label: 'هنرمند' },
+                { key: 'listener', label: t('listenerTab') },
+                { key: 'artist', label: t('artistTab') },
               ]}
               activeKey={registerTab}
               onChange={(key) => setRegisterTab(key as RegisterTab)}
@@ -94,7 +96,7 @@ function LoginPageContent() {
             textAlign: 'center',
           }}
         >
-          🧪 Dev: هر ایمیل با رمز «password123» کار می‌کند
+          {t('devHint')}
         </div>
       </div>
     </div>

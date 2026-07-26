@@ -282,7 +282,7 @@ export function mockGetUserByUsername(username: string): User | null {
   return mockGetUsers().find((u) => u.username === username) ?? null;
 }
 
-export function mockUpdateUserProfile(userId: string, partial: Pick<User, 'displayName'>): User | null {
+export function mockUpdateUserProfile(userId: string, partial: Partial<Pick<User, 'displayName' | 'avatarUrl'>>): User | null {
   const all = mockGetUsers();
   const idx = all.findIndex((u) => u.id === userId);
   if (idx === -1) return null;
@@ -524,7 +524,8 @@ export function mockConfirmSettlement(payoutId: string): ArtistPayoutRecord | nu
   return updated;
 }
 
-// ── USER SETTINGS (notification prefs, volume, language) ───────
+// ── USER SETTINGS (notification prefs, volume) ───────
+// NOTE: language preference lives in lib/store/localeStore.ts, not here.
 
 export interface UserSettings {
   notifyNewRelease: boolean;
@@ -532,7 +533,6 @@ export interface UserSettings {
   notifyAccountStatus: boolean;
   notifySystem: boolean;
   volume: number;
-  language: 'fa' | 'en';
 }
 
 export const DEFAULT_USER_SETTINGS: UserSettings = {
@@ -541,7 +541,6 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   notifyAccountStatus: true,
   notifySystem: true,
   volume: 80,
-  language: 'fa',
 };
 
 export function mockGetUserSettings(): UserSettings {

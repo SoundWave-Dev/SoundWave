@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import type { Album } from '@/types';
 import { ROUTES } from '@/lib/constants';
 import { usePlayerStore } from '@/lib/store/playerStore';
+import { useTranslation } from '@/lib/i18n';
 
 interface AlbumCardProps {
   album: Album;
@@ -12,6 +13,7 @@ interface AlbumCardProps {
 export default function AlbumCard({ album }: AlbumCardProps) {
   const router = useRouter();
   const play = usePlayerStore((s) => s.play);
+  const { t } = useTranslation('albumCard');
 
   return (
     <div
@@ -46,7 +48,7 @@ export default function AlbumCard({ album }: AlbumCardProps) {
         {album.tracks.length > 0 && (
           <button
             type="button"
-            aria-label="پخش آلبوم"
+            aria-label={t('playAlbum')}
             onClick={(e) => { e.stopPropagation(); play(album.tracks[0], album.tracks); }}
             className="sw-album-card__play"
             style={{

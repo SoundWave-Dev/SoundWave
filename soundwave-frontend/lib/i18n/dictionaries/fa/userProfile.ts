@@ -1,0 +1,15 @@
+export const userProfile = {
+  tierFree: 'رایگان',
+  tierSilver: 'اشتراک نقره‌ای',
+  tierGold: 'اشتراک طلایی',
+  followersLabel: 'دنبال‌کننده',
+  followingLabel: 'دنبال‌شونده',
+  editProfile: 'ویرایش پروفایل',
+  following: 'دنبال‌شده',
+  follow: 'دنبال کردن',
+  dailyStreamLabel: 'استریم روزانه',
+  unlimited: 'نامحدود',
+  profilePhotoLabel: 'عکس پروفایل',
+  uploadPhotoTooltip: 'آپلود عکس پروفایل فقط برای مشترکین نقره‌ای و طلایی فعال است',
+  uploadPhoto: 'آپلود عکس',
+} as const;

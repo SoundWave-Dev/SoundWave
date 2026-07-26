@@ -7,6 +7,7 @@
 
 import { useState } from 'react';
 import { Button, Input, Modal } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface ForgotPasswordModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface ForgotPasswordModalProps {
 }
 
 export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProps) {
+  const { t } = useTranslation('forgotPasswordModal');
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
 
@@ -29,15 +31,15 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="بازیابی رمز عبور">
+    <Modal isOpen={isOpen} onClose={handleClose} title={t('title')}>
       {sent ? (
         <div className="sw-fade-in-up" style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>
-          اگر حسابی با ایمیل «{email}» وجود داشته باشد، لینک بازیابی رمز عبور برای آن ارسال شد.
+          {t('sentMessage').replace('{email}', email)}
         </div>
       ) : (
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
           <Input
-            label="ایمیل"
+            label={t('emailLabel')}
             type="email"
             required
             placeholder="you@example.com"
@@ -45,7 +47,7 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
             onChange={(e) => setEmail(e.target.value)}
           />
           <Button type="submit" style={{ width: '100%' }}>
-            ارسال لینک بازیابی
+            {t('submit')}
           </Button>
         </form>
       )}

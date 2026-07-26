@@ -38,7 +38,13 @@
 //   - repeat mode cycles correctly
 // ============================================================
 
+'use client';
+
+import { useTranslation } from '@/lib/i18n';
+
 export default function PlayerPlaceholder() {
+  const { t } = useTranslation('playerPlaceholder');
+
   return (
     <div style={{
       height: 'var(--player-height)',
@@ -50,7 +56,7 @@ export default function PlayerPlaceholder() {
       color: 'var(--color-text-muted)',
       fontSize: 'var(--text-sm)',
     }}>
-      🎵 Player — Iliya در حال پیاده‌سازی
+      {t('building')}
     </div>
   );
 }

@@ -10,8 +10,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store/authStore';
 import { ROUTES } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 
 export function LandingHeader() {
+  const { t } = useTranslation('landingHeader');
   const user = useAuthStore((s) => s.user);
   const [mounted, setMounted] = useState(false);
 
@@ -58,7 +60,7 @@ export function LandingHeader() {
               fontWeight: 600,
             }}
           >
-            داشبورد
+            {t('dashboard')}
           </Link>
         ) : (
           <>
@@ -73,7 +75,7 @@ export function LandingHeader() {
                 fontWeight: 600,
               }}
             >
-              ورود
+              {t('login')}
             </Link>
             <Link
               href={ROUTES.REGISTER}
@@ -87,7 +89,7 @@ export function LandingHeader() {
                 fontWeight: 600,
               }}
             >
-              ثبت‌نام
+              {t('signup')}
             </Link>
           </>
         )}

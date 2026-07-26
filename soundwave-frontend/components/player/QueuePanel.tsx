@@ -1,3 +1,5 @@
+'use client';
+
 // ============================================================
 // SOUNDWAVE — PLAYER: Queue Panel
 // Slide-in panel listing upcoming tracks in the queue.
@@ -5,6 +7,7 @@
 
 import type { Track } from '@/types';
 import { formatDuration } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface QueuePanelProps {
   isOpen: boolean;
@@ -15,10 +18,12 @@ interface QueuePanelProps {
 }
 
 export function QueuePanel({ isOpen, onClose, queue, currentTrackId, onPlayTrack }: QueuePanelProps) {
+  const { t } = useTranslation('queuePanel');
+
   return (
     <div
       role="dialog"
-      aria-label="صف پخش"
+      aria-label={t('dialogAriaLabel')}
       aria-hidden={!isOpen}
       style={{
         position: 'fixed',
@@ -45,11 +50,11 @@ export function QueuePanel({ isOpen, onClose, queue, currentTrackId, onPlayTrack
         borderBottom: '1px solid var(--color-border)',
       }}>
         <span style={{ fontWeight: 700, fontSize: 'var(--text-base)', color: 'var(--color-text-primary)' }}>
-          صف پخش
+          {t('title')}
         </span>
         <button
           type="button"
-          aria-label="بستن صف پخش"
+          aria-label={t('close')}
           onClick={onClose}
           style={{ background: 'transparent', border: 'none', color: 'var(--color-text-secondary)', fontSize: 'var(--text-lg)', cursor: 'pointer' }}
         >
@@ -60,7 +65,7 @@ export function QueuePanel({ isOpen, onClose, queue, currentTrackId, onPlayTrack
       <div style={{ overflowY: 'auto', flex: 1, padding: 'var(--space-2) 0' }}>
         {queue.length === 0 && (
           <div style={{ padding: 'var(--space-6)', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
-            صف پخش خالی است.
+            {t('empty')}
           </div>
         )}
 

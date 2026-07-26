@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { uploadTrackSchema, type UploadTrackFormValues } from '@/lib/validators/uploadTrackSchema';
 import { Button, Input, Modal, Select, Textarea } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface UploadTrackModalProps {
   isOpen: boolean;
@@ -17,12 +18,14 @@ interface UploadTrackModalProps {
   initialValues?: Partial<UploadTrackFormValues>;
 }
 
-const TYPE_OPTIONS = [
-  { value: 'single', label: 'تک‌آهنگ' },
-  { value: 'album', label: 'آلبوم' },
-];
-
 export function UploadTrackModal({ isOpen, onClose, onSubmit, initialValues }: UploadTrackModalProps) {
+  const { t } = useTranslation('uploadTrackModal');
+
+  const TYPE_OPTIONS = [
+    { value: 'single', label: t('typeSingle') },
+    { value: 'album', label: t('typeAlbum') },
+  ];
+
   const {
     register,
     handleSubmit,
@@ -49,47 +52,49 @@ export function UploadTrackModal({ isOpen, onClose, onSubmit, initialValues }: U
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={initialValues ? 'ویرایش اثر' : 'آپلود اثر جدید'}>
+    <Modal isOpen={isOpen} onClose={handleClose} title={initialValues ? t('editTitle') : t('createTitle')}>
       <form onSubmit={handleSubmit(handleFormSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-        <Input label="عنوان اثر" placeholder="نام آهنگ یا آلبوم" error={errors.title?.message} {...register('title')} />
+        <Input label={t('titleLabel')} placeholder={t('titlePlaceholder')} error={errors.title?.message} {...register('title')} />
 
         <FileField
-          label="فایل صوتی (MP3 / WAV / FLAC)"
+          label={t('audioLabel')}
           fileName={audioFileName}
           error={errors.audioFileName?.message}
           onSelect={(name) => setValue('audioFileName', name, { shouldValidate: true })}
           accept="audio/*"
+          clickToSelectFile={t('clickToSelectFile')}
         />
 
         <FileField
-          label="تصویر کاور"
+          label={t('coverLabel')}
           fileName={coverFileName}
           error={errors.coverFileName?.message}
           onSelect={(name) => setValue('coverFileName', name, { shouldValidate: true })}
           accept="image/*"
+          clickToSelectFile={t('clickToSelectFile')}
         />
 
-        <Textarea label="متن ترانه (اختیاری)" placeholder="در صورت وجود، متن ترانه را وارد کنید" {...register('lyrics')} />
+        <Textarea label={t('lyricsLabel')} placeholder={t('lyricsPlaceholder')} {...register('lyrics')} />
 
-        <Input label="ژانر" placeholder="Pop, Rock, ..." error={errors.genre?.message} {...register('genre')} />
+        <Input label={t('genreLabel')} placeholder="Pop, Rock, ..." error={errors.genre?.message} {...register('genre')} />
 
         <Input
-          label="سال انتشار"
+          label={t('releaseYearLabel')}
           type="number"
           error={errors.releaseYear?.message}
           {...register('releaseYear', { valueAsNumber: true })}
         />
 
-        <Select label="نوع اثر" options={TYPE_OPTIONS} placeholder="انتخاب کنید" error={errors.type?.message} {...register('type')} />
+        <Select label={t('typeLabel')} options={TYPE_OPTIONS} placeholder={t('typePlaceholder')} error={errors.type?.message} {...register('type')} />
 
         <Input
-          label="هنرمندان همکار (اختیاری)"
-          placeholder="نام هنرمندان را با کاما جدا کنید"
+          label={t('collaboratorsLabel')}
+          placeholder={t('collaboratorsPlaceholder')}
           {...register('collaborators')}
         />
 
         <Button type="submit" disabled={isSubmitting} style={{ width: '100%' }}>
-          {initialValues ? 'ذخیره تغییرات' : 'انتشار اثر'}
+          {initialValues ? t('saveChanges') : t('publish')}
         </Button>
       </form>
     </Modal>
@@ -102,12 +107,14 @@ function FileField({
   error,
   onSelect,
   accept,
+  clickToSelectFile,
 }: {
   label: string;
   fileName?: string;
   error?: string;
   onSelect: (name: string) => void;
   accept: string;
+  clickToSelectFile: string;
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
@@ -123,7 +130,7 @@ function FileField({
           cursor: 'pointer',
         }}
       >
-        {fileName || 'برای انتخاب فایل کلیک کنید'}
+        {fileName || clickToSelectFile}
         <input type="file" accept={accept} hidden onChange={(e) => onSelect(e.target.files?.[0]?.name ?? '')} />
       </label>
       {error && <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-error)' }}>{error}</span>}

@@ -12,12 +12,14 @@ import { loginSchema, type LoginFormValues } from '@/lib/validators/loginSchema'
 import { useAuthStore } from '@/lib/store/authStore';
 import { Button, Input } from '@/components/ui';
 import { ForgotPasswordModal } from './ForgotPasswordModal';
+import { useTranslation } from '@/lib/i18n';
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
 }
 
 export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
+  const { t } = useTranslation('loginForm');
   const router = useRouter();
   const login = useAuthStore((s) => s.login);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
     setServerError(null);
     const success = await login(values.email, values.password);
     if (!success) {
-      setServerError('ایمیل یا رمز عبور اشتباه است.');
+      setServerError(t('invalidCredentials'));
       return;
     }
     const user = useAuthStore.getState().user;
@@ -51,14 +53,14 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
       <Input
-        label="ایمیل"
+        label={t('emailLabel')}
         type="email"
         placeholder="you@example.com"
         error={errors.email?.message}
         {...register('email')}
       />
       <Input
-        label="رمز عبور"
+        label={t('passwordLabel')}
         type="password"
         placeholder="••••••••"
         error={errors.password?.message}
@@ -86,17 +88,17 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
         onClick={() => setIsForgotOpen(true)}
         style={{ alignSelf: 'flex-end', fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}
       >
-        رمز عبور خود را فراموش کرده‌اید؟
+        {t('forgotPassword')}
       </button>
 
       <Button type="submit" disabled={isSubmitting} style={{ width: '100%' }}>
-        {isSubmitting ? 'در حال ورود...' : 'ورود'}
+        {isSubmitting ? t('loggingIn') : t('submit')}
       </Button>
 
       <div style={{ textAlign: 'center', fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
-        حساب کاربری ندارید؟{' '}
+        {t('noAccount')}{' '}
         <button type="button" onClick={onSwitchToRegister} style={{ color: 'var(--color-primary)', fontWeight: 600 }}>
-          ثبت‌نام
+          {t('register')}
         </button>
       </div>
 

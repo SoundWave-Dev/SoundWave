@@ -7,8 +7,10 @@ import { ROUTES } from '@/lib/constants';
 import { formatCount } from '@/lib/utils';
 import { Button } from '@/components/ui';
 import TrackListItem from '@/components/home/TrackListItem';
+import { useTranslation } from '@/lib/i18n';
 
 export default function AlbumPage() {
+  const { t } = useTranslation('albumPage');
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const play = usePlayerStore((s) => s.play);
@@ -18,7 +20,7 @@ export default function AlbumPage() {
   if (!album) {
     return (
       <div style={{ textAlign: 'center', color: 'var(--color-text-muted)', padding: 'var(--space-10)' }}>
-        آلبومی با این شناسه یافت نشد.
+        {t('notFound')}
       </div>
     );
   }
@@ -45,7 +47,7 @@ export default function AlbumPage() {
 
         <div style={{ flex: 1, minWidth: 200 }}>
           <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-2)' }}>
-            آلبوم {album.isEarlyAccess && '· دسترسی زودهنگام'}
+            {t('albumLabel')} {album.isEarlyAccess && t('earlyAccessLabel')}
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-3xl)', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 'var(--space-3)' }}>
             {album.title}
@@ -64,12 +66,12 @@ export default function AlbumPage() {
             {album.genre && <span>· {album.genre}</span>}
           </div>
           <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-4)' }}>
-            {formatCount(album.streamCount)} استریم · {album.tracks.length} آهنگ
+            {formatCount(album.streamCount)} {t('streamsSuffix')} · {album.tracks.length} {t('trackCountSuffix')}
           </div>
 
           {album.tracks.length > 0 && (
             <Button variant="primary" onClick={() => play(album.tracks[0], album.tracks)}>
-              ▶ پخش آلبوم
+              {t('playAlbum')}
             </Button>
           )}
         </div>

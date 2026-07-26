@@ -1,0 +1,18 @@
+export const artistManagePage = {
+  colTitle: 'عنوان',
+  colType: 'نوع',
+  colListeners: 'شنونده',
+  colStreams: 'استریم',
+  colEarnings: 'درآمد تخمینی',
+  typeAlbum: 'آلبوم',
+  typeSingle: 'تک‌آهنگ',
+  currencyToman: 'تومان',
+  edit: 'ویرایش',
+  delete: 'حذف',
+  emptyMessage: 'هنوز اثری منتشر نکرده‌اید',
+  pageTitle: 'مدیریت آثار — {name}',
+  uploadNew: 'آپلود اثر جدید',
+  deleteModalTitle: 'حذف اثر',
+  deleteConfirmText: 'آیا از حذف «{title}» مطمئن هستید؟ این عملیات غیرقابل بازگشت است.',
+  cancel: 'انصراف',
+} as const;

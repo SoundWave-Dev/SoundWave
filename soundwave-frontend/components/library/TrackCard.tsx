@@ -6,6 +6,7 @@ import { formatDuration, formatCount } from '@/lib/utils';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { ROUTES } from '@/lib/constants';
 import { AddToPlaylistMenu } from './AddToPlaylistMenu';
+import { useTranslation } from '@/lib/i18n';
 
 interface TrackCardProps {
   track: Track;
@@ -17,6 +18,7 @@ interface TrackCardProps {
 }
 
 export function TrackCard({ track, queue, playlists, limitReached, onAddToPlaylist, onCreatePlaylist }: TrackCardProps) {
+  const { t } = useTranslation('trackCard');
   const router = useRouter();
   const play = usePlayerStore((s) => s.play);
   const currentTrackId = usePlayerStore((s) => s.currentTrack?.id);
@@ -90,7 +92,7 @@ export function TrackCard({ track, queue, playlists, limitReached, onAddToPlayli
 
       <div style={{ textAlign: 'right', minWidth: 90, flexShrink: 0 }}>
         <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
-          {formatCount(track.uniqueListeners)} شنونده
+          {formatCount(track.uniqueListeners)} {t('listenersSuffix')}
         </div>
         <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
           {formatDuration(track.duration)}

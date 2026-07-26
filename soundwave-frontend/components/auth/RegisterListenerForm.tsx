@@ -15,17 +15,19 @@ import {
 import { useAuthStore } from '@/lib/store/authStore';
 import { Button, Checkbox, Input, Select } from '@/components/ui';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
-
-const GENDER_OPTIONS = [
-  { value: 'male', label: 'مرد' },
-  { value: 'female', label: 'زن' },
-  { value: 'other', label: 'سایر' },
-  { value: 'prefer_not_to_say', label: 'ترجیح می‌دهم نگویم' },
-];
+import { useTranslation } from '@/lib/i18n';
 
 export function RegisterListenerForm() {
+  const { t } = useTranslation('registerListenerForm');
   const router = useRouter();
   const registerListener = useAuthStore((s) => s.registerListener);
+
+  const GENDER_OPTIONS = [
+    { value: 'male', label: t('genderMale') },
+    { value: 'female', label: t('genderFemale') },
+    { value: 'other', label: t('genderOther') },
+    { value: 'prefer_not_to_say', label: t('genderPreferNotToSay') },
+  ];
   const [isPolicyOpen, setIsPolicyOpen] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -41,26 +43,26 @@ export function RegisterListenerForm() {
       await registerListener(values);
       router.push('/home');
     } catch {
-      setServerError('ثبت‌نام با خطا مواجه شد. دوباره تلاش کنید.');
+      setServerError(t('registerError'));
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
-      <Input label="نام نمایشی" placeholder="نام شما" error={errors.displayName?.message} {...register('displayName')} />
-      <Input label="ایمیل" type="email" placeholder="you@example.com" error={errors.email?.message} {...register('email')} />
-      <Input label="رمز عبور" type="password" placeholder="••••••••" error={errors.password?.message} {...register('password')} />
+      <Input label={t('displayNameLabel')} placeholder={t('displayNamePlaceholder')} error={errors.displayName?.message} {...register('displayName')} />
+      <Input label={t('emailLabel')} type="email" placeholder="you@example.com" error={errors.email?.message} {...register('email')} />
+      <Input label={t('passwordLabel')} type="password" placeholder="••••••••" error={errors.password?.message} {...register('password')} />
       <Input
-        label="تکرار رمز عبور"
+        label={t('confirmPasswordLabel')}
         type="password"
         placeholder="••••••••"
         error={errors.confirmPassword?.message}
         {...register('confirmPassword')}
       />
-      <Input label="تاریخ تولد" type="date" error={errors.birthDate?.message} {...register('birthDate')} />
+      <Input label={t('birthDateLabel')} type="date" error={errors.birthDate?.message} {...register('birthDate')} />
       <Select
-        label="جنسیت"
-        placeholder="انتخاب کنید"
+        label={t('genderLabel')}
+        placeholder={t('genderPlaceholder')}
         options={GENDER_OPTIONS}
         error={errors.gender?.message}
         {...register('gender')}
@@ -74,9 +76,9 @@ export function RegisterListenerForm() {
               onClick={() => setIsPolicyOpen(true)}
               style={{ color: 'var(--color-primary)', fontWeight: 600 }}
             >
-              سیاست حریم خصوصی
+              {t('privacyPolicyLink')}
             </button>{' '}
-            را مطالعه کرده و می‌پذیرم
+            {t('privacyPolicyAgreement')}
           </>
         }
         {...register('privacyPolicy')}
@@ -89,7 +91,7 @@ export function RegisterListenerForm() {
       )}
 
       <Button type="submit" disabled={isSubmitting} style={{ width: '100%' }}>
-        {isSubmitting ? 'در حال ثبت‌نام...' : 'ثبت‌نام'}
+        {isSubmitting ? t('submitting') : t('submit')}
       </Button>
 
       <PrivacyPolicyModal isOpen={isPolicyOpen} onClose={() => setIsPolicyOpen(false)} />

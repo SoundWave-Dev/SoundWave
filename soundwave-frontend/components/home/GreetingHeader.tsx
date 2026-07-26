@@ -5,20 +5,24 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { getInitials } from '@/lib/utils';
 import { ROUTES } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 
-function greetingForHour(hour: number): string {
-  if (hour < 5) return 'شب بخیر';
-  if (hour < 12) return 'صبح بخیر';
-  if (hour < 18) return 'عصر بخیر';
-  return 'شب بخیر';
+type GreetingKey = 'goodNight' | 'goodMorning' | 'goodAfternoon' | 'welcome';
+
+function greetingKeyForHour(hour: number): GreetingKey {
+  if (hour < 5) return 'goodNight';
+  if (hour < 12) return 'goodMorning';
+  if (hour < 18) return 'goodAfternoon';
+  return 'goodNight';
 }
 
 export default function GreetingHeader() {
   const user = useAuthStore((state) => state.user);
-  const [greeting, setGreeting] = useState('خوش آمدید');
+  const { t } = useTranslation('greetingHeader');
+  const [greetingKey, setGreetingKey] = useState<GreetingKey>('welcome');
 
   useEffect(() => {
-    setGreeting(greetingForHour(new Date().getHours()));
+    setGreetingKey(greetingKeyForHour(new Date().getHours()));
   }, []);
 
   if (!user) return null;
@@ -34,7 +38,7 @@ export default function GreetingHeader() {
     >
       <div>
         <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)', marginBottom: 4 }}>
-          {greeting}
+          {t(greetingKey)}
         </p>
         <h1 style={{
           fontFamily: 'var(--font-display)',

@@ -5,6 +5,7 @@
 // ============================================================
 
 import { Modal } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface PrivacyPolicyModalProps {
   isOpen: boolean;
@@ -12,8 +13,9 @@ interface PrivacyPolicyModalProps {
 }
 
 export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps) {
+  const { t } = useTranslation('privacyPolicyModal');
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="سیاست حریم خصوصی">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('title')}>
       <div
         style={{
           color: 'var(--color-text-secondary)',
@@ -24,18 +26,9 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
           gap: 'var(--space-4)',
         }}
       >
-        <p>
-          Soundwave به حریم خصوصی شما احترام می‌گذارد. اطلاعات شخصی شما شامل ایمیل، تاریخ تولد و جنسیت
-          صرفاً برای شخصی‌سازی تجربه کاربری و مدیریت حساب کاربری‌تان استفاده می‌شود و بدون رضایت شما در
-          اختیار اشخاص ثالث قرار نخواهد گرفت.
-        </p>
-        <p>
-          سابقه پخش آهنگ‌ها و پلی‌لیست‌های شما ممکن است برای بهبود پیشنهادهای موسیقی مورد استفاده قرار
-          گیرد. شما در هر زمان می‌توانید از طریق صفحه تنظیمات، درخواست حذف حساب کاربری خود را ثبت کنید.
-        </p>
-        <p>
-          با تکمیل ثبت‌نام، شما با جمع‌آوری و پردازش داده‌های فوق مطابق این سیاست موافقت می‌کنید.
-        </p>
+        <p>{t('paragraph1')}</p>
+        <p>{t('paragraph2')}</p>
+        <p>{t('paragraph3')}</p>
       </div>
     </Modal>
   );

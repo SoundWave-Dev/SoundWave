@@ -13,6 +13,7 @@ import { useAuthStore } from '@/lib/store/authStore';
 import { useHowler } from '@/lib/hooks/useHowler';
 import { ROUTES } from '@/lib/constants';
 import { canViewStats, formatCount } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 import { ProgressBar } from './ProgressBar';
 import { VolumeControl } from './VolumeControl';
 import { RepeatButton } from './RepeatButton';
@@ -25,6 +26,7 @@ import { FullscreenPlayer } from './FullscreenPlayer';
 export function Player() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  const { t } = useTranslation('player');
 
   const currentTrack = usePlayerStore((s) => s.currentTrack);
   const queue = usePlayerStore((s) => s.queue);
@@ -74,7 +76,7 @@ export function Player() {
         color: 'var(--color-text-muted)',
         fontSize: 'var(--text-sm)',
       }}>
-        هیچ آهنگی در حال پخش نیست
+        {t('noTrackPlaying')}
       </div>
     );
   }
@@ -98,7 +100,7 @@ export function Player() {
           <span style={{ width: 1, height: 24, background: 'var(--color-border)' }} />
           <button
             type="button"
-            aria-label="باز کردن صف پخش"
+            aria-label={t('openQueue')}
             aria-pressed={isQueueOpen}
             className="player-icon-btn"
             onClick={() => { setIsQueueOpen((v) => !v); setIsLyricsOpen(false); }}
@@ -118,7 +120,7 @@ export function Player() {
           {currentTrack.lyrics !== null && (
             <button
               type="button"
-              aria-label="باز کردن متن آهنگ"
+              aria-label={t('openLyrics')}
               aria-pressed={isLyricsOpen}
               className="player-icon-btn"
               onClick={() => { setIsLyricsOpen((v) => !v); setIsQueueOpen(false); }}
@@ -144,7 +146,7 @@ export function Player() {
             <ShuffleButton isShuffled={isShuffled} onClick={toggleShuffle} />
             <button
               type="button"
-              aria-label="آهنگ قبلی"
+              aria-label={t('previousTrack')}
               className="player-icon-btn"
               onClick={prev}
               style={{ background: 'transparent', border: 'none', borderRadius: 'var(--radius-full)', color: 'var(--color-text-primary)', fontSize: 'var(--text-xl)', cursor: 'pointer', width: 36, height: 36 }}
@@ -153,7 +155,7 @@ export function Player() {
             </button>
             <button
               type="button"
-              aria-label={isPlaying ? 'توقف' : 'پخش'}
+              aria-label={isPlaying ? t('pause') : t('play')}
               onClick={togglePlay}
               style={{
                 width: 40,
@@ -174,7 +176,7 @@ export function Player() {
             </button>
             <button
               type="button"
-              aria-label="آهنگ بعدی"
+              aria-label={t('nextTrack')}
               className="player-icon-btn"
               onClick={next}
               style={{ background: 'transparent', border: 'none', borderRadius: 'var(--radius-full)', color: 'var(--color-text-primary)', fontSize: 'var(--text-xl)', cursor: 'pointer', width: 36, height: 36 }}
@@ -228,7 +230,7 @@ export function Player() {
 
             {canSeeStats && (
               <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-gold)', marginTop: 2 }}>
-                {formatCount(currentTrack.streamCount)} استریم · {formatCount(currentTrack.uniqueListeners)} شنونده یکتا
+                {formatCount(currentTrack.streamCount)} {t('streamCountLabel')} · {formatCount(currentTrack.uniqueListeners)} {t('uniqueListenersLabel')}
               </div>
             )}
           </div>

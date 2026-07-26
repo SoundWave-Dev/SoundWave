@@ -11,12 +11,14 @@ import { mockGetTicketById, mockAddTicketMessage } from '@/lib/mock/store';
 import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
 import { timeAgo } from '@/lib/utils';
 import { Button, Textarea } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface TicketChatProps {
   ticketId: string;
 }
 
 export function TicketChat({ ticketId }: TicketChatProps) {
+  const { t } = useTranslation('ticketChat');
   const authUser = useAuthStore((s) => s.user);
   // TEMP (testing only): fall back to a mock support agent so replying is
   // testable without logging in. Remove this fallback (go back to
@@ -31,7 +33,7 @@ export function TicketChat({ ticketId }: TicketChatProps) {
 
   if (ticket === undefined) return null;
   if (ticket === null) {
-    return <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>تیکت یافت نشد.</div>;
+    return <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>{t('notFound')}</div>;
   }
 
   const handleSend = () => {
@@ -72,12 +74,12 @@ export function TicketChat({ ticketId }: TicketChatProps) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
         <Textarea
-          placeholder="پاسخ خود را بنویسید..."
+          placeholder={t('replyPlaceholder')}
           value={reply}
           onChange={(e) => setReply(e.target.value)}
         />
         <Button onClick={handleSend} disabled={!reply.trim()} style={{ alignSelf: 'flex-end' }}>
-          ارسال پاسخ
+          {t('sendReply')}
         </Button>
       </div>
     </div>

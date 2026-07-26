@@ -13,15 +13,16 @@ import { useSongSuggestions } from '@/lib/hooks/useSongSuggestions';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useAuthStore } from '@/lib/store/authStore';
 import { formatDuration } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 import type { Track } from '@/types';
 
 const MOOD_OPTIONS = [
-  { value: 'energetic', label: '⚡ پرانرژی' },
-  { value: 'calm',      label: '🌊 آرام' },
-  { value: 'happy',     label: '😄 شاد' },
-  { value: 'sad',       label: '🌧 غمگین' },
-  { value: 'focus',     label: '🎯 تمرکز' },
-];
+  { value: 'energetic', labelKey: 'moodEnergetic' },
+  { value: 'calm',      labelKey: 'moodCalm' },
+  { value: 'happy',     labelKey: 'moodHappy' },
+  { value: 'sad',       labelKey: 'moodSad' },
+  { value: 'focus',     labelKey: 'moodFocus' },
+] as const;
 
 const GENRE_OPTIONS = ['Pop', 'Traditional', 'Rock', 'Classical', 'Jazz', 'Electronic', 'Folk'];
 
@@ -135,6 +136,7 @@ export function SongSuggestions() {
   const { user } = useAuthStore();
   const { play, history } = usePlayerStore();
   const { suggestions, isLoading, error, fetchSuggestions } = useSongSuggestions();
+  const { t } = useTranslation('songSuggestions');
 
   const [selectedMood, setSelectedMood] = useState<string>('');
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
@@ -170,7 +172,7 @@ export function SongSuggestions() {
           fontWeight: 700,
           color: 'var(--color-text-primary)',
         }}>
-          پیشنهاد هوشمند
+          {t('title')}
         </h2>
         <span style={{
           padding: '2px var(--space-2)',
@@ -181,7 +183,7 @@ export function SongSuggestions() {
           fontWeight: 600,
           border: '1px solid var(--color-primary)',
         }}>
-          AI ✨
+          {t('aiBadge')}
         </span>
       </div>
 
@@ -201,7 +203,7 @@ export function SongSuggestions() {
             color: 'var(--color-text-secondary)',
             marginBottom: 'var(--space-3)',
           }}>
-            حال‌وهوا
+            {t('moodSectionLabel')}
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
             {MOOD_OPTIONS.map((m) => (
@@ -221,7 +223,7 @@ export function SongSuggestions() {
                   transition: 'all var(--transition-fast)',
                 }}
               >
-                {m.label}
+                {t(m.labelKey)}
               </button>
             ))}
           </div>
@@ -235,7 +237,7 @@ export function SongSuggestions() {
             color: 'var(--color-text-secondary)',
             marginBottom: 'var(--space-3)',
           }}>
-            ژانر مورد علاقه
+            {t('genreSectionLabel')}
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
             {GENRE_OPTIONS.map((g) => (
@@ -293,10 +295,10 @@ export function SongSuggestions() {
                 borderRadius: '50%',
                 animation: 'spin 0.8s linear infinite',
               }} />
-              در حال تحلیل سلیقه شما...
+              {t('analyzing')}
             </>
           ) : (
-            <>✨ پیشنهاد بده</>
+            <>{t('submit')}</>
           )}
         </button>
       </div>
@@ -336,7 +338,7 @@ export function SongSuggestions() {
           color: 'var(--color-text-muted)',
           fontSize: 'var(--text-sm)',
         }}>
-          پیشنهادی یافت نشد. ژانر یا حال‌وهوای دیگری امتحان کنید.
+          {t('noSuggestions')}
         </div>
       )}
 

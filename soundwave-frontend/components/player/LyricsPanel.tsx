@@ -1,7 +1,11 @@
+'use client';
+
 // ============================================================
 // SOUNDWAVE — PLAYER: Lyrics Panel
 // Slide-in panel showing the current track's lyrics.
 // ============================================================
+
+import { useTranslation } from '@/lib/i18n';
 
 interface LyricsPanelProps {
   isOpen: boolean;
@@ -12,11 +16,12 @@ interface LyricsPanelProps {
 
 export function LyricsPanel({ isOpen, onClose, trackTitle, lyrics }: LyricsPanelProps) {
   const lines = lyrics ? lyrics.split('\n') : [];
+  const { t } = useTranslation('lyricsPanel');
 
   return (
     <div
       role="dialog"
-      aria-label="متن آهنگ"
+      aria-label={t('dialogAriaLabel')}
       aria-hidden={!isOpen}
       style={{
         position: 'fixed',
@@ -43,11 +48,11 @@ export function LyricsPanel({ isOpen, onClose, trackTitle, lyrics }: LyricsPanel
         borderBottom: '1px solid var(--color-border)',
       }}>
         <span style={{ fontWeight: 700, fontSize: 'var(--text-base)', color: 'var(--color-text-primary)' }}>
-          متن آهنگ{trackTitle ? ` — ${trackTitle}` : ''}
+          {t('title')}{trackTitle ? ` — ${trackTitle}` : ''}
         </span>
         <button
           type="button"
-          aria-label="بستن متن آهنگ"
+          aria-label={t('close')}
           onClick={onClose}
           style={{ background: 'transparent', border: 'none', color: 'var(--color-text-secondary)', fontSize: 'var(--text-lg)', cursor: 'pointer' }}
         >
@@ -69,7 +74,7 @@ export function LyricsPanel({ isOpen, onClose, trackTitle, lyrics }: LyricsPanel
           </div>
         ) : (
           <div style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)', marginTop: 'var(--space-8)' }}>
-            متنی برای این آهنگ موجود نیست
+            {t('noLyrics')}
           </div>
         )}
       </div>

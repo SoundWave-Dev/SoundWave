@@ -1,0 +1,16 @@
+export const priceControlPanel = {
+  tierFree: 'رایگان',
+  tierSilver: 'نقره‌ای',
+  tierGold: 'طلایی',
+  freeUsers: 'کاربران رایگان',
+  silverUsers: 'کاربران نقره‌ای',
+  goldUsers: 'کاربران طلایی',
+  monthlyRevenue: 'درآمد این ماه',
+  currencyToman: 'تومان',
+  distributionTitle: 'توزیع کاربران بر اساس نوع اشتراک',
+  pricingTitle: 'تنظیم قیمت اشتراک‌ها',
+  silverPriceLabel: 'قیمت اشتراک نقره‌ای (تومان)',
+  goldPriceLabel: 'قیمت اشتراک طلایی (تومان)',
+  updatePrices: 'به‌روزرسانی قیمت‌ها',
+  savedMessage: 'قیمت‌ها ذخیره شد.',
+} as const;

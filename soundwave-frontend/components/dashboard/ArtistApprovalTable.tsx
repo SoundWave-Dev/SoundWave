@@ -11,8 +11,10 @@ import type { Artist } from '@/types';
 import { rejectReasonSchema, type RejectReasonFormValues } from '@/lib/validators/rejectReasonSchema';
 import { mockGetPendingArtists, mockGetUsers, mockApproveArtist, mockRejectArtist } from '@/lib/mock/store';
 import { Badge, Button, Modal, Table, Textarea, type TableColumn } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 export function ArtistApprovalTable() {
+  const { t } = useTranslation('artistApprovalTable');
   const [artists, setArtists] = useState<Artist[]>([]);
   const [portfolioArtist, setPortfolioArtist] = useState<Artist | null>(null);
   const [rejectingArtist, setRejectingArtist] = useState<Artist | null>(null);
@@ -46,27 +48,27 @@ export function ArtistApprovalTable() {
   };
 
   const columns: TableColumn<Artist>[] = [
-    { key: 'stageName', header: 'نام هنری', render: (a) => a.stageName },
-    { key: 'email', header: 'ایمیل', render: (a) => getEmail(a.userId) },
+    { key: 'stageName', header: t('colStageName'), render: (a) => a.stageName },
+    { key: 'email', header: t('colEmail'), render: (a) => getEmail(a.userId) },
     {
       key: 'date',
-      header: 'تاریخ ثبت‌نام',
+      header: t('colDate'),
       render: (a) => new Date(a.createdAt).toLocaleDateString('fa-IR'),
     },
-    { key: 'status', header: 'وضعیت', render: () => <Badge tone="warning">در انتظار تایید</Badge> },
+    { key: 'status', header: t('colStatus'), render: () => <Badge tone="warning">{t('statusPending')}</Badge> },
     {
       key: 'actions',
       header: '',
       render: (a) => (
         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
           <Button variant="secondary" size="sm" onClick={() => setPortfolioArtist(a)}>
-            مشاهده نمونه‌کار
+            {t('viewPortfolio')}
           </Button>
           <Button variant="primary" size="sm" onClick={() => handleApprove(a)}>
-            تایید
+            {t('approve')}
           </Button>
           <Button variant="danger" size="sm" onClick={() => setRejectingArtist(a)}>
-            رد درخواست
+            {t('reject')}
           </Button>
         </div>
       ),
@@ -75,11 +77,11 @@ export function ArtistApprovalTable() {
 
   return (
     <>
-      <Table columns={columns} rows={artists} rowKey={(a) => a.id} emptyMessage="درخواست هنرمندی در انتظار بررسی وجود ندارد" />
+      <Table columns={columns} rows={artists} rowKey={(a) => a.id} emptyMessage={t('emptyMessage')} />
 
-      <Modal isOpen={!!portfolioArtist} onClose={() => setPortfolioArtist(null)} title="نمونه‌کار هنرمند">
+      <Modal isOpen={!!portfolioArtist} onClose={() => setPortfolioArtist(null)} title={t('portfolioModalTitle')}>
         <div style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>
-          نمونه‌کار ارسالی «{portfolioArtist?.stageName}» — بارگذاری فایل واقعی در فاز دوم پیاده‌سازی می‌شود.
+          {t('portfolioBody').replace('{name}', portfolioArtist?.stageName ?? '')}
         </div>
       </Modal>
 
@@ -89,17 +91,17 @@ export function ArtistApprovalTable() {
           setRejectingArtist(null);
           reset();
         }}
-        title="رد درخواست هنرمندی"
+        title={t('rejectModalTitle')}
       >
         <form onSubmit={handleSubmit(handleRejectSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
           <Textarea
-            label={`دلیل رد درخواست «${rejectingArtist?.stageName ?? ''}»`}
-            placeholder="دلیل رد درخواست را بنویسید"
+            label={t('rejectReasonLabel').replace('{name}', rejectingArtist?.stageName ?? '')}
+            placeholder={t('rejectReasonPlaceholder')}
             error={errors.reason?.message}
             {...register('reason')}
           />
           <Button type="submit" variant="danger" style={{ width: '100%' }}>
-            رد درخواست
+            {t('reject')}
           </Button>
         </form>
       </Modal>

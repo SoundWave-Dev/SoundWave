@@ -1,0 +1,15 @@
+export const userProfile = {
+  tierFree: 'Free',
+  tierSilver: 'Silver Subscription',
+  tierGold: 'Gold Subscription',
+  followersLabel: 'Followers',
+  followingLabel: 'Following',
+  editProfile: 'Edit Profile',
+  following: 'Following',
+  follow: 'Follow',
+  dailyStreamLabel: 'Daily Streams',
+  unlimited: 'Unlimited',
+  profilePhotoLabel: 'Profile Photo',
+  uploadPhotoTooltip: 'Uploading a profile photo is only available for silver and gold subscribers',
+  uploadPhoto: 'Upload Photo',
+} as const;

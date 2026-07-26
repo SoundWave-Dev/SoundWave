@@ -86,6 +86,7 @@ export const STORAGE_KEYS = {
   TICKETS:               'sw_tickets',
   PAYOUTS:               'sw_payouts',
   SUBSCRIPTION_PRICES:   'sw_subscription_prices',
+  LOCALE:                'sw_locale',
 } as const;
 
 // ── PLAYER ───────────────────────────────────────────────────

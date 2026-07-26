@@ -14,8 +14,10 @@ import {
 } from '@/lib/validators/registerArtistSchema';
 import { useAuthStore } from '@/lib/store/authStore';
 import { Button, Input } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 export function RegisterArtistForm() {
+  const { t } = useTranslation('registerArtistForm');
   const registerArtist = useAuthStore((s) => s.registerArtist);
   const [isPending, setIsPending] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export function RegisterArtistForm() {
       await registerArtist(values);
       setIsPending(true);
     } catch {
-      setServerError('ثبت‌نام با خطا مواجه شد. دوباره تلاش کنید.');
+      setServerError(t('registerError'));
     }
   };
 
@@ -53,21 +55,21 @@ export function RegisterArtistForm() {
       >
         <div style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-4)' }}>⏳</div>
         <div style={{ fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 'var(--space-2)' }}>
-          درخواست شما در انتظار بررسی است
+          {t('pendingReviewTitle')}
         </div>
-        پس از تایید تیم پشتیبانی، از طریق اعلانات و ایمیل مطلع خواهید شد.
+        {t('pendingReviewDescription')}
       </div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
-      <Input label="ایمیل" type="email" placeholder="you@example.com" error={errors.email?.message} {...register('email')} />
-      <Input label="رمز عبور" type="password" placeholder="••••••••" error={errors.password?.message} {...register('password')} />
-      <Input label="نام هنری" placeholder="نام هنری شما" error={errors.stageName?.message} {...register('stageName')} />
+      <Input label={t('emailLabel')} type="email" placeholder="you@example.com" error={errors.email?.message} {...register('email')} />
+      <Input label={t('passwordLabel')} type="password" placeholder="••••••••" error={errors.password?.message} {...register('password')} />
+      <Input label={t('stageNameLabel')} placeholder={t('stageNamePlaceholder')} error={errors.stageName?.message} {...register('stageName')} />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-        <label style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>نمونه‌کار (Portfolio)</label>
+        <label style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>{t('portfolioLabel')}</label>
         <label
           style={{
             border: `1px dashed ${errors.portfolio ? 'var(--color-error)' : 'var(--color-border)'}`,
@@ -79,7 +81,7 @@ export function RegisterArtistForm() {
             cursor: 'pointer',
           }}
         >
-          {portfolioFileName || 'برای انتخاب فایل نمونه‌کار کلیک کنید'}
+          {portfolioFileName || t('portfolioPlaceholder')}
           <input
             type="file"
             hidden
@@ -98,7 +100,7 @@ export function RegisterArtistForm() {
       )}
 
       <Button type="submit" disabled={isSubmitting} style={{ width: '100%' }}>
-        {isSubmitting ? 'در حال ارسال...' : 'ارسال درخواست'}
+        {isSubmitting ? t('submitting') : t('submit')}
       </Button>
     </form>
   );

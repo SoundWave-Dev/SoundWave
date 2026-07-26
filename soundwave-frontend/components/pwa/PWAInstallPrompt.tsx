@@ -15,6 +15,7 @@
 // ============================================================
 
 import { useEffect, useState } from 'react';
+import { useTranslation } from '@/lib/i18n';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -26,6 +27,7 @@ const DISMISSED_KEY = 'sw_pwa_install_dismissed';
 export function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const { t } = useTranslation('pwaInstallPrompt');
 
   useEffect(() => {
     // Don't show if already dismissed or already installed
@@ -98,14 +100,14 @@ export function PWAInstallPrompt() {
           fontSize: 'var(--text-sm)',
           color: 'var(--color-text-primary)',
         }}>
-          Soundwave را نصب کنید
+          {t('title')}
         </div>
         <div style={{
           fontSize: 'var(--text-xs)',
           color: 'var(--color-text-secondary)',
           marginTop: 2,
         }}>
-          دسترسی سریع‌تر، مثل یک اپ واقعی
+          {t('description')}
         </div>
       </div>
 
@@ -121,7 +123,7 @@ export function PWAInstallPrompt() {
             background: 'transparent',
           }}
         >
-          بعداً
+          {t('later')}
         </button>
         <button
           onClick={handleInstall}
@@ -135,7 +137,7 @@ export function PWAInstallPrompt() {
             transition: 'opacity var(--transition-fast)',
           }}
         >
-          نصب
+          {t('install')}
         </button>
       </div>
 

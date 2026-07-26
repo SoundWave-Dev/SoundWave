@@ -5,6 +5,7 @@ import type { Track } from '@/types';
 import { formatDuration, formatCount } from '@/lib/utils';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { ROUTES } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 
 interface TrackListItemProps {
   track: Track;
@@ -14,6 +15,7 @@ interface TrackListItemProps {
 export default function TrackListItem({ track, queue }: TrackListItemProps) {
   const router = useRouter();
   const play = usePlayerStore((s) => s.play);
+  const { t } = useTranslation('trackListItem');
   const currentTrackId = usePlayerStore((s) => s.currentTrack?.id);
   const isPlaying = usePlayerStore((s) => s.isPlaying);
   const isCurrent = currentTrackId === track.id;
@@ -89,7 +91,7 @@ export default function TrackListItem({ track, queue }: TrackListItemProps) {
 
       <div style={{ textAlign: 'right', minWidth: 90, flexShrink: 0 }}>
         <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
-          {formatCount(track.streamCount)} استریم
+          {formatCount(track.streamCount)} {t('streamCountLabel')}
         </div>
         <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
           {formatDuration(track.duration)}

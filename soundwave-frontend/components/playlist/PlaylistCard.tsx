@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { Playlist } from '@/types';
 import { ROUTES } from '@/lib/constants';
 import { Input } from '@/components/ui';
+import { useTranslation } from '@/lib/i18n';
 
 interface PlaylistCardProps {
   playlist: Playlist;
@@ -13,6 +14,7 @@ interface PlaylistCardProps {
 }
 
 export function PlaylistCard({ playlist, onRename, onDelete }: PlaylistCardProps) {
+  const { t } = useTranslation('playlistCard');
   const router = useRouter();
   const [isRenaming, setIsRenaming] = useState(false);
   const [name, setName] = useState(playlist.name);
@@ -69,7 +71,7 @@ export function PlaylistCard({ playlist, onRename, onDelete }: PlaylistCardProps
       ) : (
         <h3
           onClick={() => setIsRenaming(true)}
-          title="برای تغییر نام کلیک کنید"
+          title={t('renameTooltip')}
           style={{
             fontSize: 'var(--text-base)',
             fontWeight: 700,
@@ -87,11 +89,11 @@ export function PlaylistCard({ playlist, onRename, onDelete }: PlaylistCardProps
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-xs)' }}>
-          {playlist.tracks.length} آهنگ
+          {playlist.tracks.length} {t('trackCountSuffix')}
         </span>
         <button
           type="button"
-          aria-label="حذف پلی‌لیست"
+          aria-label={t('deletePlaylistAriaLabel')}
           onClick={() => onDelete(playlist)}
           style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer', fontSize: 'var(--text-sm)' }}
         >

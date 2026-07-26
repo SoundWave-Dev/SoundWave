@@ -1,0 +1,18 @@
+export const artistManagePage = {
+  colTitle: 'Title',
+  colType: 'Type',
+  colListeners: 'Listeners',
+  colStreams: 'Streams',
+  colEarnings: 'Estimated earnings',
+  typeAlbum: 'Album',
+  typeSingle: 'Single',
+  currencyToman: 'toman',
+  edit: 'Edit',
+  delete: 'Delete',
+  emptyMessage: "You haven't released any tracks yet",
+  pageTitle: 'Manage works — {name}',
+  uploadNew: 'Upload new work',
+  deleteModalTitle: 'Delete work',
+  deleteConfirmText: 'Are you sure you want to delete "{title}"? This action cannot be undone.',
+  cancel: 'Cancel',
+} as const;

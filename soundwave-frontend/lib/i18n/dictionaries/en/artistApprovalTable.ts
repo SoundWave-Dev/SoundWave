@@ -1,0 +1,16 @@
+export const artistApprovalTable = {
+  colStageName: 'Stage name',
+  colEmail: 'Email',
+  colDate: 'Registration date',
+  colStatus: 'Status',
+  statusPending: 'Pending approval',
+  viewPortfolio: 'View portfolio',
+  approve: 'Approve',
+  reject: 'Reject request',
+  emptyMessage: 'No pending artist requests to review',
+  portfolioModalTitle: 'Artist portfolio',
+  portfolioBody: 'Portfolio submitted by "{name}" — real file uploads will be implemented in phase two.',
+  rejectModalTitle: 'Reject artist request',
+  rejectReasonLabel: 'Reason for rejecting "{name}"',
+  rejectReasonPlaceholder: 'Write the reason for rejection',
+} as const;

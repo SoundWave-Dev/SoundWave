@@ -1,9 +1,12 @@
+'use client';
+
 // ============================================================
 // SOUNDWAVE — PLAYER: Progress Bar
 // Displays elapsed/total time. Click or drag to seek.
 // ============================================================
 
 import { formatDuration } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface ProgressBarProps {
   progress: number;   // 0–1
@@ -13,6 +16,7 @@ interface ProgressBarProps {
 
 export function ProgressBar({ progress, duration, onSeek }: ProgressBarProps) {
   const elapsed = progress * duration;
+  const { t } = useTranslation('progressBar');
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', width: '100%' }}>
@@ -23,7 +27,7 @@ export function ProgressBar({ progress, duration, onSeek }: ProgressBarProps) {
       <input
         type="range"
         role="slider"
-        aria-label="پیشرفت پخش"
+        aria-label={t('playbackProgress')}
         min={0}
         max={1}
         step={0.001}

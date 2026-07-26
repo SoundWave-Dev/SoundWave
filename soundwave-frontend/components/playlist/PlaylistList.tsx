@@ -3,6 +3,7 @@
 import type { Playlist } from '@/types';
 import { Button } from '@/components/ui';
 import { PlaylistCard } from './PlaylistCard';
+import { useTranslation } from '@/lib/i18n';
 
 interface PlaylistListProps {
   playlists: Playlist[];
@@ -13,6 +14,7 @@ interface PlaylistListProps {
 }
 
 export function PlaylistList({ playlists, limit, onCreateClick, onRename, onDeleteRequest }: PlaylistListProps) {
+  const { t } = useTranslation('playlistList');
   const limitReached = limit !== null && playlists.length >= limit;
 
   return (
@@ -27,16 +29,16 @@ export function PlaylistList({ playlists, limit, onCreateClick, onRename, onDele
       }}>
         <div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-            پلی‌لیست‌های من
+            {t('title')}
           </h1>
           <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)', marginTop: 4 }}>
-            {playlists.length}{limit !== null ? ` از ${limit}` : ''} پلی‌لیست
+            {playlists.length}{limit !== null ? ` ${t('countOf')} ${limit}` : ''} {t('countSuffix')}
           </p>
         </div>
 
-        <div title={limitReached ? 'به سقف مجاز پلی‌لیست‌های اشتراک فعلی رسیده‌اید. برای ساخت پلی‌لیست بیشتر، اشتراک خود را ارتقا دهید.' : undefined}>
+        <div title={limitReached ? t('limitReachedTooltip') : undefined}>
           <Button variant="primary" onClick={onCreateClick} disabled={limitReached}>
-            + پلی‌لیست جدید
+            {t('newPlaylist')}
           </Button>
         </div>
       </div>
@@ -51,7 +53,7 @@ export function PlaylistList({ playlists, limit, onCreateClick, onRename, onDele
           border: '1px dashed var(--color-border)',
         }}>
           <div style={{ fontSize: 40, marginBottom: 'var(--space-3)' }}>🎧</div>
-          هنوز پلی‌لیستی نساخته‌اید. اولین پلی‌لیست خود را بسازید!
+          {t('emptyState')}
         </div>
       ) : (
         <div style={{

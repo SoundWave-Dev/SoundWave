@@ -5,6 +5,7 @@
 // ============================================================
 
 import { ReactNode, useEffect, useState } from 'react';
+import { useLocaleStore } from '@/lib/store/localeStore';
 
 interface ModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ interface ModalProps {
 const TRANSITION_MS = 240;
 
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+  const language = useLocaleStore((s) => s.language);
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -57,7 +59,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         justifyContent: 'center',
         zIndex: 500,
         padding: 'var(--space-6)',
-        direction: 'rtl',
+        direction: language === 'en' ? 'ltr' : 'rtl',
         opacity: isVisible ? 1 : 0,
         transition: `opacity ${TRANSITION_MS}ms var(--ease-smooth)`,
       }}
@@ -94,7 +96,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             <span>{title}</span>
             <button
               onClick={onClose}
-              aria-label="بستن"
+              aria-label={language === 'en' ? 'Close' : 'بستن'}
               style={{
                 color: 'var(--color-text-muted)',
                 fontSize: 'var(--text-xl)',

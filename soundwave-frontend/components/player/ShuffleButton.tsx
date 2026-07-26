@@ -1,6 +1,10 @@
+'use client';
+
 // ============================================================
 // SOUNDWAVE — PLAYER: Shuffle Button
 // ============================================================
+
+import { useTranslation } from '@/lib/i18n';
 
 interface ShuffleButtonProps {
   isShuffled: boolean;
@@ -8,12 +12,14 @@ interface ShuffleButtonProps {
 }
 
 export function ShuffleButton({ isShuffled, onClick }: ShuffleButtonProps) {
+  const { t } = useTranslation('shuffleButton');
+
   return (
     <button
       type="button"
-      aria-label={isShuffled ? 'خاموش کردن پخش تصادفی' : 'روشن کردن پخش تصادفی'}
+      aria-label={isShuffled ? t('turnOff') : t('turnOn')}
       aria-pressed={isShuffled}
-      title="پخش تصادفی"
+      title={t('title')}
       onClick={onClick}
       style={{
         background: 'transparent',
