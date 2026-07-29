@@ -85,7 +85,15 @@ export function mockLogout(): void {
 }
 
 export function mockGetCurrentUser(): User | null {
-  return load<User | null>(STORAGE_KEYS.USER, null);
+  // NOTE: the same STORAGE_KEYS.USER key is also written by authStore's
+  // zustand `persist` middleware, which wraps the value as
+  // `{ state: { user, token }, version }` rather than a raw User — handle
+  // both shapes so this stays correct after a real login via the UI.
+  const raw = load<unknown>(STORAGE_KEYS.USER, null);
+  if (raw && typeof raw === 'object' && 'state' in raw) {
+    return (raw as { state: { user: User | null } }).state.user ?? null;
+  }
+  return raw as User | null;
 }
 
 export interface RegisterListenerInput {
@@ -161,6 +169,19 @@ export function mockRegisterArtist(input: RegisterArtistInput): { user: User; ar
   };
   save(STORAGE_KEYS.ARTISTS, [...mockGetAllArtists(), artist]);
 
+  for (const staff of mockGetUsers().filter((u) => u.role === 'support' || u.role === 'admin')) {
+    addNotification({
+      id: nextNotificationId(),
+      userId: staff.id,
+      type: 'new_artist_request',
+      title: 'درخواست هنرمندی جدید',
+      body: `کاربر «${input.stageName}» درخواست تبدیل شدن به هنرمند را ثبت کرد.`,
+      isRead: false,
+      actionUrl: '/support/artist-requests',
+      createdAt: new Date().toISOString(),
+    });
+  }
+
   return { user, artist };
 }
 
@@ -235,29 +256,42 @@ export function mockAddTrackToPlaylist(playlistId: string, track: Track): Playli
 }
 
 // ── NOTIFICATIONS ─────────────────────────────────────────────
+// Notification.userId records who an event was "for" (used by the
+// triggers below), but the list here is shown as one shared feed
+// regardless of who's logged in — simpler for demoing/testing.
 
-export function mockGetNotifications(): Notification[] {
+function loadAllNotifications(): Notification[] {
   return load<Notification[]>(STORAGE_KEYS.NOTIFICATIONS, MOCK_NOTIFICATIONS);
 }
 
+export function mockGetNotifications(): Notification[] {
+  return loadAllNotifications();
+}
+
 export function mockMarkAsRead(notificationId: string): void {
-  const all = load<Notification[]>(STORAGE_KEYS.NOTIFICATIONS, MOCK_NOTIFICATIONS);
+  const all = loadAllNotifications();
   save(STORAGE_KEYS.NOTIFICATIONS, all.map((n) => n.id === notificationId ? { ...n, isRead: true } : n));
 }
 
 export function mockMarkAllAsRead(): void {
-  const all = load<Notification[]>(STORAGE_KEYS.NOTIFICATIONS, MOCK_NOTIFICATIONS);
+  const all = loadAllNotifications();
   save(STORAGE_KEYS.NOTIFICATIONS, all.map((n) => ({ ...n, isRead: true })));
 }
 
 export function mockDeleteNotification(notificationId: string): void {
-  const all = load<Notification[]>(STORAGE_KEYS.NOTIFICATIONS, MOCK_NOTIFICATIONS);
+  const all = loadAllNotifications();
   save(STORAGE_KEYS.NOTIFICATIONS, all.filter((n) => n.id !== notificationId));
 }
 
 function addNotification(notification: Notification): void {
-  const all = load<Notification[]>(STORAGE_KEYS.NOTIFICATIONS, MOCK_NOTIFICATIONS);
+  const all = loadAllNotifications();
   save(STORAGE_KEYS.NOTIFICATIONS, [notification, ...all]);
+}
+
+let notificationSeq = 0;
+function nextNotificationId(): string {
+  notificationSeq += 1;
+  return `n-${Date.now()}-${notificationSeq}`;
 }
 
 // ── MUSIC ────────────────────────────────────────────────────
@@ -339,8 +373,25 @@ export function mockToggleFollowArtist(byUserId: string, artistId: string): bool
   const all = mockGetAllArtists();
   const idx = all.findIndex((a) => a.id === artistId);
   if (idx !== -1) {
-    all[idx] = { ...all[idx], followersCount: all[idx].followersCount + (isFollowing ? -1 : 1) };
+    const artist = all[idx];
+    all[idx] = { ...artist, followersCount: artist.followersCount + (isFollowing ? -1 : 1) };
     save(STORAGE_KEYS.ARTISTS, all);
+
+    if (!isFollowing) {
+      const follower = mockGetUsers().find((u) => u.id === byUserId);
+      if (follower && artist.userId !== byUserId) {
+        addNotification({
+          id: nextNotificationId(),
+          userId: artist.userId,
+          type: 'new_follower',
+          title: 'دنبال‌کننده جدید',
+          body: `${follower.displayName} شما را دنبال کرد.`,
+          isRead: false,
+          actionUrl: `/profile/${follower.username}`,
+          createdAt: new Date().toISOString(),
+        });
+      }
+    }
   }
   return !isFollowing;
 }
@@ -360,8 +411,22 @@ export function mockToggleFollowUser(byUserId: string, targetUserId: string): bo
   const all = mockGetUsers();
   const idx = all.findIndex((u) => u.id === targetUserId);
   if (idx !== -1) {
+    const follower = all.find((u) => u.id === byUserId);
     all[idx] = { ...all[idx], followersCount: all[idx].followersCount + (isFollowing ? -1 : 1) };
     saveUsers(all);
+
+    if (!isFollowing && follower && byUserId !== targetUserId) {
+      addNotification({
+        id: nextNotificationId(),
+        userId: targetUserId,
+        type: 'new_follower',
+        title: 'دنبال‌کننده جدید',
+        body: `${follower.displayName} شما را دنبال کرد.`,
+        isRead: false,
+        actionUrl: `/profile/${follower.username}`,
+        createdAt: new Date().toISOString(),
+      });
+    }
   }
   return !isFollowing;
 }
@@ -388,6 +453,28 @@ export function mockCreateTrack(input: NewTrackInput): Track {
     createdAt: new Date().toISOString(),
   };
   save(STORAGE_KEYS.TRACKS, [...mockGetAllManagedTracks(), track]);
+
+  const notifiedUserIds = new Set<string>();
+  const allUsers = mockGetUsers();
+  for (const artist of track.artists) {
+    for (const user of allUsers) {
+      if (notifiedUserIds.has(user.id)) continue;
+      if (mockIsFollowingArtist(user.id, artist.id)) {
+        notifiedUserIds.add(user.id);
+        addNotification({
+          id: nextNotificationId(),
+          userId: user.id,
+          type: 'new_release',
+          title: `آهنگ جدید از ${artist.stageName}`,
+          body: `${artist.stageName} آهنگ «${track.title}» را منتشر کرد.`,
+          isRead: false,
+          actionUrl: `/artist/${artist.id}`,
+          createdAt: new Date().toISOString(),
+        });
+      }
+    }
+  }
+
   return track;
 }
 
@@ -429,7 +516,8 @@ export function mockApproveArtist(artistId: string): Artist | null {
   all[idx] = updated;
   save(STORAGE_KEYS.ARTISTS, all);
   addNotification({
-    id: `n-${Date.now()}`,
+    id: nextNotificationId(),
+    userId: updated.userId,
     type: 'artist_verified',
     title: 'حساب هنرمند شما تایید شد',
     body: `درخواست هنرمندی «${updated.stageName}» تایید شد. اکنون می‌توانید آثار خود را منتشر کنید.`,
@@ -448,7 +536,8 @@ export function mockRejectArtist(artistId: string, reason: string): Artist | nul
   all[idx] = updated;
   save(STORAGE_KEYS.ARTISTS, all);
   addNotification({
-    id: `n-${Date.now()}`,
+    id: nextNotificationId(),
+    userId: updated.userId,
     type: 'artist_rejected',
     title: 'درخواست هنرمندی شما رد شد',
     body: `دلیل: ${reason}`,
@@ -495,6 +584,33 @@ export function mockAddTicketMessage(
   };
   all[idx] = updated;
   save(STORAGE_KEYS.TICKETS, all);
+
+  if (isStaffReply) {
+    addNotification({
+      id: nextNotificationId(),
+      userId: updated.userId,
+      type: 'new_ticket',
+      title: 'پاسخ جدید به تیکت شما',
+      body: `تیکت «${updated.subject}» پاسخ جدیدی دریافت کرد.`,
+      isRead: false,
+      actionUrl: `/support/tickets/${updated.id}`,
+      createdAt: new Date().toISOString(),
+    });
+  } else {
+    for (const staff of mockGetUsers().filter((u) => u.role === 'support' || u.role === 'admin')) {
+      addNotification({
+        id: nextNotificationId(),
+        userId: staff.id,
+        type: 'new_ticket',
+        title: 'پیام جدید در تیکت پشتیبانی',
+        body: `پیام جدیدی در تیکت «${updated.subject}» ثبت شد.`,
+        isRead: false,
+        actionUrl: `/support/tickets/${updated.id}`,
+        createdAt: new Date().toISOString(),
+      });
+    }
+  }
+
   return updated;
 }
 
@@ -521,6 +637,21 @@ export function mockConfirmSettlement(payoutId: string): ArtistPayoutRecord | nu
   const updated: ArtistPayoutRecord = { ...all[idx], isPaid: true, paidAt: new Date().toISOString() };
   all[idx] = updated;
   save(STORAGE_KEYS.PAYOUTS, all);
+
+  const artist = mockGetAllArtists().find((a) => a.id === updated.artistId);
+  if (artist) {
+    addNotification({
+      id: nextNotificationId(),
+      userId: artist.userId,
+      type: 'monthly_payment',
+      title: 'پرداخت ماهانه واریز شد',
+      body: `مبلغ درآمد ${updated.month} شما به حساب بانکی واریز شد.`,
+      isRead: false,
+      actionUrl: '/manage/earnings',
+      createdAt: new Date().toISOString(),
+    });
+  }
+
   return updated;
 }
 

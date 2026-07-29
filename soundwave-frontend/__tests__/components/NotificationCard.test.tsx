@@ -13,6 +13,7 @@ jest.mock('next/navigation', () => ({
 
 const notification: Notification = {
   id: 'n-test',
+  userId: 'u1',
   type: 'new_release',
   title: 'Test notification',
   body: 'Body text',

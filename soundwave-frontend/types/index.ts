@@ -105,10 +105,12 @@ export type NotificationType =
   | 'artist_rejected'
   | 'monthly_payment'
   | 'new_ticket'
-  | 'new_artist_request';
+  | 'new_artist_request'
+  | 'new_follower';
 
 export interface Notification {
   id: string;
+  userId: string;           // recipient — notifications are scoped per user
   type: NotificationType;
   title: string;
   body: string;

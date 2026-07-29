@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useLocaleStore, type Language } from '@/lib/store/localeStore';
 import { mockGetUserSettings, mockUpdateUserSettings, DEFAULT_USER_SETTINGS, type UserSettings } from '@/lib/mock/store';
 import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
-import { SUBSCRIPTION_PLANS, ROUTES } from '@/lib/constants';
+import { SUBSCRIPTION_PLANS } from '@/lib/constants';
 import { Card, Checkbox, Select, Button, Modal } from '@/components/ui';
 import { ProfileForm } from '@/components/settings/ProfileForm';
 import { ChangePasswordForm } from '@/components/settings/ChangePasswordForm';
@@ -31,7 +30,6 @@ export default function SettingsPage() {
   const logout = useAuthStore((s) => s.logout);
   const language = useLocaleStore((s) => s.language);
   const setLanguage = useLocaleStore((s) => s.setLanguage);
-  const router = useRouter();
 
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_USER_SETTINGS);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -51,7 +49,6 @@ export default function SettingsPage() {
   const handleDeleteAccount = () => {
     setIsDeleteOpen(false);
     logout();
-    router.push(ROUTES.LOGIN);
   };
 
   return (
