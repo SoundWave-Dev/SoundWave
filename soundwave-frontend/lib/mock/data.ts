@@ -515,6 +515,7 @@ export const MOCK_PLAYLISTS: Playlist[] = [
 export const MOCK_NOTIFICATIONS: Notification[] = [
   {
     id: 'n1',
+    userId: 'u2', // Sara Karimi (listener)
     type: 'subscription_expiry',
     title: 'اشتراک شما رو به اتمام است',
     body: 'اشتراک نقره‌ای شما ۷ روز دیگر منقضی می‌شود.',
@@ -524,6 +525,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
   },
   {
     id: 'n2',
+    userId: 'u2', // Sara Karimi (listener)
     type: 'new_release',
     title: 'آهنگ جدید از Dariush',
     body: 'Dariush آهنگ جدیدی منتشر کرد.',
@@ -533,6 +535,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
   },
   {
     id: 'n3',
+    userId: 'u1', // Ali Rezaei (listener)
     type: 'new_release',
     title: 'آلبوم جدید از Homay',
     body: 'Homay آلبوم «Shab Bidari» را منتشر کرد.',
@@ -542,6 +545,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
   },
   {
     id: 'n4',
+    userId: 'u7', // Shadmehr Aghili (artist — this is their own verification notice)
     type: 'artist_verified',
     title: 'حساب هنرمند شما تایید شد',
     body: 'درخواست هنرمندی «Shadmehr» تایید شد. اکنون می‌توانید آثار خود را منتشر کنید.',
@@ -551,6 +555,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
   },
   {
     id: 'n5',
+    userId: 'u6', // Newcomer Artist (artist — this is their own rejection notice)
     type: 'artist_rejected',
     title: 'درخواست هنرمندی شما رد شد',
     body: 'دلیل: پروفایل ناقص است. لطفاً اطلاعات بیشتری ارائه دهید.',
@@ -560,6 +565,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
   },
   {
     id: 'n6',
+    userId: 'u3', // Dariush Eghbali (artist — payout recipient)
     type: 'monthly_payment',
     title: 'پرداخت ماهانه واریز شد',
     body: 'مبلغ درآمد شهریور شما به حساب بانکی واریز شد.',
@@ -569,6 +575,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
   },
   {
     id: 'n7',
+    userId: 'u5', // Support Agent
     type: 'new_ticket',
     title: 'تیکت پشتیبانی جدید',
     body: 'یک تیکت جدید با موضوع «مشکل در پرداخت اشتراک» ثبت شد.',
@@ -578,6 +585,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
   },
   {
     id: 'n8',
+    userId: 'u5', // Support Agent
     type: 'new_artist_request',
     title: 'درخواست هنرمندی جدید',
     body: 'کاربر «Newcomer Artist» درخواست تبدیل شدن به هنرمند را ثبت کرد.',
@@ -587,6 +595,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
   },
   {
     id: 'n9',
+    userId: 'u1', // Ali Rezaei (listener)
     type: 'subscription_expiry',
     title: 'اشتراک شما منقضی شد',
     body: 'اشتراک طلایی شما منقضی شده. برای ادامه استفاده از امکانات ویژه تمدید کنید.',

@@ -5,7 +5,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '@/types';
-import { STORAGE_KEYS } from '@/lib/constants';
+import { STORAGE_KEYS, ROUTES } from '@/lib/constants';
 import {
   mockLogin,
   mockLogout,
@@ -51,6 +51,12 @@ export const useAuthStore = create<AuthStore>()(
       logout: () => {
         mockLogout();
         set({ user: null, token: null });
+        // Full page reload (not a client-side router navigation) so every
+        // in-memory store/component resets — avoids stale state carrying
+        // over between accounts when switching who's logged in.
+        if (typeof window !== 'undefined') {
+          window.location.href = ROUTES.LOGIN;
+        }
       },
 
       updateUser: (partial) =>

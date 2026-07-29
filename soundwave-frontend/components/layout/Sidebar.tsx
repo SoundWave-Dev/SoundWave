@@ -41,10 +41,6 @@ export default function Sidebar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const { t } = useTranslation('sidebar');
 
-  const handleLogout = () => {
-    logout();
-    router.push(ROUTES.LOGIN);
-  };
 
   useEffect(() => {
     setUnreadCount(mockGetNotifications().filter((n) => !n.isRead).length);
@@ -202,7 +198,7 @@ export default function Sidebar() {
           </Link>
           <button
             type="button"
-            onClick={handleLogout}
+            onClick={logout}
             style={{
               display: 'flex',
               alignItems: 'center',
