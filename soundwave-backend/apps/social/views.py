@@ -1,4 +1,5 @@
-from rest_framework import permissions
+from rest_framework import permissions, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -14,8 +15,12 @@ class FollowStatsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, user_id):
-        # TODO(Rayan): Follow.objects.filter(followee_id=user_id).count(), etc.
-        raise NotImplementedError
+        data = {
+            "follower_count": Follow.objects.filter(followee_id=user_id).count(),
+            "following_count": Follow.objects.filter(follower_id=user_id).count(),
+            "is_following": Follow.objects.filter(follower=request.user, followee_id=user_id).exists(),
+        }
+        return Response(FollowStatsSerializer(data).data)
 
 
 class FollowToggleView(APIView):
@@ -24,10 +29,13 @@ class FollowToggleView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, user_id):
-        # TODO(Rayan): Follow.objects.get_or_create(follower=request.user, followee_id=user_id)
-        # reject if user_id == request.user.id
-        raise NotImplementedError
+        if request.user.id == user_id:
+            raise ValidationError("You cannot follow yourself.")
+        _, created = Follow.objects.get_or_create(follower=request.user, followee_id=user_id)
+        return Response(status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
     def delete(self, request, user_id):
-        # TODO(Rayan): Follow.objects.filter(follower=request.user, followee_id=user_id).delete()
-        raise NotImplementedError
+        deleted, _ = Follow.objects.filter(follower=request.user, followee_id=user_id).delete()
+        if not deleted:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_204_NO_CONTENT)
