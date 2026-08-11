@@ -19,10 +19,12 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, views
 
     @action(detail=True, methods=["post"], url_path="mark-read")
     def mark_read(self, request, pk=None):
-        # TODO(Foad): notification = self.get_object(); notification.is_read = True; notification.save()
-        raise NotImplementedError
+        notification = self.get_object()
+        notification.is_read = True
+        notification.save(update_fields=["is_read"])
+        return Response(NotificationSerializer(notification).data)
 
     @action(detail=False, methods=["post"], url_path="mark-all-read")
     def mark_all_read(self, request):
-        # TODO(Foad): self.get_queryset().update(is_read=True)
-        raise NotImplementedError
+        updated = self.get_queryset().filter(is_read=False).update(is_read=True)
+        return Response({"updated": updated})

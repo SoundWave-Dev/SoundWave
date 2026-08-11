@@ -27,9 +27,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 class SubscribeRequestSerializer(serializers.Serializer):
     plan_tier = serializers.ChoiceField(choices=SubscriptionPlan.Tier.choices)
     duration_months = serializers.ChoiceField(choices=Subscription.Duration.choices)
-    # TODO(Foad): view creates a pending PaymentTransaction + Subscription(status=pending
-    # equivalent, or defer Subscription creation until payment succeeds) then returns
-    # the gateway redirect URL from apps.billing.gateways.get_gateway().request_payment()
 
 
 class PaymentTransactionSerializer(serializers.ModelSerializer):

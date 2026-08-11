@@ -124,6 +124,14 @@ SIMPLE_JWT = {
 
 CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",")
 
+# Forgot-password emails (apps.accounts) — console backend in dev so there's no SMTP
+# dependency; point EMAIL_BACKEND at a real backend via env for production.
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend" if DEBUG else "django.core.mail.backends.smtp.EmailBackend",
+)
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@soundwave.local")
+
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
@@ -136,3 +144,8 @@ PAYMENT_GATEWAY_SANDBOX = os.getenv("PAYMENT_GATEWAY_SANDBOX", "True") == "True"
 # Daily stream limits and playlist limits are read from apps.billing.models.SubscriptionPlan
 # (DB-backed, admin-editable) — never hard-code tier limits here. See spec §2.4/§3.2:
 # pricing and limits must be changeable without a code deploy.
+
+# Artist payout rate (Toman per stream) used by `manage.py calculate_payouts` — spec
+# §2.11.2 leaves the exact formula to Phase 2 design; kept here (not hard-coded in the
+# command) so it can be tuned via env without a code change.
+PAYOUT_RATE_PER_STREAM = int(os.getenv("PAYOUT_RATE_PER_STREAM", "500"))

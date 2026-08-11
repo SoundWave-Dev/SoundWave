@@ -8,7 +8,7 @@ class TicketMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = TicketMessage
         fields = ["id", "ticket", "sender", "body", "created_at"]
-        read_only_fields = ["sender", "created_at"]
+        read_only_fields = ["ticket", "sender", "created_at"]
 
 
 class TicketSerializer(serializers.ModelSerializer):

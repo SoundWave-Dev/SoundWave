@@ -1,21 +1,70 @@
+import re
+
+from django.db import transaction
+from django.utils import timezone
 from rest_framework import serializers
 
 from apps.accounts.models import ArtistProfile, User
 
 
+def _generate_username(email):
+    """System-assigned username derived from the email's local part (spec §2.1/§2.3
+    — users log in with email but see a distinct system-assigned username on their profile).
+    """
+    base = re.sub(r"[^a-zA-Z0-9_]", "", email.split("@")[0]).lower() or "user"
+    username = base
+    suffix = 1
+    while User.objects.filter(username=username).exists():
+        suffix += 1
+        username = f"{base}{suffix}"
+    return username
+
+
 class UserSerializer(serializers.ModelSerializer):
     """Read-only profile representation (spec §2.3 User Profile page)."""
+
+    subscription_tier = serializers.SerializerMethodField()
+    follower_count = serializers.SerializerMethodField()
+    following_count = serializers.SerializerMethodField()
+    daily_stream_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = [
             "id", "email", "username", "display_name", "role",
             "avatar", "date_of_birth", "gender", "date_joined",
+            "subscription_tier", "follower_count", "following_count", "daily_stream_count",
         ]
         read_only_fields = ["id", "username", "role", "date_joined"]
 
-    # TODO(Foad): add `subscription_tier`, `follower_count`, `following_count`,
-    # `daily_stream_count` as SerializerMethodFields once apps.billing/apps.social exist.
+    def get_subscription_tier(self, obj):
+        from apps.billing.models import Subscription, SubscriptionPlan
+
+        subscription = (
+            Subscription.objects.filter(user=obj, status=Subscription.Status.ACTIVE)
+            .select_related("plan")
+            .order_by("-expires_at")
+            .first()
+        )
+        return subscription.plan.tier if subscription else SubscriptionPlan.Tier.FREE
+
+    def get_follower_count(self, obj):
+        from apps.social.models import Follow
+
+        return Follow.objects.filter(followee=obj).count()
+
+    def get_following_count(self, obj):
+        from apps.social.models import Follow
+
+        return Follow.objects.filter(follower=obj).count()
+
+    def get_daily_stream_count(self, obj):
+        from datetime import timedelta
+
+        from apps.music.models import StreamEvent
+
+        since = timezone.now() - timedelta(days=1)
+        return StreamEvent.objects.filter(user=obj, played_at__gte=since).count()
 
 
 class ListenerRegisterSerializer(serializers.ModelSerializer):
@@ -31,13 +80,27 @@ class ListenerRegisterSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
-        # TODO(Foad): confirm_password == password, accept_privacy_policy must be True
-        raise NotImplementedError
+        if attrs["password"] != attrs["confirm_password"]:
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+        if not attrs.get("accept_privacy_policy"):
+            raise serializers.ValidationError(
+                {"accept_privacy_policy": "You must accept the privacy policy to register."}
+            )
+        return attrs
 
     def create(self, validated_data):
-        # TODO(Foad): pop confirm_password/accept_privacy_policy, set role=LISTENER,
-        # generate system username, hash password via User.objects.create_user
-        raise NotImplementedError
+        validated_data.pop("confirm_password")
+        validated_data.pop("accept_privacy_policy")
+        password = validated_data.pop("password")
+        email = validated_data.pop("email")
+        return User.objects.create_user(
+            email=email,
+            password=password,
+            username=_generate_username(email),
+            role=User.Role.LISTENER,
+            accepted_privacy_policy_at=timezone.now(),
+            **validated_data,
+        )
 
 
 class ArtistRegisterSerializer(serializers.ModelSerializer):
@@ -50,8 +113,46 @@ class ArtistRegisterSerializer(serializers.ModelSerializer):
         fields = ["email", "password", "stage_name", "portfolio_url"]
 
     def create(self, validated_data):
-        # TODO(Foad): create User(role=ARTIST) + ArtistProfile(status=PENDING) in one transaction
-        raise NotImplementedError
+        password = validated_data.pop("password")
+        stage_name = validated_data.pop("stage_name")
+        portfolio_url = validated_data.pop("portfolio_url", "")
+        email = validated_data.pop("email")
+
+        with transaction.atomic():
+            user = User.objects.create_user(
+                email=email,
+                password=password,
+                username=_generate_username(email),
+                role=User.Role.ARTIST,
+            )
+            ArtistProfile.objects.create(
+                user=user,
+                stage_name=stage_name,
+                portfolio_url=portfolio_url,
+                verification_status=ArtistProfile.VerificationStatus.PENDING,
+            )
+
+            from apps.notifications.models import Notification
+
+            staff = User.objects.filter(role__in=[User.Role.SUPPORT, User.Role.ADMIN])
+            Notification.objects.bulk_create(
+                [
+                    Notification(
+                        user=staff_user,
+                        kind=Notification.Kind.NEW_ARTIST_REQUEST,
+                        title="New artist verification request",
+                        body=f'"{stage_name}" has requested artist verification.',
+                        action_url="/support/artist-verifications",
+                    )
+                    for staff_user in staff
+                ]
+            )
+
+        # Transient (unsaved) attributes so the response can serialize `stage_name`/
+        # `portfolio_url` even though they live on ArtistProfile, not User.
+        user.stage_name = stage_name
+        user.portfolio_url = portfolio_url
+        return user
 
 
 class ArtistProfileSerializer(serializers.ModelSerializer):
@@ -66,9 +167,6 @@ class ArtistProfileSerializer(serializers.ModelSerializer):
 
 class ForgotPasswordRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
-
-    # TODO(Foad): look up user, generate a reset token (django's PasswordResetTokenGenerator
-    # is fine), email it. Always return 200 regardless of whether the email exists.
 
 
 class ForgotPasswordConfirmSerializer(serializers.Serializer):

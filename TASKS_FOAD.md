@@ -195,43 +195,43 @@ public/
 
 ## 🔐 `apps/accounts` — Auth & Artist Verification (spec §2.1, §3.1)
 
-- [ ] `ListenerRegisterSerializer.validate()` — confirm_password match + privacy policy accepted
-- [ ] `ListenerRegisterSerializer.create()` — generate system-assigned `username`, `role=listener`
-- [ ] `ArtistRegisterSerializer.create()` — `User(role=artist)` + `ArtistProfile(status=pending)` in one transaction
-- [ ] Embed `role` into the JWT claims (custom `TokenObtainPairSerializer`) so the frontend
+- [x] `ListenerRegisterSerializer.validate()` — confirm_password match + privacy policy accepted
+- [x] `ListenerRegisterSerializer.create()` — generate system-assigned `username`, `role=listener`
+- [x] `ArtistRegisterSerializer.create()` — `User(role=artist)` + `ArtistProfile(status=pending)` in one transaction
+- [x] Embed `role` into the JWT claims (custom `TokenObtainPairSerializer`) so the frontend
       can redirect listener/artist → `/home` vs support/admin → `/support` without an extra request
-- [ ] Forgot-password request/confirm — always return 200 regardless of whether the email exists
-- [ ] `MeView` — add `subscription_tier`, `follower_count`, `following_count`, `daily_stream_count`
+- [x] Forgot-password request/confirm — always return 200 regardless of whether the email exists
+- [x] `MeView` — add `subscription_tier`, `follower_count`, `following_count`, `daily_stream_count`
       as read-only fields once `apps.billing`/`apps.social`/`apps.music` are wired up
 
 ## 💳 `apps/billing` — Subscriptions, Pricing, Payments, Payouts (spec §2.11.2, §2.11.3, §3.2, §3.6)
 
-- [ ] Admin pricing panel (`SubscriptionPlanPriceUpdateView`) — update Silver/Gold price, no code change needed
-- [ ] `SubscribeView` — create `PaymentTransaction(status=pending)`, redirect to gateway
-- [ ] Pick **one** gateway in `apps/billing/gateways.py` (ZarinPal / AqayePardakht / PayPing / SizPay — sandbox docs in spec §3.6) and implement `request_payment()` + `verify_payment()`
-- [ ] `PaymentCallbackView` — verify payment, activate/extend `Subscription` (respect 1/3/6/12-month durations)
-- [ ] `ConfirmSettlementView` — admin-only, flips a `Payout` to `Paid`
-- [ ] Monthly payout calculation (management command or Celery task) — `unique_listeners`/`total_streams` → `amount`, run monthly not on-request
-- [ ] `RevenueSummaryView` / `SubscriptionDistributionView` — aggregated queries only, never raw rows (spec §3.7)
+- [x] Admin pricing panel (`SubscriptionPlanPriceUpdateView`) — update Silver/Gold price, no code change needed
+- [x] `SubscribeView` — create `PaymentTransaction(status=pending)`, redirect to gateway
+- [x] Pick **one** gateway in `apps/billing/gateways.py` (ZarinPal / AqayePardakht / PayPing / SizPay — sandbox docs in spec §3.6) and implement `request_payment()` + `verify_payment()` — went with ZarinPal
+- [x] `PaymentCallbackView` — verify payment, activate/extend `Subscription` (respect 1/3/6/12-month durations)
+- [x] `ConfirmSettlementView` — admin-only, flips a `Payout` to `Paid`
+- [x] Monthly payout calculation (management command or Celery task) — `unique_listeners`/`total_streams` → `amount`, run monthly not on-request — `manage.py calculate_payouts`
+- [x] `RevenueSummaryView` / `SubscriptionDistributionView` — aggregated queries only, never raw rows (spec §3.7)
 
 ## 🎫 `apps/support` — Tickets & Verification Review (spec §2.11.1)
 
-- [ ] `TicketViewSet.messages` — list/create `TicketMessage` for the chatbox UI
-- [ ] `ArtistVerificationViewSet.approve` — set `approved`, notify the artist
-- [ ] `ArtistVerificationViewSet.reject` — require `reason`, store it, notify the artist
+- [x] `TicketViewSet.messages` — list/create `TicketMessage` for the chatbox UI
+- [x] `ArtistVerificationViewSet.approve` — set `approved`, notify the artist
+- [x] `ArtistVerificationViewSet.reject` — require `reason`, store it, notify the artist
 
 ## 🔔 `apps/notifications`
 
-- [ ] `mark_read` / `mark_all_read` actions
-- [ ] Emit a `Notification` from the relevant place in `billing`/`support` (verification result, payout settled, new ticket, new artist request)
+- [x] `mark_read` / `mark_all_read` actions
+- [x] Emit a `Notification` from the relevant place in `billing`/`support` (verification result, payout settled, new ticket, new artist request)
 
 ## 🧪 Tests — Foad's minimum: contribute to the 15-test Phase 2 minimum
 
-- [ ] Listener/artist registration + login (see `apps/accounts/tests.py` TODOs)
-- [ ] Admin price update is admin-only
-- [ ] Payment callback activates a subscription
-- [ ] Ticket visibility scoping (own tickets vs. support sees all)
-- [ ] Approve/reject artist verification
+- [x] Listener/artist registration + login (see `apps/accounts/tests.py` TODOs)
+- [x] Admin price update is admin-only
+- [x] Payment callback activates a subscription
+- [x] Ticket visibility scoping (own tickets vs. support sees all)
+- [x] Approve/reject artist verification
 
 ## 🚫 NOT Foad's Backend Responsibility
 

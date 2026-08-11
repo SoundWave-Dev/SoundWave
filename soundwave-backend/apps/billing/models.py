@@ -78,6 +78,11 @@ class PaymentTransaction(models.Model):
     subscription = models.ForeignKey(
         Subscription, null=True, blank=True, on_delete=models.SET_NULL, related_name="payments"
     )
+    # The Subscription itself isn't created until payment succeeds (Subscription.Status
+    # has no "pending" state), so the plan/duration the user asked for is held here in
+    # the meantime and read back by PaymentCallbackView once the gateway confirms payment.
+    plan_tier = models.CharField(max_length=16, choices=SubscriptionPlan.Tier.choices, blank=True)
+    duration_months = models.PositiveSmallIntegerField(choices=Subscription.Duration.choices, null=True, blank=True)
     gateway = models.CharField(max_length=16, choices=Gateway.choices)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)

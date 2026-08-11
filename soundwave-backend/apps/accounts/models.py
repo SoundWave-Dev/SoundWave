@@ -1,5 +1,8 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
@@ -100,3 +103,21 @@ class ArtistProfile(models.Model):
 
     def __str__(self):
         return self.stage_name
+
+
+class PasswordResetToken(models.Model):
+    """Backs forgot/reset password (spec §2.1). Keeping the token itself (rather than
+    Django's uid+PasswordResetTokenGenerator pair) as the sole lookup key matches the
+    frontend contract: ForgotPasswordConfirmSerializer only carries `token`, not a uid.
+    """
+
+    TOKEN_LIFETIME = timedelta(hours=1)
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="password_reset_tokens")
+    token = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def is_valid(self):
+        return self.used_at is None and self.created_at >= timezone.now() - self.TOKEN_LIFETIME
