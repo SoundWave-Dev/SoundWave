@@ -7,8 +7,7 @@
 import { useEffect, useState } from 'react';
 import type { Ticket } from '@/types';
 import { useAuthStore } from '@/lib/store/authStore';
-import { mockGetTicketById, mockAddTicketMessage } from '@/lib/mock/store';
-import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
+import { getTicketById, addTicketMessage } from '@/lib/api/support';
 import { timeAgo } from '@/lib/utils';
 import { Button, Textarea } from '@/components/ui';
 import { useTranslation } from '@/lib/i18n';
@@ -19,16 +18,15 @@ interface TicketChatProps {
 
 export function TicketChat({ ticketId }: TicketChatProps) {
   const { t } = useTranslation('ticketChat');
-  const authUser = useAuthStore((s) => s.user);
-  // TEMP (testing only): fall back to a mock support agent so replying is
-  // testable without logging in. Remove this fallback (go back to
-  // `const user = authUser`) before shipping/committing.
-  const user = authUser ?? MOCK_USERS[4];
+  const user = useAuthStore((s) => s.user);
   const [ticket, setTicket] = useState<Ticket | null | undefined>(undefined);
   const [reply, setReply] = useState('');
 
+  const refresh = () => getTicketById(ticketId).then(setTicket);
+
   useEffect(() => {
-    setTicket(mockGetTicketById(ticketId));
+    refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketId]);
 
   if (ticket === undefined) return null;
@@ -36,11 +34,11 @@ export function TicketChat({ ticketId }: TicketChatProps) {
     return <div style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>{t('notFound')}</div>;
   }
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!reply.trim() || !user) return;
-    const updated = mockAddTicketMessage(ticketId, user.id, user.role, reply.trim());
-    setTicket(updated);
+    await addTicketMessage(ticketId, reply.trim());
     setReply('');
+    refresh();
   };
 
   return (

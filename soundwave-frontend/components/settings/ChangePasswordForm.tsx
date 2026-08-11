@@ -8,15 +8,12 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { changePasswordSchema, type ChangePasswordFormValues } from '@/lib/validators/changePasswordSchema';
-import { mockChangePassword } from '@/lib/mock/store';
+import { changePassword } from '@/lib/api/auth';
+import { getApiErrorMessage } from '@/lib/api/client';
 import { Button, Input } from '@/components/ui';
 import { useTranslation } from '@/lib/i18n';
 
-interface ChangePasswordFormProps {
-  email: string;
-}
-
-export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
+export function ChangePasswordForm() {
   const { t } = useTranslation('changePasswordForm');
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -34,9 +31,10 @@ export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
   const onSubmit = async (values: ChangePasswordFormValues) => {
     setServerError(null);
     setSuccessMessage(null);
-    const success = mockChangePassword(email, values.currentPassword, values.newPassword);
-    if (!success) {
-      setServerError(t('incorrectCurrentPassword'));
+    try {
+      await changePassword(values.currentPassword, values.newPassword);
+    } catch (error) {
+      setServerError(getApiErrorMessage(error, t('incorrectCurrentPassword')));
       return;
     }
     reset();

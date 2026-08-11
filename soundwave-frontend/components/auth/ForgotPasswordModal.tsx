@@ -2,12 +2,16 @@
 
 // ============================================================
 // SOUNDWAVE — FORGOT PASSWORD MODAL
-// Phase 1: UI only — no real email is sent.
+// Sends the reset request to the backend, which always responds 200
+// regardless of whether the email exists (no account-existence leak).
+// There's no "enter the emailed token" step yet — that would need its
+// own page — so this only covers the request half of the flow.
 // ============================================================
 
 import { useState } from 'react';
 import { Button, Input, Modal } from '@/components/ui';
 import { useTranslation } from '@/lib/i18n';
+import { requestPasswordReset } from '@/lib/api/auth';
 
 interface ForgotPasswordModalProps {
   isOpen: boolean;
@@ -18,6 +22,7 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
   const { t } = useTranslation('forgotPasswordModal');
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleClose = () => {
     setEmail('');
@@ -25,9 +30,15 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
     onClose();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
+    setIsSubmitting(true);
+    try {
+      await requestPasswordReset(email);
+    } finally {
+      setIsSubmitting(false);
+      setSent(true);
+    }
   };
 
   return (
@@ -46,7 +57,7 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <Button type="submit" style={{ width: '100%' }}>
+          <Button type="submit" disabled={isSubmitting} style={{ width: '100%' }}>
             {t('submit')}
           </Button>
         </form>

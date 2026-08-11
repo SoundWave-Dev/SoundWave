@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { useSongSuggestions } from '@/lib/hooks/useSongSuggestions';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useAuthStore } from '@/lib/store/authStore';
+import { getRecentlyPlayed } from '@/lib/api/playback';
 import { formatDuration } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
 import type { Track } from '@/types';
@@ -134,7 +135,7 @@ function SuggestionCard({ track, reason, onPlay }: SuggestionCardProps) {
 
 export function SongSuggestions() {
   const { user } = useAuthStore();
-  const { play, history } = usePlayerStore();
+  const { play } = usePlayerStore();
   const { suggestions, isLoading, error, fetchSuggestions } = useSongSuggestions();
   const { t } = useTranslation('songSuggestions');
 
@@ -148,10 +149,13 @@ export function SongSuggestions() {
     );
   };
 
-  const handleGetSuggestions = () => {
+  const handleGetSuggestions = async () => {
     setHasRequested(true);
+    // Server-side play history (apps.playback), not just this tab's in-memory
+    // queue, so suggestions reflect listening across devices/sessions too.
+    const recentlyPlayedIds = await getRecentlyPlayed().catch(() => []);
     fetchSuggestions({
-      recentlyPlayedIds: history,
+      recentlyPlayedIds,
       likedGenres: selectedGenres,
       mood: selectedMood || undefined,
     });

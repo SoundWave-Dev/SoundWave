@@ -1,23 +1,20 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
-import {
-  mockGetAlbums,
-  mockGetPlaylists,
-  mockGetTracks,
-} from '@/lib/mock/store';
+import { getAlbums, getTracks } from '@/lib/api/music';
+import { getPlaylists } from '@/lib/api/playlists';
 import { canAccessEarlyContent } from '@/lib/utils';
 import { ROUTES } from '@/lib/constants';
 import { useTranslation } from '@/lib/i18n';
 import { SongSuggestions } from '@/components/suggestions/SongSuggestions';
-import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
 import GreetingHeader from '@/components/home/GreetingHeader';
 import SectionRow from '@/components/home/SectionRow';
 import AlbumCard from '@/components/home/AlbumCard';
 import TrackListItem from '@/components/home/TrackListItem';
-import type { Playlist } from '@/types';
+import type { Album, Playlist, Track } from '@/types';
 
 function PlaylistMiniCard({ playlist }: { playlist: Playlist }) {
   const router = useRouter();
@@ -77,26 +74,46 @@ function PlaylistMiniCard({ playlist }: { playlist: Playlist }) {
 }
 
 export default function HomePage() {
-  const authUser = useAuthStore((s) => s.user);
+  const user = useAuthStore((s) => s.user);
   const { t } = useTranslation('homePage');
-  // TEMP (testing only): fall back to a mock gold user so the page is
-  // viewable without logging in. Remove this fallback (go back to
-  // `const user = authUser` + the early return) before shipping/committing.
-  const user = authUser ?? MOCK_USERS[1];
+
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [topTracks, setTopTracks] = useState<Track[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+
+    Promise.all([
+      getPlaylists(user.id),
+      getAlbums(),
+      getTracks({ sortBy: 'listeners', sortOrder: 'desc' }),
+    ]).then(([playlistsRes, albumsRes, tracksRes]) => {
+      if (cancelled) return;
+      setPlaylists(playlistsRes);
+      setAlbums(albumsRes);
+      setTopTracks(tracksRes.slice(0, 6));
+      setIsLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   if (!user) {
     return <h2>{t('loginFirst')}</h2>;
   }
 
-  const playlists = mockGetPlaylists(user.id);
-  const albums = mockGetAlbums();
+  if (isLoading) {
+    return null;
+  }
 
-  const tracks = [...mockGetTracks()].sort(
-    (a, b) => b.streamCount - a.streamCount
-  );
-  const topTracks = tracks.slice(0, 6);
-
-  const earlyTracks = tracks.filter((t) => t.isEarlyAccess);
+  // No early-access window is modeled on the backend yet, so this section
+  // never has tracks to show (see lib/api/mappers.ts mapTrack).
+  const earlyTracks: Track[] = [];
 
   return (
     <div>

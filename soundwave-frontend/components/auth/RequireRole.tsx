@@ -18,7 +18,6 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
-import { mockGetArtistByUserId } from '@/lib/mock/store';
 import type { UserRole } from '@/types';
 
 interface RequireRoleProps {
@@ -38,7 +37,7 @@ export function RequireRole({ allow, requireApprovedArtist, children }: RequireR
   const isAuthorized =
     !!user &&
     allow.includes(user.role) &&
-    (!requireApprovedArtist || mockGetArtistByUserId(user.id)?.status === 'approved');
+    (!requireApprovedArtist || user.artistVerificationStatus === 'approved');
 
   useEffect(() => {
     if (!mounted) return;

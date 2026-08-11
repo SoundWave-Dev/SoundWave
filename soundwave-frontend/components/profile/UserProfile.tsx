@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import type { User } from '@/types';
 import { ROUTES } from '@/lib/constants';
 import { getInitials, canUploadPhoto, getDailyStreamLimit, formatCount } from '@/lib/utils';
-import { mockIsFollowingUser, mockToggleFollowUser, mockUpdateUserProfile } from '@/lib/mock/store';
+import { getFollowStats, follow, unfollow } from '@/lib/api/social';
+import { updateMyAvatar } from '@/lib/api/auth';
 import { useAuthStore } from '@/lib/store/authStore';
 import { Button } from '@/components/ui';
 import { useTranslation } from '@/lib/i18n';
@@ -32,31 +33,32 @@ export function UserProfile({ user, viewerId, isOwnProfile }: UserProfileProps) 
 
   useEffect(() => {
     if (!viewerId || isOwnProfile) return;
-    setIsFollowing(mockIsFollowingUser(viewerId, user.id));
+    getFollowStats(user.id).then((stats) => {
+      setIsFollowing(stats.isFollowing);
+      setFollowersCount(stats.followerCount);
+    });
   }, [viewerId, user.id, isOwnProfile]);
 
-  const handleToggleFollow = () => {
+  const handleToggleFollow = async () => {
     if (!viewerId) return;
-    const nowFollowing = mockToggleFollowUser(viewerId, user.id);
+    const nowFollowing = !isFollowing;
+    if (nowFollowing) {
+      await follow(user.id);
+    } else {
+      await unfollow(user.id);
+    }
     setIsFollowing(nowFollowing);
     setFollowersCount((c) => c + (nowFollowing ? 1 : -1));
   };
 
-  const handlePhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      const updated = mockUpdateUserProfile(user.id, { avatarUrl: dataUrl });
-      if (updated) {
-        setAvatarUrl(updated.avatarUrl);
-        if (isOwnProfile) updateAuthUser({ avatarUrl: updated.avatarUrl });
-      }
-    };
-    reader.readAsDataURL(file);
+    const updated = await updateMyAvatar(file);
+    setAvatarUrl(updated.avatarUrl);
+    if (isOwnProfile) updateAuthUser({ avatarUrl: updated.avatarUrl });
   };
 
   const badge = TIER_BADGE[user.subscription];

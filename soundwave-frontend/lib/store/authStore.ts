@@ -7,14 +7,14 @@ import { persist } from 'zustand/middleware';
 import type { User } from '@/types';
 import { STORAGE_KEYS, ROUTES } from '@/lib/constants';
 import {
-  mockLogin,
-  mockLogout,
-  mockGetCurrentUser,
-  mockRegisterListener,
-  mockRegisterArtist,
+  login as apiLogin,
+  logout as apiLogout,
+  registerListener as apiRegisterListener,
+  registerArtist as apiRegisterArtist,
   type RegisterListenerInput,
   type RegisterArtistInput,
-} from '@/lib/mock/store';
+} from '@/lib/api/auth';
+import { getAccessToken } from '@/lib/api/tokenStore';
 
 interface AuthStore {
   user: User | null;
@@ -36,12 +36,9 @@ export const useAuthStore = create<AuthStore>()(
 
       login: async (email, password) => {
         set({ isLoading: true });
-        // TODO Phase 2: replace with real API call
-        await new Promise((r) => setTimeout(r, 600)); // simulate network
-        const user = mockLogin(email, password);
+        const user = await apiLogin(email, password);
         if (user) {
-          const token = `mock-token-${user.id}`;
-          set({ user, token, isLoading: false });
+          set({ user, token: getAccessToken(), isLoading: false });
           return true;
         }
         set({ isLoading: false });
@@ -49,7 +46,7 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       logout: () => {
-        mockLogout();
+        apiLogout();
         set({ user: null, token: null });
         // Full page reload (not a client-side router navigation) so every
         // in-memory store/component resets — avoids stale state carrying
@@ -66,20 +63,17 @@ export const useAuthStore = create<AuthStore>()(
 
       registerListener: async (input) => {
         set({ isLoading: true });
-        await new Promise((r) => setTimeout(r, 600));
-        const user = mockRegisterListener(input);
-        const token = `mock-token-${user.id}`;
-        set({ user, token, isLoading: false });
+        const user = await apiRegisterListener(input);
+        set({ user, token: getAccessToken(), isLoading: false });
         return user;
       },
 
       registerArtist: async (input) => {
         set({ isLoading: true });
-        await new Promise((r) => setTimeout(r, 600));
-        mockRegisterArtist(input);
+        const result = await apiRegisterArtist(input);
         // Artist accounts start in 'pending' review — do not auto-login.
         set({ isLoading: false });
-        return { pending: true };
+        return result;
       },
     }),
     {

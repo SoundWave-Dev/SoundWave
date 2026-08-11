@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { mockGetPlaylistById, mockRemoveTrackFromPlaylist } from '@/lib/mock/store';
+import { getPlaylistById, removeTrackFromPlaylist } from '@/lib/api/playlists';
+import { useAuthStore } from '@/lib/store/authStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { ROUTES } from '@/lib/constants';
 import { Button } from '@/components/ui';
@@ -15,7 +16,17 @@ export default function PlaylistDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const play = usePlayerStore((s) => s.play);
-  const [playlist, setPlaylist] = useState<Playlist | null>(() => mockGetPlaylistById(params.id));
+  const user = useAuthStore((s) => s.user);
+  const [playlist, setPlaylist] = useState<Playlist | null | undefined>(undefined);
+
+  useEffect(() => {
+    if (!user) return;
+    getPlaylistById(params.id, user.id).then(setPlaylist);
+  }, [params.id, user]);
+
+  if (playlist === undefined) {
+    return null;
+  }
 
   if (!playlist) {
     return (
@@ -25,8 +36,8 @@ export default function PlaylistDetailPage() {
     );
   }
 
-  const handleRemoveTrack = (trackId: string) => {
-    mockRemoveTrackFromPlaylist(playlist.id, trackId);
+  const handleRemoveTrack = async (trackId: string) => {
+    await removeTrackFromPlaylist(playlist.id, trackId);
     setPlaylist((prev) => (prev ? { ...prev, tracks: prev.tracks.filter((t) => t.id !== trackId) } : prev));
   };
 

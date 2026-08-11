@@ -11,7 +11,9 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { Howl } from 'howler';
+import axios from 'axios';
 import { usePlayerStore } from '@/lib/store/playerStore';
+import { logStream } from '@/lib/api/music';
 
 const PROGRESS_INTERVAL_MS = 250;
 
@@ -86,6 +88,16 @@ export function useHowler() {
     howlRef.current = howl;
 
     if (shouldAutoplay) howl.play();
+
+    // Log the play server-side (spec §2.9) — a track "starts" exactly when a fresh
+    // Howl is created for it, since play() always sets isPlaying immediately.
+    logStream(currentTrack.id).catch((error) => {
+      // Daily stream limit hit (Free tier) — stop playback rather than looping
+      // silently against an endpoint that will keep rejecting.
+      if (axios.isAxiosError(error) && error.response?.status === 400) {
+        usePlayerStore.getState().pause();
+      }
+    });
 
     return () => {
       clearProgressInterval();

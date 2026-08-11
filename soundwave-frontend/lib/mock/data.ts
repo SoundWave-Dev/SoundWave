@@ -454,6 +454,7 @@ export const MOCK_ALBUMS: Album[] = [
     tracks: [MOCK_TRACKS[0], MOCK_TRACKS[3]],
     streamCount: 715000,
     isEarlyAccess: false,
+    releaseType: 'album',
     createdAt: '2023-03-10T00:00:00Z',
   },
   {
@@ -466,6 +467,7 @@ export const MOCK_ALBUMS: Album[] = [
     tracks: [MOCK_TRACKS[4], MOCK_TRACKS[5]],
     streamCount: 910000,
     isEarlyAccess: false,
+    releaseType: 'album',
     createdAt: '2023-06-01T00:00:00Z',
   },
   {
@@ -478,6 +480,7 @@ export const MOCK_ALBUMS: Album[] = [
     tracks: [MOCK_TRACKS[6], MOCK_TRACKS[7]],
     streamCount: 1055000,
     isEarlyAccess: false,
+    releaseType: 'album',
     createdAt: '2023-07-15T00:00:00Z',
   },
 ];

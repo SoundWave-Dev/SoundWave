@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { Artist, Album, Track, SubscriptionTier } from '@/types';
 import { canViewStats, formatCount } from '@/lib/utils';
-import { mockIsFollowingArtist, mockToggleFollowArtist } from '@/lib/mock/store';
+import { getFollowStats, follow, unfollow } from '@/lib/api/social';
 import { Button } from '@/components/ui';
 import AlbumCard from '@/components/home/AlbumCard';
 import TrackListItem from '@/components/home/TrackListItem';
@@ -24,12 +24,20 @@ export function ArtistProfile({ artist, albums, singles, viewerId, viewerSubscri
 
   useEffect(() => {
     if (!viewerId) return;
-    setIsFollowing(mockIsFollowingArtist(viewerId, artist.id));
-  }, [viewerId, artist.id]);
+    getFollowStats(artist.userId).then((stats) => {
+      setIsFollowing(stats.isFollowing);
+      setFollowersCount(stats.followerCount);
+    });
+  }, [viewerId, artist.userId]);
 
-  const handleToggleFollow = () => {
+  const handleToggleFollow = async () => {
     if (!viewerId) return;
-    const nowFollowing = mockToggleFollowArtist(viewerId, artist.id);
+    const nowFollowing = !isFollowing;
+    if (nowFollowing) {
+      await follow(artist.userId);
+    } else {
+      await unfollow(artist.userId);
+    }
     setIsFollowing(nowFollowing);
     setFollowersCount((c) => c + (nowFollowing ? 1 : -1));
   };

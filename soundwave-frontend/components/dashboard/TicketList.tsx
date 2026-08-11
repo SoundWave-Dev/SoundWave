@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Ticket, TicketStatus } from '@/types';
-import { mockGetTickets } from '@/lib/mock/store';
+import { getTickets } from '@/lib/api/support';
 import { Badge, Table, type TableColumn } from '@/components/ui';
 import { useTranslation } from '@/lib/i18n';
 
@@ -23,7 +23,7 @@ export function TicketList() {
   };
 
   useEffect(() => {
-    setTickets(mockGetTickets());
+    getTickets().then(setTickets);
   }, []);
 
   const columns: TableColumn<Ticket>[] = [

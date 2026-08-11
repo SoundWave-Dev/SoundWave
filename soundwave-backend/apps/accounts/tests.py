@@ -137,3 +137,62 @@ class ForgotPasswordTests(APITestCase):
             "/api/v1/auth/password/reset/", {"token": "not-a-real-token", "new_password": "brandnewpass1"}
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class ChangePasswordTests(APITestCase):
+    def test_change_password_with_correct_current_password(self):
+        user = _make_user("changer@example.com")
+        self.client.force_authenticate(user=user)
+
+        response = self.client.post(
+            "/api/v1/auth/password/change/", {"current_password": "pass1234", "new_password": "brandnewpass1"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        user.refresh_from_db()
+        self.assertTrue(user.check_password("brandnewpass1"))
+
+    def test_change_password_rejects_wrong_current_password(self):
+        user = _make_user("changer2@example.com")
+        self.client.force_authenticate(user=user)
+
+        response = self.client.post(
+            "/api/v1/auth/password/change/", {"current_password": "wrong-password", "new_password": "brandnewpass1"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        user.refresh_from_db()
+        self.assertTrue(user.check_password("pass1234"))
+
+
+class PublicProfileTests(APITestCase):
+    def test_public_user_profile_excludes_private_fields(self):
+        User.objects.create_user(
+            email="public-user@example.com", username="publicuser", password="pass1234", display_name="Public User"
+        )
+        self.client.force_authenticate(user=_make_user("viewer@example.com"))
+
+        response = self.client.get("/api/v1/auth/users/publicuser/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["display_name"], "Public User")
+        self.assertNotIn("email", response.data)
+        self.assertNotIn("gender", response.data)
+
+    def test_public_artist_profile_only_lists_approved_artists(self):
+        approved = ArtistProfile.objects.create(
+            user=_make_user("approved-artist@example.com", role=User.Role.ARTIST),
+            stage_name="Approved Artist",
+            verification_status=ArtistProfile.VerificationStatus.APPROVED,
+        )
+        pending = ArtistProfile.objects.create(
+            user=_make_user("pending-artist2@example.com", role=User.Role.ARTIST),
+            stage_name="Pending Artist",
+            verification_status=ArtistProfile.VerificationStatus.PENDING,
+        )
+
+        response = self.client.get(f"/api/v1/auth/artists/{approved.id}/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["stage_name"], "Approved Artist")
+
+        response = self.client.get(f"/api/v1/auth/artists/{pending.id}/")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

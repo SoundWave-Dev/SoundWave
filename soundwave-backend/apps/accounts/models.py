@@ -49,13 +49,15 @@ class User(AbstractUser):
         MALE = "male", "Male"
         FEMALE = "female", "Female"
         OTHER = "other", "Other"
-        UNSPECIFIED = "unspecified", "Prefer not to say"
+        # Value matches the frontend's gender union (types/index.ts) exactly —
+        # registration/profile forms send this literal string.
+        PREFER_NOT_TO_SAY = "prefer_not_to_say", "Prefer not to say"
 
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=16, choices=Role.choices, default=Role.LISTENER)
     display_name = models.CharField(max_length=100, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
-    gender = models.CharField(max_length=16, choices=Gender.choices, default=Gender.UNSPECIFIED)
+    gender = models.CharField(max_length=20, choices=Gender.choices, default=Gender.PREFER_NOT_TO_SAY)
     avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
     accepted_privacy_policy_at = models.DateTimeField(null=True, blank=True)
 

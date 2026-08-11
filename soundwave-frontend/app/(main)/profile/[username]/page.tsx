@@ -1,24 +1,33 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
-import { mockGetUserByUsername } from '@/lib/mock/store';
-import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
+import { getUserByUsername } from '@/lib/api/auth';
 import { UserProfile } from '@/components/profile/UserProfile';
 import { useTranslation } from '@/lib/i18n';
+import type { User } from '@/types';
 
 export default function ProfilePage() {
   const { t } = useTranslation('profilePage');
   const params = useParams<{ username: string }>();
-  const authViewer = useAuthStore((s) => s.user);
-  // TEMP (testing only): fall back to a mock user so the page is viewable
-  // without logging in. Remove this fallback (go back to
-  // `const viewer = authViewer` + the early return) before shipping/committing.
-  const viewer = authViewer ?? MOCK_USERS[1];
+  const viewer = useAuthStore((s) => s.user);
+  const [profileUser, setProfileUser] = useState<User | null | undefined>(undefined);
+
+  useEffect(() => {
+    if (!viewer) return;
+    if (params.username === viewer.username) {
+      setProfileUser(viewer);
+    } else {
+      getUserByUsername(params.username).then(setProfileUser);
+    }
+  }, [params.username, viewer]);
 
   if (!viewer) return <h2>{t('loginFirst')}</h2>;
 
-  const profileUser = mockGetUserByUsername(params.username) ?? (params.username === viewer.username ? viewer : null);
+  if (profileUser === undefined) {
+    return null;
+  }
 
   if (!profileUser) {
     return (

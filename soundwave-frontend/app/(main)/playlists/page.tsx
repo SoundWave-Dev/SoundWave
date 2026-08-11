@@ -1,14 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/lib/store/authStore';
 import {
-  mockGetPlaylists,
-  mockCreatePlaylist,
-  mockDeletePlaylist,
-  mockRenamePlaylist,
-} from '@/lib/mock/store';
-import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
+  getPlaylists,
+  createPlaylist,
+  deletePlaylist,
+  renamePlaylist,
+} from '@/lib/api/playlists';
 import { getPlaylistLimit } from '@/lib/utils';
 import { Modal, Button } from '@/components/ui';
 import { PlaylistList } from '@/components/playlist/PlaylistList';
@@ -18,32 +17,32 @@ import { useTranslation } from '@/lib/i18n';
 
 export default function PlaylistsPage() {
   const { t } = useTranslation('playlistsPage');
-  const authUser = useAuthStore((s) => s.user);
-  // TEMP (testing only): fall back to a mock user so the page is viewable
-  // without logging in. Remove this fallback (go back to
-  // `const user = authUser` + the early return) before shipping/committing.
-  const user = authUser ?? MOCK_USERS[1];
-  const [playlists, setPlaylists] = useState<Playlist[]>(() => (user ? mockGetPlaylists(user.id) : []));
+  const user = useAuthStore((s) => s.user);
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Playlist | null>(null);
+
+  useEffect(() => {
+    if (user) getPlaylists(user.id).then(setPlaylists);
+  }, [user]);
 
   if (!user) return <h2>{t('loginFirst')}</h2>;
 
   const limit = getPlaylistLimit(user.subscription);
 
-  const handleCreate = (name: string) => {
-    const p = mockCreatePlaylist(user.id, name);
+  const handleCreate = async (name: string) => {
+    const p = await createPlaylist(name, user.id);
     setPlaylists((prev) => [...prev, p]);
   };
 
-  const handleRename = (id: string, name: string) => {
-    mockRenamePlaylist(id, name);
+  const handleRename = async (id: string, name: string) => {
+    await renamePlaylist(id, name, user.id);
     setPlaylists((prev) => prev.map((p) => (p.id === id ? { ...p, name } : p)));
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!pendingDelete) return;
-    mockDeletePlaylist(pendingDelete.id);
+    await deletePlaylist(pendingDelete.id);
     setPlaylists((prev) => prev.filter((p) => p.id !== pendingDelete.id));
     setPendingDelete(null);
   };

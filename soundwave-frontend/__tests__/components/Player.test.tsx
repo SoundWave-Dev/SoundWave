@@ -12,6 +12,10 @@ jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn() }),
 }));
 
+jest.mock('@/lib/api/music', () => ({
+  logStream: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('howler', () => {
   class Howl {
     constructor(_opts: unknown) {}

@@ -2,18 +2,21 @@ import secrets
 
 from django.core.mail import send_mail
 from django.utils import timezone
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from apps.accounts.models import PasswordResetToken, User
+from apps.accounts.models import ArtistProfile, PasswordResetToken, User
 from apps.accounts.serializers import (
     ArtistRegisterSerializer,
+    ChangePasswordSerializer,
     ForgotPasswordConfirmSerializer,
     ForgotPasswordRequestSerializer,
     ListenerRegisterSerializer,
+    PublicArtistProfileSerializer,
+    PublicUserSerializer,
     UserSerializer,
 )
 
@@ -47,6 +50,25 @@ class RegisterArtistView(generics.CreateAPIView):
 
     permission_classes = [permissions.AllowAny]
     serializer_class = ArtistRegisterSerializer
+
+
+class PublicUserProfileViewSet(viewsets.ReadOnlyModelViewSet):
+    """Public `/profile/[username]` page (spec §2.3), looked up by username."""
+
+    permission_classes = [permissions.AllowAny]
+    serializer_class = PublicUserSerializer
+    queryset = User.objects.all()
+    lookup_field = "username"
+
+
+class PublicArtistProfileViewSet(viewsets.ReadOnlyModelViewSet):
+    """Public `/artist/[id]` page (spec §2.4) — approved artists only."""
+
+    permission_classes = [permissions.AllowAny]
+    serializer_class = PublicArtistProfileSerializer
+    queryset = ArtistProfile.objects.filter(
+        verification_status=ArtistProfile.VerificationStatus.APPROVED
+    ).select_related("user")
 
 
 class MeView(generics.RetrieveUpdateAPIView):
@@ -98,4 +120,23 @@ class ForgotPasswordConfirmView(APIView):
         reset.used_at = timezone.now()
         reset.save(update_fields=["used_at"])
 
+        return Response(status=status.HTTP_200_OK)
+
+
+class ChangePasswordView(APIView):
+    """Settings page's "change password" form — the user proves identity with their
+    current password instead of an emailed token (see ChangePasswordSerializer).
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChangePasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if not request.user.check_password(serializer.validated_data["current_password"]):
+            return Response({"current_password": "Incorrect password."}, status=status.HTTP_400_BAD_REQUEST)
+
+        request.user.set_password(serializer.validated_data["new_password"])
+        request.user.save(update_fields=["password"])
         return Response(status=status.HTTP_200_OK)

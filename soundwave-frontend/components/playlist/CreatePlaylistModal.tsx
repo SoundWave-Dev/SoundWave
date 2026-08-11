@@ -7,13 +7,14 @@ import { useTranslation } from '@/lib/i18n';
 interface CreatePlaylistModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (name: string) => void;
+  onCreate: (name: string) => void | Promise<void>;
 }
 
 export function CreatePlaylistModal({ isOpen, onClose, onCreate }: CreatePlaylistModalProps) {
   const { t } = useTranslation('createPlaylistModal');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleClose = () => {
     setName('');
@@ -21,15 +22,22 @@ export function CreatePlaylistModal({ isOpen, onClose, onCreate }: CreatePlaylis
     onClose();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) {
       setError(t('nameRequired'));
       return;
     }
-    onCreate(trimmed);
-    handleClose();
+    setIsSubmitting(true);
+    try {
+      await onCreate(trimmed);
+      handleClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('nameRequired'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -45,7 +53,7 @@ export function CreatePlaylistModal({ isOpen, onClose, onCreate }: CreatePlaylis
         />
         <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end' }}>
           <Button type="button" variant="secondary" onClick={handleClose}>{t('cancel')}</Button>
-          <Button type="submit" variant="primary">{t('create')}</Button>
+          <Button type="submit" variant="primary" disabled={isSubmitting}>{t('create')}</Button>
         </div>
       </form>
     </Modal>

@@ -1,66 +1,60 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { mockGetTracks, mockGetAlbums, mockGetPlaylists, mockAddTrackToPlaylist, mockCreatePlaylist } from '@/lib/mock/store';
+import { useEffect, useState } from 'react';
+import { getAlbums, getTracks } from '@/lib/api/music';
+import { getPlaylists, createPlaylist as apiCreatePlaylist, addTrackToPlaylist } from '@/lib/api/playlists';
 import { useAuthStore } from '@/lib/store/authStore';
-import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
 import { getPlaylistLimit } from '@/lib/utils';
 import { SearchBar } from '@/components/library/SearchBar';
 import { SortDropdown, type SortOption } from '@/components/library/SortDropdown';
 import AlbumCard from '@/components/library/AlbumCard';
 import { TrackCard } from '@/components/library/TrackCard';
 import { CreatePlaylistModal } from '@/components/playlist/CreatePlaylistModal';
-import type { Playlist, Track } from '@/types';
+import type { Album, Playlist, Track } from '@/types';
 import { useTranslation } from '@/lib/i18n';
+
+const SORT_TO_API: Record<SortOption, 'listeners' | 'releaseDate'> = {
+  listeners: 'listeners',
+  date: 'releaseDate',
+};
 
 export default function LibraryPage() {
   const { t } = useTranslation('libraryPage');
-  const authUser = useAuthStore((s) => s.user);
-  // TEMP (testing only): fall back to a mock user so the page is viewable
-  // without logging in. Remove this fallback (go back to
-  // `const user = authUser` + the early return) before shipping/committing.
-  const user = authUser ?? MOCK_USERS[1];
+  const user = useAuthStore((s) => s.user);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortOption>('listeners');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [playlists, setPlaylists] = useState<Playlist[]>(() => (user ? mockGetPlaylists(user.id) : []));
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
 
-  const query = search.trim().toLowerCase();
+  useEffect(() => {
+    if (!user) return;
+    getPlaylists(user.id).then(setPlaylists);
+  }, [user]);
 
-  const matchesQuery = (title: string, artistNames: string[]) =>
-    !query || title.toLowerCase().includes(query) || artistNames.some((n) => n.toLowerCase().includes(query));
-
-  const tracks = useMemo(() => {
-    const list = mockGetTracks().filter((t) =>
-      matchesQuery(t.title, t.artists.map((a) => a.stageName))
-    );
-    return [...list].sort((a, b) =>
-      sort === 'listeners'
-        ? b.uniqueListeners - a.uniqueListeners
-        : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Debounced so every keystroke doesn't fire its own request.
+  useEffect(() => {
+    const query = search.trim();
+    const handle = setTimeout(() => {
+      getTracks({ query: query || undefined, sortBy: SORT_TO_API[sort], sortOrder: 'desc' }).then(setTracks);
+      getAlbums({ search: query || undefined }).then(setAlbums);
+    }, 250);
+    return () => clearTimeout(handle);
   }, [search, sort]);
-
-  const albums = useMemo(() => {
-    return mockGetAlbums().filter((a) =>
-      matchesQuery(a.title, a.artists.map((x) => x.stageName))
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
 
   if (!user) return <h2>{t('loginFirst')}</h2>;
 
   const limit = getPlaylistLimit(user.subscription);
   const limitReached = limit !== null && playlists.length >= limit;
 
-  const handleAddToPlaylist = (playlistId: string, track: Track) => {
-    const updated = mockAddTrackToPlaylist(playlistId, track);
-    if (updated) setPlaylists((prev) => prev.map((p) => (p.id === playlistId ? updated : p)));
+  const handleAddToPlaylist = async (playlistId: string, track: Track) => {
+    const updated = await addTrackToPlaylist(playlistId, track.id, user.id);
+    setPlaylists((prev) => prev.map((p) => (p.id === playlistId ? updated : p)));
   };
 
-  const handleCreatePlaylist = (name: string) => {
-    const p = mockCreatePlaylist(user.id, name);
+  const handleCreatePlaylist = async (name: string) => {
+    const p = await apiCreatePlaylist(name, user.id);
     setPlaylists((prev) => [...prev, p]);
   };
 

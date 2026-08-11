@@ -1,22 +1,36 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { mockGetArtistById, mockGetAlbums, mockGetTracks } from '@/lib/mock/store';
+import { getAlbums } from '@/lib/api/music';
+import { getArtistById } from '@/lib/api/artists';
 import { useAuthStore } from '@/lib/store/authStore';
-import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
 import { ArtistProfile } from '@/components/profile/ArtistProfile';
 import { useTranslation } from '@/lib/i18n';
+import type { Album, Artist, Track } from '@/types';
 
 export default function ArtistPage() {
   const { t } = useTranslation('artistPage');
   const params = useParams<{ id: string }>();
-  const authViewer = useAuthStore((s) => s.user);
-  // TEMP (testing only): fall back to a mock gold user so follow/stats are
-  // testable without logging in. Remove this fallback (go back to
-  // `const viewer = authViewer`) before shipping/committing.
-  const viewer = authViewer ?? MOCK_USERS[1];
+  const viewer = useAuthStore((s) => s.user);
 
-  const artist = mockGetArtistById(params.id);
+  const [artist, setArtist] = useState<Artist | null | undefined>(undefined);
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [singles, setSingles] = useState<Track[]>([]);
+
+  useEffect(() => {
+    getArtistById(params.id).then(setArtist);
+    getAlbums({ artistProfileId: params.id }).then((allReleases) => {
+      // A "single" on the backend is an Album with releaseType='single' holding
+      // exactly one track — split releases into the two sections the UI expects.
+      setAlbums(allReleases.filter((a) => a.releaseType === 'album'));
+      setSingles(allReleases.filter((a) => a.releaseType === 'single').flatMap((a) => a.tracks));
+    });
+  }, [params.id]);
+
+  if (artist === undefined) {
+    return null;
+  }
 
   if (!artist) {
     return (
@@ -25,11 +39,6 @@ export default function ArtistPage() {
       </div>
     );
   }
-
-  const albums = mockGetAlbums().filter((a) => a.artists.some((x) => x.id === artist.id));
-  const singles = mockGetTracks().filter(
-    (t) => t.albumId === null && t.artists.some((x) => x.id === artist.id)
-  );
 
   return (
     <ArtistProfile

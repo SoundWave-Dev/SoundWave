@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 import type { ArtistPayoutRecord } from '@/types';
-import { mockGetPayouts, mockConfirmSettlement } from '@/lib/mock/store';
+import { getPayouts, confirmSettlement } from '@/lib/api/billing';
 import { formatCount } from '@/lib/utils';
 import { Badge, Button, Table, type TableColumn } from '@/components/ui';
 import { useTranslation } from '@/lib/i18n';
@@ -19,14 +19,14 @@ export function PayoutTable({ isAdmin }: PayoutTableProps) {
   const { t } = useTranslation('payoutTable');
   const [payouts, setPayouts] = useState<ArtistPayoutRecord[]>([]);
 
-  const refresh = () => setPayouts(mockGetPayouts());
+  const refresh = () => getPayouts().then(setPayouts);
 
   useEffect(() => {
     refresh();
   }, []);
 
-  const handleConfirm = (id: string) => {
-    mockConfirmSettlement(id);
+  const handleConfirm = async (id: string) => {
+    await confirmSettlement(id);
     refresh();
   };
 

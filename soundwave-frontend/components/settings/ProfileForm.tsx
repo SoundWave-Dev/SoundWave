@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { User } from '@/types';
 import { profileSchema, type ProfileFormValues } from '@/lib/validators/profileSchema';
-import { mockUpdateUserProfile } from '@/lib/mock/store';
+import { updateMe } from '@/lib/api/auth';
 import { useAuthStore } from '@/lib/store/authStore';
 import { Button, Input } from '@/components/ui';
 import { useTranslation } from '@/lib/i18n';
@@ -41,12 +41,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
   const onSubmit = async (values: ProfileFormValues) => {
     setSuccessMessage(null);
-    const updated = mockUpdateUserProfile(user.id, { displayName: values.displayName });
-    if (updated) {
-      updateUser({ displayName: updated.displayName });
-      reset({ displayName: updated.displayName });
-      setSuccessMessage(t('updateSuccess'));
-    }
+    const updated = await updateMe({ displayName: values.displayName });
+    updateUser({ displayName: updated.displayName });
+    reset({ displayName: updated.displayName });
+    setSuccessMessage(t('updateSuccess'));
   };
 
   return (

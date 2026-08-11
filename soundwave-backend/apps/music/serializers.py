@@ -11,13 +11,31 @@ ALLOWED_AUDIO_EXTENSIONS = {".mp3", ".wav", ".flac"}
 class TrackSerializer(serializers.ModelSerializer):
     stream_count = serializers.SerializerMethodField()
     unique_listeners = serializers.SerializerMethodField()
+    # Convenience read-only fields so the frontend can render a track card without an
+    # extra request per track for its album's title/cover/genre/year or artist names.
+    album_title = serializers.CharField(source="album.title", read_only=True)
+    album_cover = serializers.ImageField(source="album.cover_image", read_only=True)
+    genre = serializers.CharField(source="album.genre", read_only=True)
+    release_year = serializers.IntegerField(source="album.release_year", read_only=True)
+    artists = serializers.SerializerMethodField()
 
     class Meta:
         model = Track
         fields = [
-            "id", "title", "album", "collaborators", "audio_file",
-            "lyrics", "duration_seconds", "track_number", "stream_count", "unique_listeners",
+            "id", "title", "album", "album_title", "album_cover", "genre", "release_year",
+            "collaborators", "artists", "audio_file", "lyrics", "duration_seconds",
+            "track_number", "stream_count", "unique_listeners",
         ]
+
+    def get_artists(self, obj):
+        primary = obj.album.artist_profile
+        seen = {primary.id}
+        artists = [{"id": primary.id, "stage_name": primary.stage_name}]
+        for collaborator in obj.collaborators.all():
+            if collaborator.id not in seen:
+                seen.add(collaborator.id)
+                artists.append({"id": collaborator.id, "stage_name": collaborator.stage_name})
+        return artists
 
     def get_stream_count(self, obj):
         if hasattr(obj, "annotated_stream_count"):
@@ -49,14 +67,18 @@ class TrackSerializer(serializers.ModelSerializer):
 class AlbumSerializer(serializers.ModelSerializer):
     tracks = TrackSerializer(many=True, read_only=True)
     artist_stage_name = serializers.CharField(source="artist_profile.stage_name", read_only=True)
+    artists = serializers.SerializerMethodField()
 
     class Meta:
         model = Album
         fields = [
-            "id", "title", "artist_profile", "artist_stage_name", "cover_image",
+            "id", "title", "artist_profile", "artist_stage_name", "artists", "cover_image",
             "genre", "release_year", "release_type", "tracks", "created_at",
         ]
         read_only_fields = ["artist_profile"]
+
+    def get_artists(self, obj):
+        return [{"id": obj.artist_profile_id, "stage_name": obj.artist_profile.stage_name}]
 
 
 class StreamEventCreateSerializer(serializers.ModelSerializer):

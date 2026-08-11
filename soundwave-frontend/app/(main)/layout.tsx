@@ -13,11 +13,8 @@ export default function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // TEMP (testing only): auth guard disabled so /home etc. are viewable
-  // without logging in. Restore the <RequireRole> wrapper below before
-  // shipping/committing.
   return (
-    // <RequireRole allow={['listener', 'artist', 'support', 'admin']}>
+    <RequireRole allow={['listener', 'artist', 'support', 'admin']}>
       <div className="app-shell">
         {/* Sidebar */}
         <aside className="app-sidebar">
@@ -36,7 +33,7 @@ export default function MainLayout({
 
         <PWAInstallPrompt />
       </div>
-    // </RequireRole>
+    </RequireRole>
   );
 }
 

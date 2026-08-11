@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import type { SubscriptionTier } from '@/types';
-import { mockGetUsers, mockGetSubscriptionPrices, mockUpdateSubscriptionPrices } from '@/lib/mock/store';
+import { getSubscriptionPlans, getSubscriptionDistribution, getRevenueSummary, updatePlanPrices } from '@/lib/api/billing';
 import { formatCount } from '@/lib/utils';
 import { Button, Card, Input } from '@/components/ui';
 import { useTranslation } from '@/lib/i18n';
@@ -29,26 +29,26 @@ export function PriceControlPanel() {
   const [silver, setSilver] = useState(0);
   const [gold, setGold] = useState(0);
   const [saved, setSaved] = useState(false);
+  const [counts, setCounts] = useState<Record<SubscriptionTier, number>>({ free: 0, silver: 0, gold: 0 });
+  const [revenue, setRevenue] = useState(0);
 
-  const users = mockGetUsers();
-  const counts: Record<SubscriptionTier, number> = { free: 0, silver: 0, gold: 0 };
-  users.forEach((u) => counts[u.subscription]++);
-  const total = users.length || 1;
+  const total = counts.free + counts.silver + counts.gold || 1;
 
   useEffect(() => {
-    const prices = mockGetSubscriptionPrices();
-    setSilver(prices.silver);
-    setGold(prices.gold);
+    getSubscriptionPlans().then((plans) => {
+      setSilver(plans.find((p) => p.tier === 'silver')?.monthlyPrice ?? 0);
+      setGold(plans.find((p) => p.tier === 'gold')?.monthlyPrice ?? 0);
+    });
+    getSubscriptionDistribution().then(setCounts);
+    getRevenueSummary().then((r) => setRevenue(r.currentMonthRevenue));
   }, []);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    mockUpdateSubscriptionPrices({ silver, gold });
+    await updatePlanPrices(silver, gold);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
-
-  const revenue = counts.silver * silver + counts.gold * gold;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>

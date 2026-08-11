@@ -3,45 +3,53 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useLocaleStore, type Language } from '@/lib/store/localeStore';
-import { mockGetUserSettings, mockUpdateUserSettings, DEFAULT_USER_SETTINGS, type UserSettings } from '@/lib/mock/store';
-import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
+import { getMyPreferences, updateMyPreferences, type UserPreferences } from '@/lib/api/playback';
 import { SUBSCRIPTION_PLANS } from '@/lib/constants';
 import { Card, Checkbox, Select, Button, Modal } from '@/components/ui';
 import { ProfileForm } from '@/components/settings/ProfileForm';
 import { ChangePasswordForm } from '@/components/settings/ChangePasswordForm';
 import { useTranslation } from '@/lib/i18n';
 
+// Settings-page toggle keys map onto apps.playback.UserPreference's four
+// notify_* booleans — "account status" -> artist verification result,
+// "system" -> ticket replies, the two closest matches on the backend.
+const NOTIF_KEY_MAP = {
+  notifySubscription: 'notifySubscription',
+  notifyNewRelease: 'notifyNewReleases',
+  notifyAccountStatus: 'notifyArtistVerification',
+  notifySystem: 'notifyTickets',
+} as const satisfies Record<string, keyof UserPreferences>;
+
+type NotifToggleKey = keyof typeof NOTIF_KEY_MAP;
+
 export default function SettingsPage() {
   const { t } = useTranslation('settingsPage');
 
   const TIER_LABEL: Record<string, string> = { free: t('tierFree'), silver: t('tierSilver'), gold: t('tierGold') };
 
-  const NOTIF_TOGGLES: { key: keyof UserSettings; label: string }[] = [
+  const NOTIF_TOGGLES: { key: NotifToggleKey; label: string }[] = [
     { key: 'notifySubscription', label: t('notifySubscription') },
     { key: 'notifyNewRelease', label: t('notifyNewRelease') },
     { key: 'notifyAccountStatus', label: t('notifyAccountStatus') },
     { key: 'notifySystem', label: t('notifySystem') },
   ];
-  const authUser = useAuthStore((s) => s.user);
-  // TEMP (testing only): fall back to a mock user so the page is viewable
-  // without logging in. Remove this fallback (go back to
-  // `const user = authUser` + the early return) before shipping/committing.
-  const user = authUser ?? MOCK_USERS[1];
+  const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const language = useLocaleStore((s) => s.language);
   const setLanguage = useLocaleStore((s) => s.setLanguage);
 
-  const [settings, setSettings] = useState<UserSettings>(DEFAULT_USER_SETTINGS);
+  const [preferences, setPreferences] = useState<UserPreferences | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   useEffect(() => {
-    setSettings(mockGetUserSettings());
-  }, []);
+    if (user) getMyPreferences().then(setPreferences);
+  }, [user]);
 
-  if (!user) return <p>{t('loading')}</p>;
+  if (!user || !preferences) return <p>{t('loading')}</p>;
 
-  const updateSetting = <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => {
-    setSettings(mockUpdateUserSettings({ [key]: value } as Partial<UserSettings>));
+  const updatePreference = async <K extends keyof UserPreferences>(key: K, value: UserPreferences[K]) => {
+    setPreferences((prev) => (prev ? { ...prev, [key]: value } : prev));
+    await updateMyPreferences({ [key]: value });
   };
 
   const plan = SUBSCRIPTION_PLANS[user.subscription];
@@ -68,7 +76,7 @@ export default function SettingsPage() {
         <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 'var(--space-4)' }}>
           {t('changePasswordTitle')}
         </h3>
-        <ChangePasswordForm email={user.email} />
+        <ChangePasswordForm />
       </Card>
 
       <Card>
@@ -108,14 +116,17 @@ export default function SettingsPage() {
           {t('notificationsTitle')}
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-          {NOTIF_TOGGLES.map(({ key, label }) => (
-            <Checkbox
-              key={key}
-              label={label}
-              checked={Boolean(settings[key])}
-              onChange={(e) => updateSetting(key, e.target.checked as UserSettings[typeof key])}
-            />
-          ))}
+          {NOTIF_TOGGLES.map(({ key, label }) => {
+            const prefKey = NOTIF_KEY_MAP[key];
+            return (
+              <Checkbox
+                key={key}
+                label={label}
+                checked={preferences[prefKey] as boolean}
+                onChange={(e) => updatePreference(prefKey, e.target.checked as UserPreferences[typeof prefKey])}
+              />
+            );
+          })}
         </div>
       </Card>
 
@@ -128,12 +139,12 @@ export default function SettingsPage() {
             type="range"
             min={0}
             max={100}
-            value={settings.volume}
-            onChange={(e) => updateSetting('volume', Number(e.target.value))}
+            value={preferences.systemVolume}
+            onChange={(e) => updatePreference('systemVolume', Number(e.target.value))}
             style={{ flex: 1, accentColor: 'var(--color-primary)' }}
           />
           <span style={{ minWidth: 40, textAlign: 'left', color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>
-            {settings.volume}%
+            {preferences.systemVolume}%
           </span>
         </div>
       </Card>
@@ -144,7 +155,11 @@ export default function SettingsPage() {
         </h3>
         <Select
           value={language}
-          onChange={(e) => setLanguage(e.target.value as Language)}
+          onChange={(e) => {
+            const next = e.target.value as Language;
+            setLanguage(next);
+            updatePreference('language', next);
+          }}
           options={[
             { value: 'fa', label: 'فارسی' },
             { value: 'en', label: 'English' },

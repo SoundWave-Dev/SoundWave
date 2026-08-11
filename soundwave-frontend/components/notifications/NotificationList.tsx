@@ -7,38 +7,46 @@
 import { useEffect, useState } from 'react';
 import type { Notification } from '@/types';
 import {
-  mockGetNotifications,
-  mockMarkAsRead,
-  mockMarkAllAsRead,
-  mockDeleteNotification,
-} from '@/lib/mock/store';
+  getNotifications,
+  markAsRead,
+  markAllAsRead,
+  deleteNotification,
+} from '@/lib/api/notifications';
+import { useAuthStore } from '@/lib/store/authStore';
 import { Button } from '@/components/ui';
 import { useTranslation } from '@/lib/i18n';
 import { NotificationCard } from './NotificationCard';
 
 export function NotificationList() {
+  const user = useAuthStore((s) => s.user);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const { t } = useTranslation('notificationList');
 
+  const refresh = (userId: string) => getNotifications(userId).then(setNotifications);
+
   useEffect(() => {
-    setNotifications(mockGetNotifications());
-  }, []);
+    if (user) refresh(user.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-  const handleMarkAsRead = (id: string) => {
-    mockMarkAsRead(id);
-    setNotifications(mockGetNotifications());
+  const handleMarkAsRead = async (id: string) => {
+    if (!user) return;
+    await markAsRead(id);
+    refresh(user.id);
   };
 
-  const handleDelete = (id: string) => {
-    mockDeleteNotification(id);
-    setNotifications(mockGetNotifications());
+  const handleDelete = async (id: string) => {
+    if (!user) return;
+    await deleteNotification(id);
+    refresh(user.id);
   };
 
-  const handleMarkAllAsRead = () => {
-    mockMarkAllAsRead();
-    setNotifications(mockGetNotifications());
+  const handleMarkAllAsRead = async () => {
+    if (!user) return;
+    await markAllAsRead();
+    refresh(user.id);
   };
 
   if (notifications.length === 0) {

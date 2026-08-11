@@ -1,13 +1,15 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { mockGetAlbumById } from '@/lib/mock/store';
+import { getAlbumById } from '@/lib/api/music';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { ROUTES } from '@/lib/constants';
 import { formatCount } from '@/lib/utils';
 import { Button } from '@/components/ui';
 import TrackListItem from '@/components/home/TrackListItem';
 import { useTranslation } from '@/lib/i18n';
+import type { Album } from '@/types';
 
 export default function AlbumPage() {
   const { t } = useTranslation('albumPage');
@@ -15,7 +17,15 @@ export default function AlbumPage() {
   const router = useRouter();
   const play = usePlayerStore((s) => s.play);
 
-  const album = mockGetAlbumById(params.id);
+  const [album, setAlbum] = useState<Album | null | undefined>(undefined);
+
+  useEffect(() => {
+    getAlbumById(params.id).then(setAlbum);
+  }, [params.id]);
+
+  if (album === undefined) {
+    return null;
+  }
 
   if (!album) {
     return (

@@ -47,6 +47,7 @@ class TrackViewSet(viewsets.ModelViewSet):
     serializer_class = TrackSerializer
     queryset = (
         Track.objects.select_related("album", "album__artist_profile")
+        .prefetch_related("collaborators")
         .annotate(
             annotated_stream_count=Count("stream_events", distinct=False),
             annotated_unique_listeners=Count("stream_events__user", distinct=True),

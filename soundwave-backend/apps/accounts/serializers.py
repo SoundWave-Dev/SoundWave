@@ -24,29 +24,44 @@ class UserSerializer(serializers.ModelSerializer):
     """Read-only profile representation (spec §2.3 User Profile page)."""
 
     subscription_tier = serializers.SerializerMethodField()
+    subscription_expires_at = serializers.SerializerMethodField()
     follower_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
     daily_stream_count = serializers.SerializerMethodField()
+    artist_id = serializers.SerializerMethodField()
+    artist_verification_status = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = [
             "id", "email", "username", "display_name", "role",
             "avatar", "date_of_birth", "gender", "date_joined",
-            "subscription_tier", "follower_count", "following_count", "daily_stream_count",
+            "subscription_tier", "subscription_expires_at", "follower_count", "following_count",
+            "daily_stream_count", "artist_id", "artist_verification_status",
         ]
         read_only_fields = ["id", "username", "role", "date_joined"]
 
-    def get_subscription_tier(self, obj):
-        from apps.billing.models import Subscription, SubscriptionPlan
+    def _active_subscription(self, obj):
+        if not hasattr(self, "_subscription_cache"):
+            from apps.billing.models import Subscription
 
-        subscription = (
-            Subscription.objects.filter(user=obj, status=Subscription.Status.ACTIVE)
-            .select_related("plan")
-            .order_by("-expires_at")
-            .first()
-        )
+            self._subscription_cache = (
+                Subscription.objects.filter(user=obj, status=Subscription.Status.ACTIVE)
+                .select_related("plan")
+                .order_by("-expires_at")
+                .first()
+            )
+        return self._subscription_cache
+
+    def get_subscription_tier(self, obj):
+        from apps.billing.models import SubscriptionPlan
+
+        subscription = self._active_subscription(obj)
         return subscription.plan.tier if subscription else SubscriptionPlan.Tier.FREE
+
+    def get_subscription_expires_at(self, obj):
+        subscription = self._active_subscription(obj)
+        return subscription.expires_at if subscription else None
 
     def get_follower_count(self, obj):
         from apps.social.models import Follow
@@ -65,6 +80,14 @@ class UserSerializer(serializers.ModelSerializer):
 
         since = timezone.now() - timedelta(days=1)
         return StreamEvent.objects.filter(user=obj, played_at__gte=since).count()
+
+    def get_artist_id(self, obj):
+        profile = getattr(obj, "artist_profile", None)
+        return profile.id if profile else None
+
+    def get_artist_verification_status(self, obj):
+        profile = getattr(obj, "artist_profile", None)
+        return profile.verification_status if profile else None
 
 
 class ListenerRegisterSerializer(serializers.ModelSerializer):
@@ -155,6 +178,54 @@ class ArtistRegisterSerializer(serializers.ModelSerializer):
         return user
 
 
+class PublicUserSerializer(serializers.ModelSerializer):
+    """Public `/profile/[username]` page (spec §2.3) — deliberately excludes private
+    fields (email, gender, date_of_birth) that UserSerializer exposes for `/me/`.
+    """
+
+    subscription_tier = serializers.SerializerMethodField()
+    follower_count = serializers.SerializerMethodField()
+    following_count = serializers.SerializerMethodField()
+    daily_stream_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            "id", "username", "display_name", "role", "avatar",
+            "subscription_tier", "follower_count", "following_count", "daily_stream_count", "date_joined",
+        ]
+        read_only_fields = fields
+
+    def get_subscription_tier(self, obj):
+        from apps.billing.models import Subscription, SubscriptionPlan
+
+        subscription = (
+            Subscription.objects.filter(user=obj, status=Subscription.Status.ACTIVE)
+            .select_related("plan")
+            .order_by("-expires_at")
+            .first()
+        )
+        return subscription.plan.tier if subscription else SubscriptionPlan.Tier.FREE
+
+    def get_follower_count(self, obj):
+        from apps.social.models import Follow
+
+        return Follow.objects.filter(followee=obj).count()
+
+    def get_following_count(self, obj):
+        from apps.social.models import Follow
+
+        return Follow.objects.filter(follower=obj).count()
+
+    def get_daily_stream_count(self, obj):
+        from datetime import timedelta
+
+        from apps.music.models import StreamEvent
+
+        since = timezone.now() - timedelta(days=1)
+        return StreamEvent.objects.filter(user=obj, played_at__gte=since).count()
+
+
 class ArtistProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArtistProfile
@@ -165,10 +236,52 @@ class ArtistProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ["verification_status", "rejection_reason", "reviewed_at"]
 
 
+class PublicArtistProfileSerializer(serializers.ModelSerializer):
+    """Backs the public `/artist/[id]` page — approved artists only (spec §2.3/§2.4)."""
+
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
+    avatar = serializers.ImageField(source="user.avatar", read_only=True)
+    follower_count = serializers.SerializerMethodField()
+    total_streams = serializers.SerializerMethodField()
+    total_listeners = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ArtistProfile
+        fields = [
+            "id", "user_id", "stage_name", "bio", "avatar", "verification_status",
+            "follower_count", "total_streams", "total_listeners", "created_at",
+        ]
+        read_only_fields = fields
+
+    def get_follower_count(self, obj):
+        from apps.social.models import Follow
+
+        return Follow.objects.filter(followee_id=obj.user_id).count()
+
+    def get_total_streams(self, obj):
+        from apps.music.models import StreamEvent
+
+        return StreamEvent.objects.filter(track__album__artist_profile=obj).count()
+
+    def get_total_listeners(self, obj):
+        from apps.music.models import StreamEvent
+
+        return StreamEvent.objects.filter(track__album__artist_profile=obj).values("user").distinct().count()
+
+
 class ForgotPasswordRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
 
 class ForgotPasswordConfirmSerializer(serializers.Serializer):
     token = serializers.CharField()
+    new_password = serializers.CharField(min_length=8)
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """Authenticated in-settings password change — distinct from the forgot/reset
+    token flow above, which is for a logged-out user who can't prove current_password.
+    """
+
+    current_password = serializers.CharField()
     new_password = serializers.CharField(min_length=8)

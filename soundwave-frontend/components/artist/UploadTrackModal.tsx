@@ -2,24 +2,31 @@
 
 // ============================================================
 // SOUNDWAVE — UPLOAD / EDIT TRACK MODAL
-// Phase 1: audio + cover "upload" is UI only — no real file transfer.
 // ============================================================
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { uploadTrackSchema, type UploadTrackFormValues } from '@/lib/validators/uploadTrackSchema';
 import { Button, Input, Modal, Select, Textarea } from '@/components/ui';
 import { useTranslation } from '@/lib/i18n';
 
+export interface UploadTrackSubmitValues extends UploadTrackFormValues {
+  audioFile: File | null;
+  coverFile: File | null;
+}
+
 interface UploadTrackModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (values: UploadTrackFormValues) => void;
+  onSubmit: (values: UploadTrackSubmitValues) => void;
   initialValues?: Partial<UploadTrackFormValues>;
 }
 
 export function UploadTrackModal({ isOpen, onClose, onSubmit, initialValues }: UploadTrackModalProps) {
   const { t } = useTranslation('uploadTrackModal');
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const TYPE_OPTIONS = [
     { value: 'single', label: t('typeSingle') },
@@ -42,12 +49,16 @@ export function UploadTrackModal({ isOpen, onClose, onSubmit, initialValues }: U
   const coverFileName = watch('coverFileName');
 
   const handleFormSubmit = (values: UploadTrackFormValues) => {
-    onSubmit(values);
+    onSubmit({ ...values, audioFile, coverFile });
     reset();
+    setAudioFile(null);
+    setCoverFile(null);
   };
 
   const handleClose = () => {
     reset();
+    setAudioFile(null);
+    setCoverFile(null);
     onClose();
   };
 
@@ -60,7 +71,10 @@ export function UploadTrackModal({ isOpen, onClose, onSubmit, initialValues }: U
           label={t('audioLabel')}
           fileName={audioFileName}
           error={errors.audioFileName?.message}
-          onSelect={(name) => setValue('audioFileName', name, { shouldValidate: true })}
+          onSelect={(file) => {
+            setAudioFile(file);
+            setValue('audioFileName', file?.name ?? '', { shouldValidate: true });
+          }}
           accept="audio/*"
           clickToSelectFile={t('clickToSelectFile')}
         />
@@ -69,7 +83,10 @@ export function UploadTrackModal({ isOpen, onClose, onSubmit, initialValues }: U
           label={t('coverLabel')}
           fileName={coverFileName}
           error={errors.coverFileName?.message}
-          onSelect={(name) => setValue('coverFileName', name, { shouldValidate: true })}
+          onSelect={(file) => {
+            setCoverFile(file);
+            setValue('coverFileName', file?.name ?? '', { shouldValidate: true });
+          }}
           accept="image/*"
           clickToSelectFile={t('clickToSelectFile')}
         />
@@ -112,7 +129,7 @@ function FileField({
   label: string;
   fileName?: string;
   error?: string;
-  onSelect: (name: string) => void;
+  onSelect: (file: File | null) => void;
   accept: string;
   clickToSelectFile: string;
 }) {
@@ -131,7 +148,7 @@ function FileField({
         }}
       >
         {fileName || clickToSelectFile}
-        <input type="file" accept={accept} hidden onChange={(e) => onSelect(e.target.files?.[0]?.name ?? '')} />
+        <input type="file" accept={accept} hidden onChange={(e) => onSelect(e.target.files?.[0] ?? null)} />
       </label>
       {error && <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-error)' }}>{error}</span>}
     </div>

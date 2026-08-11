@@ -24,6 +24,10 @@ export interface User {
   followingCount: number;
   dailyStreamsUsed: number;
   createdAt: string;
+  /** Only set for role='artist' — backs RequireRole's requireApprovedArtist check
+   *  without a separate fetch (the backend embeds it directly on /auth/me/). */
+  artistId?: string | null;
+  artistVerificationStatus?: ArtistStatus | null;
 }
 
 export interface AuthState {
@@ -81,6 +85,9 @@ export interface Album {
   tracks: Track[];
   streamCount: number;
   isEarlyAccess: boolean;
+  /** A single is an Album with releaseType='single' holding exactly one track —
+   *  there's no separate standalone-track model on the backend. */
+  releaseType: 'single' | 'album';
   createdAt: string;
 }
 

@@ -7,91 +7,80 @@
 // ============================================================
 
 import { useEffect, useState } from 'react';
-import type { Track } from '@/types';
-import type { UploadTrackFormValues } from '@/lib/validators/uploadTrackSchema';
 import { useAuthStore } from '@/lib/store/authStore';
 import {
-  mockGetArtistByUserId,
-  mockGetArtistTracks,
-  mockCreateTrack,
-  mockUpdateTrack,
-  mockDeleteTrack,
-} from '@/lib/mock/store';
+  getMyArtistTracks,
+  createArtistTrack,
+  updateArtistTrack,
+  deleteArtistTrack,
+  type ManagedTrack,
+} from '@/lib/api/music';
 import { formatCount } from '@/lib/utils';
 import { Button, Card, Modal, Table, type TableColumn } from '@/components/ui';
-// import { RequireRole } from '@/components/auth/RequireRole'; // TEMP (testing only): see below
-import { MOCK_USERS } from '@/lib/mock/data'; // TEMP (testing only): see fallback below
-import { UploadTrackModal } from '@/components/artist/UploadTrackModal';
+import { RequireRole } from '@/components/auth/RequireRole';
+import { UploadTrackModal, type UploadTrackSubmitValues } from '@/components/artist/UploadTrackModal';
 import { useTranslation } from '@/lib/i18n';
 
 const EARNINGS_PER_STREAM = 0.0005; // mock rate, in currency units per stream
 
 function ManagePanel() {
   const { t } = useTranslation('artistManagePage');
-  const authUser = useAuthStore((s) => s.user);
-  // TEMP (testing only): fall back to a mock approved artist (Dariush) so
-  // the page is viewable without logging in. Remove this fallback (go back
-  // to `const user = authUser`) before shipping/committing.
-  const user = authUser ?? MOCK_USERS[2];
-  const [tracks, setTracks] = useState<Track[]>([]);
+  const user = useAuthStore((s) => s.user);
+  const [tracks, setTracks] = useState<ManagedTrack[]>([]);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [editingTrack, setEditingTrack] = useState<Track | null>(null);
-  const [deletingTrack, setDeletingTrack] = useState<Track | null>(null);
+  const [editingTrack, setEditingTrack] = useState<ManagedTrack | null>(null);
+  const [deletingTrack, setDeletingTrack] = useState<ManagedTrack | null>(null);
 
-  const artist = user ? mockGetArtistByUserId(user.id) : null;
+  const artistId = user?.artistId ?? null;
 
   const refresh = () => {
-    if (artist) setTracks(mockGetArtistTracks(artist.id));
+    if (artistId) getMyArtistTracks(artistId).then(setTracks);
   };
 
   useEffect(() => {
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [artist?.id]);
+  }, [artistId]);
 
-  if (!artist) return null;
+  if (!artistId) return null;
 
-  const handleCreateOrUpdate = (values: UploadTrackFormValues) => {
-    const collaborators = (values.collaborators ?? '')
-      .split(',')
-      .map((name) => name.trim())
-      .filter(Boolean)
-      .map((name, i) => ({ id: `collab-${Date.now()}-${i}`, stageName: name }));
-
-    const payload = {
-      title: values.title,
-      duration: editingTrack?.duration ?? 180,
-      audioUrl: `/mock/audio/${values.audioFileName}`,
-      coverUrl: `/mock/covers/${values.coverFileName}`,
-      lyrics: values.lyrics || null,
-      genre: values.genre,
-      releaseYear: values.releaseYear,
-      albumId: values.type === 'album' ? editingTrack?.albumId ?? `al-${Date.now()}` : null,
-      albumTitle: values.type === 'album' ? values.title : null,
-      artists: [{ id: artist.id, stageName: artist.stageName }, ...collaborators],
-      isEarlyAccess: false,
-    };
-
+  const handleCreateOrUpdate = async (values: UploadTrackSubmitValues) => {
     if (editingTrack) {
-      mockUpdateTrack(editingTrack.id, payload);
+      await updateArtistTrack(editingTrack.id, editingTrack.albumId as string, {
+        title: values.title,
+        lyrics: values.lyrics ?? '',
+        genre: values.genre,
+        releaseYear: values.releaseYear,
+        releaseType: values.type,
+        audioFile: values.audioFile,
+        coverFile: values.coverFile,
+      });
     } else {
-      mockCreateTrack(payload);
+      await createArtistTrack({
+        title: values.title,
+        audioFile: values.audioFile,
+        coverFile: values.coverFile,
+        lyrics: values.lyrics ?? '',
+        genre: values.genre,
+        releaseYear: values.releaseYear,
+        releaseType: values.type,
+      });
     }
     refresh();
     setIsUploadOpen(false);
     setEditingTrack(null);
   };
 
-  const handleDelete = () => {
-    if (!deletingTrack) return;
-    mockDeleteTrack(deletingTrack.id);
+  const handleDelete = async () => {
+    if (!deletingTrack?.albumId) return;
+    await deleteArtistTrack(deletingTrack.albumId);
     setDeletingTrack(null);
     refresh();
   };
 
-  const columns: TableColumn<Track>[] = [
+  const columns: TableColumn<ManagedTrack>[] = [
     { key: 'title', header: t('colTitle'), render: (row) => row.title },
-    { key: 'type', header: t('colType'), render: (row) => (row.albumId ? t('typeAlbum') : t('typeSingle')) },
+    { key: 'type', header: t('colType'), render: (row) => (row.releaseType === 'album' ? t('typeAlbum') : t('typeSingle')) },
     { key: 'listeners', header: t('colListeners'), render: (row) => formatCount(row.uniqueListeners) },
     { key: 'streams', header: t('colStreams'), render: (row) => formatCount(row.streamCount) },
     {
@@ -126,7 +115,7 @@ function ManagePanel() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-          {t('pageTitle').replace('{name}', artist.stageName)}
+          {t('pageTitle').replace('{name}', user?.displayName ?? '')}
         </h1>
         <Button
           onClick={() => {
@@ -159,11 +148,8 @@ function ManagePanel() {
                 lyrics: editingTrack.lyrics ?? '',
                 genre: editingTrack.genre ?? '',
                 releaseYear: editingTrack.releaseYear ?? new Date().getFullYear(),
-                type: editingTrack.albumId ? 'album' : 'single',
-                collaborators: editingTrack.artists
-                  .filter((a) => a.id !== artist.id)
-                  .map((a) => a.stageName)
-                  .join(', '),
+                type: editingTrack.releaseType,
+                collaborators: '',
               }
             : undefined
         }
@@ -189,11 +175,9 @@ function ManagePanel() {
 }
 
 export default function ArtistManagePage() {
-  // TEMP (testing only): auth guard disabled, restore the <RequireRole>
-  // wrapper below before shipping/committing.
   return (
-    // <RequireRole allow={['artist']} requireApprovedArtist>
+    <RequireRole allow={['artist']} requireApprovedArtist>
       <ManagePanel />
-    // </RequireRole>
+    </RequireRole>
   );
 }

@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, ListMusic, Library, Settings, Bell, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
-import { mockGetNotifications } from '@/lib/mock/store';
+import { getNotifications } from '@/lib/api/notifications';
 import { getInitials } from '@/lib/utils';
 import { ROUTES } from '@/lib/constants';
 import { useTranslation } from '@/lib/i18n';
@@ -43,8 +43,11 @@ export default function Sidebar() {
 
 
   useEffect(() => {
-    setUnreadCount(mockGetNotifications().filter((n) => !n.isRead).length);
-  }, [pathname]);
+    if (!user) return;
+    getNotifications(user.id)
+      .then((list) => setUnreadCount(list.filter((n) => !n.isRead).length))
+      .catch(() => {});
+  }, [pathname, user]);
 
   const tierBadge = user ? TIER_BADGE_KEY[user.subscription] : null;
 
