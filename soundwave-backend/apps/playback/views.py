@@ -1,9 +1,11 @@
+from django.db.models import Max
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.music.models import StreamEvent
 from apps.playback.models import UserPreference
-from apps.playback.serializers import RecentlyPlayedTrackSerializer, UserPreferenceSerializer
+from apps.playback.serializers import UserPreferenceSerializer
 
 
 class MyPreferencesView(generics.RetrieveUpdateAPIView):
@@ -25,8 +27,11 @@ class RecentlyPlayedView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        # TODO(Iliya): distinct track ids from apps.music.StreamEvent for this user,
-        # most recent first, e.g.:
-        #   StreamEvent.objects.filter(user=request.user).order_by("-played_at")
-        #       .values_list("track_id", flat=True).distinct()[:20]
-        raise NotImplementedError
+        track_ids = (
+            StreamEvent.objects.filter(user=request.user)
+            .values("track_id")
+            .annotate(last_played=Max("played_at"))
+            .order_by("-last_played")
+            .values_list("track_id", flat=True)[:20]
+        )
+        return Response(list(track_ids))
