@@ -1,0 +1,676 @@
+\documentclass[a4paper,12pt]{article}
+
+% ===================== Layout & packages =====================
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tabularx}
+
+% ===================== Persian / RTL setup =====================
+\usepackage{xepersian}
+\settextfont{XB Niloofar}
+\setlatintextfont[Scale=0.92]{Times New Roman}
+\setdigitfont{Yas}
+\newfontfamily\latinmono{DejaVu Sans Mono}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codekw}{RGB}{0,90,180}
+\definecolor{codestr}{RGB}{163,21,21}
+\definecolor{codecom}{RGB}{110,110,110}
+
+\lstdefinestyle{codestyle}{
+    backgroundcolor=\color{codebg},
+    basicstyle=\latinmono\footnotesize,
+    keywordstyle=\color{codekw}\bfseries,
+    stringstyle=\color{codestr},
+    commentstyle=\color{codecom}\itshape,
+    numbers=none,
+    frame=single,
+    rulecolor=\color{gray!40},
+    breaklines=true,
+    breakatwhitespace=false,
+    tabsize=2,
+    showstringspaces=false,
+    columns=flexible,
+    xleftmargin=1.5em,
+    framexleftmargin=1.2em,
+}
+\lstset{style=codestyle}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!50!black,
+    urlcolor=blue!50!black,
+    citecolor=blue!50!black,
+    pdftitle={گزارش نهایی پروژه SoundWave},
+    pdfauthor={فواد خیرآبادی، ایلیا، رایان},
+}
+
+\setlength{\headheight}{15pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{گزارش نهایی پروژه برنامه‌سازی وب - SoundWave}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\section}{\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
+
+\newcommand{\en}[1]{\lr{\latinmono #1}}
+\emergencystretch=3em
+\tolerance=1500
+
+\begin{document}
+
+% ===================== Title Page =====================
+\begin{titlepage}
+\begin{center}
+
+\vspace*{1.5cm}
+{\Large دانشگاه صنعتی شریف}\\[0.3cm]
+{\large دانشکده مهندسی کامپیوتر}\\[2cm]
+
+{\huge \bfseries درس برنامه‌سازی وب}\\[0.5cm]
+{\large نیم‌سال بهار ۱۴۰۵}\\[0.3cm]
+استاد درس: علی ابریشمی\\[2.5cm]
+
+\rule{0.8\textwidth}{0.5pt}\\[0.5cm]
+{\Huge \bfseries گزارش نهایی پروژه درس}\\[0.3cm]
+{\Large \en{SoundWave} یک سرویس استریم موسیقی}\\[0.5cm]
+\rule{0.8\textwidth}{0.5pt}\\[2.5cm]
+
+{\large نوشته‌شده توسط:}\\[0.5cm]
+{\large فواد خیرآبادی - 402105976}\\
+{\large ایلیا فرصتی - 402106297}\\
+{\large رایان حدیدی - 402111111}
+
+
+\end{center}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{مقدمه و شرح کلی پروژه}
+% =====================================================================
+
+\en{SoundWave} یک سرویس استریم موسیقی مشابه \en{Spotify} است که طی دو فاز درس برنامه‌سازی
+وب توسعه داده شد: فاز اول با تمرکز بر رابط کاربری و منطق سمت کلاینت (\en{Next.js 14} با
+\en{TypeScript})، و فاز دوم با تمرکز بر پیاده‌سازی بک‌اند واقعی (\en{Django} +
+\en{Django REST Framework}) و ادغام آن با فرانت‌اند موجود.
+
+سامانه چهار نقش کاربری دارد: \textbf{شنونده} (کاربر عادی)، \textbf{هنرمند} (پس از تأیید
+هویت می‌تواند اثر منتشر کند)، \textbf{پشتیبان} (بررسی درخواست‌های تأیید هنرمند و رسیدگی به
+تیکت‌ها) و \textbf{مدیر سامانه} (دسترسی کامل، شامل قیمت‌گذاری و تسویه حساب هنرمندان). سه سطح
+اشتراک پایه (رایگان)، نقره‌ای و طلایی محدودیت‌های متفاوتی در تعداد استریم روزانه،
+تعداد پلی‌لیست، دانلود آهنگ، دسترسی زودهنگام به انتشارهای جدید و مشاهده آمار هنرمندان اعمال
+می‌کنند؛ این مقادیر به‌صورت رکوردهای قابل ویرایش در دیتابیس (نه مقادیر ثابت در کد) نگهداری
+می‌شوند تا مدیر سامانه بتواند بدون نیاز به دیپلوی مجدد، سیاست قیمت‌گذاری را تغییر دهد.
+
+پروژه توسط سه نفر و به‌صورت تیمی توسعه داده شد. مالکیت هر بخش از فرانت‌اند در فاز اول، مستقیماً
+مالکیت اپ‌های \en{Django} متناظر آن در فاز دوم را تعیین کرد؛ یعنی هرکس صفحه/کامپوننتی را در
+فاز اول ساخته بود، در فاز دوم منطق سمت سرور همان بخش را نیز پیاده‌سازی کرد. این تصمیم، آشنایی
+عمیق هر عضو با دامنهٔ کاری خودش را از فاز اول به فاز دوم منتقل کرد و از هزینهٔ یادگیری مجدد
+دامنه توسط فرد دیگر جلوگیری کرد.
+
+% =====================================================================
+\section{نقش و کارهای هر عضو در هر فاز}
+% =====================================================================
+
+جدول زیر مالکیت کلی هر عضو در دو فاز پروژه را نشان می‌دهد؛ توضیحات دقیق‌تر هر بخش در ادامه
+آمده و شرح کامل هر مورد در فایل‌های \en{TASKS\_FOAD.md}، \en{TASKS\_ILIYA.md} و
+\en{TASKS\_RAYAN.md} در ریشهٔ مخزن قابل مشاهده است.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|l|X|X|}
+\hline
+\textbf{عضو} & \textbf{فاز اول (فرانت‌اند)} & \textbf{فاز دوم (بک‌اند)} \\
+\hline
+فواد & احراز هویت (ورود/ثبت‌نام)، اعلانات، پنل مدیریت هنرمند، داشبورد پشتیبانی/مدیر، \en{PWA}
+ & \en{accounts}، \en{billing}، \en{support}، \en{notifications} \\
+\hline
+ایلیا & پخش‌کنندهٔ موسیقی (پلیر)، سیستم پیشنهاددهندهٔ آهنگ با هوش مصنوعی
+ & \en{music}، \en{playback} \\
+\hline
+رایان & صفحهٔ خانه، نوار کناری، پروفایل کاربر/هنرمند، کتابخانه/جستجو، پلی‌لیست‌ها، تنظیمات
+ & \en{playlists}، \en{social} \\
+\hline
+\end{tabularx}
+\end{center}
+
+\subsection{فاز اول - فرانت‌اند}
+
+\textbf{فواد.} صفحهٔ ورود و ثبت‌نام با اعتبارسنجی \en{zod} + \en{react-hook-form} (تب جداگانه
+برای شنونده و هنرمند)، هدایت پس از ورود بر اساس نقش کاربر (شنونده/هنرمند $\to$ خانه، پشتیبان/
+مدیر $\to$ داشبورد پشتیبانی)، صفحهٔ اعلانات با وضعیت خوانده/نخوانده و حذف/علامت‌گذاری، پنل
+مدیریت آثار هنرمند (افزودن/ویرایش/حذف اثر همراه با آمار هر اثر)، داشبورد پشتیبانی/مدیر با
+چهار تب (تأیید هویت هنرمندان، تیکت‌های پشتیبانی، حسابرسی، مدیریت اشتراک‌ها و قیمت‌گذاری)، و
+پیاده‌سازی \en{PWA} (آیکون‌ها، \en{manifest}، صفحهٔ آفلاین، دکمهٔ نصب برنامه).
+
+\textbf{ایلیا.} پخش‌کنندهٔ موسیقی پرارزش‌ترین بخش فاز اول - شامل نوار پخش ثابت
+دسکتاپ (کاور، عنوان، هنرمند، آلبوم، کنترل‌های پخش/توقف/بعدی/قبلی، نوار پیشرفت با قابلیت
+جابه‌جایی، دکمهٔ تکرار سه‌حالته و شافل، کنترل صدا)، حالت میلی‌پلیر و پلیر تمام‌صفحه در موبایل،
+پنل صف پخش و پنل نمایش متن آهنگ، و یکپارچه‌سازی \en{Howler.js} از طریق هوک اختصاصی
+\en{useHowler}. همچنین ویجت پیشنهاددهندهٔ آهنگ مبتنی بر هوش مصنوعی را در صفحهٔ خانه جای‌گذاری
+و به تاریخچهٔ پخش واقعی کاربر متصل کرد.
+
+\textbf{رایان.} نوار کناری (ناوبری دسکتاپ + نوار پایین/کشوی موبایل)، صفحهٔ خانه (پلی‌لیست‌های
+اخیر، آلبوم‌های جدید، پرطرفدارترین آهنگ‌ها، بخش دسترسی زودهنگام ویژهٔ اشتراک طلایی)، صفحات
+پروفایل کاربر و هنرمند (آمار دنبال‌کننده، نشان اشتراک، دکمهٔ دنبال‌کردن)، صفحهٔ تنظیمات، صفحات
+پلی‌لیست (ایجاد/حذف/تغییر نام با اعمال محدودیت تعداد بر اساس سطح اشتراک) و صفحهٔ کتابخانه/
+جستجو (جستجو، مرتب‌سازی، افزودن به پلی‌لیست).
+
+\subsection{فاز دوم - بک‌اند}
+
+\textbf{فواد.} اپ \en{accounts}: سریالایزرهای ثبت‌نام شنونده/هنرمند، تولید خودکار
+\en{username}، جاسازی نقش کاربر در \en{JWT}، فراموشی رمز عبور با پاسخ یکنواخت (برای جلوگیری
+از افشای وجود ایمیل). اپ \en{billing}: پنل قیمت‌گذاری مدیر، اتصال به درگاه پرداخت \en{ZarinPal}
+(\en{request\_payment}/\en{verify\_payment})، فعال‌سازی/تمدید اشتراک پس از تأیید پرداخت،
+تسویه‌حساب ماهانهٔ هنرمندان از طریق دستور مدیریتی \en{calculate\_payouts}، و گزارش‌های تجمیعی
+درآمد/توزیع اشتراک. اپ \en{support}: چت‌باکس تیکت، تأیید/رد درخواست هویت هنرمند. اپ
+\en{notifications}: علامت‌گذاری خوانده/همه‌خوانده و صدور اعلان از رخدادهای اپ‌های دیگر.
+
+\textbf{ایلیا.} اپ \en{music}: مجوز ایجاد/ویرایش اثر منحصر به هنرمند تأییدشدهٔ مالک آن، اعتبارسنجی
+و ذخیرهٔ فایل صوتی/کاور، محاسبهٔ تعداد استریم و شنوندگان یکتا (نمایش شنوندگان یکتا فقط برای
+مشترکان طلایی)، اعمال سقف استریم روزانه پیش از ثبت رویداد پخش، جستجو و مرتب‌سازی. اپ
+\en{playback}: همگام‌سازی تنظیمات کاربر بین دستگاه‌ها و اندپوینت «اخیراً پخش‌شده» که ورودی
+واقعی سیستم پیشنهاددهندهٔ آهنگ را تأمین می‌کند.
+
+\textbf{رایان.} اپ \en{playlists}: اعمال سقف تعداد پلی‌لیست بر اساس سطح اشتراک، مدیریت افزودن/
+حذف آهنگ با حفظ ترتیب (\en{position})، محدودسازی دسترسی به پلی‌لیست‌های خود کاربر. اپ
+\en{social}: آمار دنبال‌کننده/دنبال‌شونده، دنبال‌کردن/لغو دنبال‌کردن با جلوگیری از دنبال‌کردن
+خود و از ثبت رکورد تکراری.
+
+\subsection{تست‌نویسی}
+
+طبق سیاست‌نامهٔ پروژه، فاز اول حداقل ۱۰ تست و فاز دوم حداقل ۱۵ تست جنگو نیاز داشت. هر عضو در
+هر دو فاز حداقل ۴ تا ۵ تست در حوزهٔ کاری خود نوشت (مثلاً فواد: ثبت‌نام/ورود، دسترسی ادمین به
+تغییر قیمت، فعال‌سازی اشتراک پس از پرداخت؛ ایلیا: محدودیت استریم روزانه، مجوز هنرمند تأییدشده؛
+رایان: سقف پلی‌لیست، عدم امکان دنبال‌کردن خود) تا مجموع حداقل‌های تعیین‌شده در هر دو فاز
+تأمین شود.
+
+% =====================================================================
+\section{قوانین توسعه و فرآیند کار}
+% =====================================================================
+
+\subsection{شاخه‌بندی گیت}
+
+\begin{latin}\begin{lstlisting}[language=bash]
+main              # stable, always deployable
+dev               # integration branch
+feature/foad-*    # Foad's features
+feature/iliya-*   # Iliya's features
+feature/rayan-*   # Rayan's features
+\end{lstlisting}\end{latin}
+
+هر ویژگی در یک شاخهٔ \en{feature/<owner>-*} توسعه و از طریق \en{Pull Request} به \en{main}
+ادغام می‌شد (مطابق تاریخچهٔ گیت پروژه، بیش از ده \en{PR} جداگانه برای بخش‌های مختلف از
+جمله \en{back-end-initialize}، \en{phase2-feature-pages}، \en{music-playback-enhancements}
+و \en{support-english} مرور و ادغام شده‌اند).
+
+\subsection{قالب پیام کامیت}
+
+از قالب \en{Conventional Commits} استفاده شد تا تاریخچهٔ پروژه خوانا و قابل جستجو بماند:
+
+\begin{latin}\begin{lstlisting}[language=bash]
+feat(auth): add JWT login endpoint
+fix(player): correct repeat mode cycling
+style(sidebar): align nav icons
+refactor(models): simplify subscription logic
+test(api): add track CRUD tests
+docs(readme): update setup instructions
+\end{lstlisting}\end{latin}
+
+\subsection{قراردادهای نام‌گذاری}
+
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{نوع} & \textbf{قرارداد} & \textbf{مثال} \\
+\hline
+کامپوننت \en{React} & \en{PascalCase} & \en{TrackCard.tsx} \\
+هوک \en{React} & \en{camelCase} با پیشوند \en{use} & \en{usePlayerStore.ts} \\
+\en{View} در \en{Django} & \en{PascalCase} & \en{TrackViewSet} \\
+مدل \en{Django} & \en{PascalCase} & \en{ArtistProfile} \\
+فایل تست & \en{*.test.tsx} یا \en{test\_*.py} & \en{Player.test.tsx} \\
+\hline
+\end{tabular}
+\end{center}
+
+همچنین در کل پروژه هیچ مقدار رنگی به‌صورت مستقیم در کد فرانت‌اند نوشته نمی‌شود؛ تمام رنگ‌ها،
+فاصله‌گذاری‌ها و تایپوگرافی از طریق متغیرهای \en{CSS} تعریف‌شده در
+\en{styles/globals.css} (مانند \en{var(--color-primary)}) مصرف می‌شوند تا تغییر بعدی سیستم
+طراحی در یک فایل متمرکز باشد، نه پراکنده در ده‌ها کامپوننت.
+
+\subsection{فرآیند ادغام فرانت‌اند و بک‌اند}
+
+در فاز اول، فرانت‌اند به‌طور کامل روی توابع \en{mock} (مانند \en{mockGetPlaylists} و
+\en{mockGetNotifications}) و \en{Local Storage} کار می‌کرد. در فاز دوم، لایهٔ \en{lib/api/*}
+(شامل \en{auth.ts}، \en{music.ts}، \en{billing.ts}، \en{playlists.ts} و مشابه) نوشته شد تا هر
+یک از این توابع \en{mock} با فراخوانی واقعی به \en{/api/v1/<app>/...} جایگزین شود، بدون آنکه
+ساختار کامپوننت‌ها تغییر اساسی کند. مدل داده‌ای پاسخ بک‌اند از طریق توابع نگاشت
+(\en{lib/api/mappers.ts}) به همان تایپ‌های \en{TypeScript} تعریف‌شده در فاز اول تبدیل می‌شود؛
+این تصمیم عمداً اتخاذ شد تا تغییر منبع داده (از \en{mock} به \en{API} واقعی) کمترین تأثیر را
+روی کد کامپوننت‌ها بگذارد.
+
+% =====================================================================
+\section{ساختار پروژه و توجیه آن}
+% =====================================================================
+
+مخزن به دو پوشهٔ مستقل تقسیم شده که هرکدام قابل اجرای جداگانه‌اند و از طریق \en{docker-compose.yml}
+نیز می‌توانند هم‌زمان اجرا شوند:
+
+\begin{latin}\begin{lstlisting}[language=bash]
+SoundWave/
+|-- soundwave-frontend/    # Next.js 14 (React, TypeScript)
+|-- soundwave-backend/     # Django + Django REST Framework (Phase 2)
+`-- docker-compose.yml     # docker compose up -> runs both services
+\end{lstlisting}\end{latin}
+
+\subsection{ساختار فرانت‌اند}
+
+فرانت‌اند از \en{App Router} در \en{Next.js 14} استفاده می‌کند و مسیرها با گروه‌های مسیریابی
+\en{(auth)}، \en{(main)} و \en{(dashboard)} از هم جدا شده‌اند این جداسازی به هر گروه اجازه
+می‌دهد \en{layout} و منطق نگهبانی نقش (\en{RequireRole}) اختصاصی خودش را داشته باشد، بدون
+آنکه صفحات عمومی (ورود/ثبت‌نام) به‌اشتباه در چیدمان اصلی برنامه (با نوار کناری و پخش‌کننده)
+رندر شوند.
+
+\begin{latin}\begin{lstlisting}[language=bash]
+app/
+  (auth)/login, register        # public pages, no sidebar/player
+  (main)/home, library, ...     # main app shell, behind login guard
+  (dashboard)/support           # behind support/admin role guard
+  api/suggest-songs             # route handler for the AI suggester
+components/
+  auth/, player/, playlist/, dashboard/, ui/, ...   # one folder per domain
+lib/
+  api/        # backend integration layer (phase 2)
+  hooks/      # custom hooks (useHowler, useSongSuggestions)
+  store/      # Zustand: authStore, playerStore, localeStore
+  validators/ # zod schema per form
+  mock/       # phase 1 mock data/functions (kept for tests/local dev)
+\end{lstlisting}\end{latin}
+
+کامپوننت‌ها بر اساس دامنهٔ کسب‌وکار (\en{player}، \en{playlist}، \en{dashboard}, ...) دسته‌بندی
+شده‌اند نه بر اساس نوع فایل؛ این ساختار مستقیماً با تقسیم مالکیت تیم (جدول بخش ۲) هم‌راستاست
+و باعث می‌شود هر عضو تیم عمدتاً در پوشهٔ خودش کار کند و تداخل \en{merge} کاهش یابد. کامپوننت‌های
+عمومی و بدون منطق دامنه (دکمه، مودال، جدول، ورودی) در \en{components/ui} جدا شده‌اند تا در همهٔ
+صفحات یکسان استفاده شوند.
+
+\subsection{ساختار بک‌اند}
+
+بک‌اند به‌صورت یک اپلیکیشن \en{Django} با پوشهٔ \en{apps/} تقسیم‌شده بر اساس دامنه (نه بر اساس
+نوع فایل) سازمان‌دهی شده است الگوی رایج و توصیه‌شده در \en{Django} برای پروژه‌های با چند
+دامنهٔ مستقل:
+
+\begin{latin}\begin{lstlisting}[language=bash]
+soundwave-backend/
+  soundwave/         # project settings, root urls.py
+  apps/
+    accounts/        # User, ArtistProfile               -> Foad
+    billing/         # SubscriptionPlan, Subscription,
+                      # PaymentTransaction, Payout        -> Foad
+    support/         # Ticket, TicketMessage              -> Foad
+    notifications/   # Notification                       -> Foad
+    music/           # Album, Track, StreamEvent          -> Iliya
+    playback/        # UserPreference                     -> Iliya
+    playlists/       # Playlist, PlaylistTrack            -> Rayan
+    social/          # Follow                             -> Rayan
+\end{lstlisting}\end{latin}
+
+این تفکیک هشت‌گانه، دقیقاً هم‌راستا با تقسیم مالکیت فرانت‌اند در فاز اول انتخاب شد (بخش ۲)
+تا هر عضو بتواند بدون هماهنگی مداوم با دو نفر دیگر، هم مدل و هم منطق \en{API} حوزهٔ خودش را
+مستقل توسعه دهد. هر اپ چهار فایل استاندارد \en{Django} دارد
+(\en{models.py}، \en{serializers.py}، \en{views.py}، \en{urls.py}) و همهٔ مسیرها زیر
+\en{/api/v1/<app>/...} با یک \en{router} به‌ازای هر اپ ثبت می‌شوند این یکنواختی باعث
+می‌شود افزودن اپ جدید در آینده الگوی از پیش شناخته‌شده‌ای داشته باشد.
+
+% =====================================================================
+\section{توجیه نگهداری‌پذیری کد}
+% =====================================================================
+
+چند تصمیم طراحی مشخصاً با هدف نگهداری‌پذیری (\en{maintainability}) گرفته شده‌اند:
+
+\begin{itemize}[rightmargin=0pt]
+    \item \textbf{عدم تکرار منطق دسترسی.} محدودیت‌های سطح اشتراک (سقف پلی‌لیست، سقف استریم
+    روزانه، دسترسی زودهنگام) همگی در جدول \en{SubscriptionPlan} نگهداری می‌شوند، نه به‌صورت
+    عدد ثابت در چند \en{view} پراکنده؛ تغییر سیاست قیمت‌گذاری فقط یک رکورد دیتابیس را تغییر
+    می‌دهد، نه کد را.
+    \item \textbf{عدم ساخت مدل زائد.} برای مثال، اپ \en{playback} به‌جای مدلی مجزا برای
+    تاریخچهٔ پخش، از \en{StreamEvent} موجود در \en{music} به‌عنوان منبع واحد حقیقت
+    استفاده می‌کند (به‌جای دو مدل که باید همیشه هم‌زمان به‌روزرسانی شوند). به همین ترتیب
+    «تک‌آهنگ» به‌جای مدل مستقل، صرفاً یک \en{Album} با \en{release\_type=single} و یک
+    \en{Track} است.
+    \item \textbf{تجمیع در بک‌اند، نه فرانت‌اند.} آمار شنونده/استریم/درآمد همیشه در بک‌اند
+    محاسبه و به‌صورت خلاصه (نه رکورد خام) در اختیار فرانت‌اند قرار می‌گیرد؛ این کار هم از نشت
+    دادهٔ خام کاربران جلوگیری می‌کند و هم منطق محاسبه را در یک نقطه نگه می‌دارد.
+    \item \textbf{لایهٔ انتزاعی درگاه پرداخت.} \en{apps/billing/gateways.py} یک کلاس پایهٔ
+    \en{PaymentGateway} با متدهای \en{request\_payment}/\en{verify\_payment} تعریف می‌کند؛
+    \en{views.py} فقط با این واسط کار می‌کند، نه با \en{API} مشخصِ \en{ZarinPal}. جایگزینی
+    یا افزودن درگاه دوم صرفاً نیازمند یک کلاس جدید در همین فایل است.
+    \item \textbf{تایپ‌های مشترک بین فاز اول و دوم.} تایپ‌های \en{TypeScript} تعریف‌شده در
+    فاز اول (\en{types/index.ts}) بدون تغییر در فاز دوم نیز استفاده می‌شوند؛ لایهٔ
+    \en{lib/api/mappers.ts} پاسخ \en{API} واقعی را به همین تایپ‌ها نگاشت می‌کند تا کامپوننت‌ها
+    از منبع داده (\en{mock} در برابر \en{API}) بی‌اطلاع بمانند.
+    \item \textbf{تست به‌عنوان مستندسازی رفتار.} حداقل تست تعیین‌شده برای هر فاز
+    (۱۰ فرانت‌اند / ۱۵ بک‌اند) باعث شد رفتارهای مرزی حساس مانند «کاربر رایگان پس از
+    رسیدن به سقف استریم مسدود می‌شود» یا «کاربر نمی‌تواند پلی‌لیست دیگری را ویرایش کند»
+    به‌صورت اجراپذیر مستند شوند، نه فقط در کامنت کد.
+\end{itemize}
+
+% =====================================================================
+\section{مدل‌های موجود در بک‌اند، روابط و توجیه آن‌ها}
+% =====================================================================
+
+بک‌اند شامل ۱۲ مدل در ۸ اپ است. جدول زیر مدل‌ها، فیلدهای کلیدی و روابط آن‌ها را خلاصه می‌کند.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\textbf{اپ} & \textbf{مدل} & \textbf{روابط اصلی} \\
+\hline
+\en{accounts} & \en{User} & کاربر پایه با نقش (\en{listener/artist/support/admin})؛
+مبنای همهٔ کلیدهای خارجی کاربر در سایر اپ‌ها \\
+\hline
+\en{accounts} & \en{ArtistProfile} & \en{OneToOne} با \en{User}؛ وضعیت تأیید هویت
+(\en{pending/approved/rejected}) \\
+\hline
+\en{accounts} & \en{PasswordResetToken} & \en{ForeignKey} به \en{User}؛ توکن یک‌بارمصرف با
+انقضای ۱ ساعته \\
+\hline
+\en{billing} & \en{SubscriptionPlan} & مستقل؛ تعریف سه سطح اشتراک و محدودیت‌های هرکدام \\
+\hline
+\en{billing} & \en{Subscription} & \en{ForeignKey} به \en{User} و \en{SubscriptionPlan}؛
+دورهٔ فعال/منقضی اشتراک \\
+\hline
+\en{billing} & \en{PaymentTransaction} & \en{ForeignKey} به \en{User}؛ \en{ForeignKey}
+اختیاری (\en{nullable}) به \en{Subscription} (چون اشتراک تا موفقیت پرداخت ساخته نمی‌شود) \\
+\hline
+\en{billing} & \en{Payout} & \en{ForeignKey} به \en{ArtistProfile}؛ یکتا بر
+(\en{artist\_profile}, \en{period\_month}) \\
+\hline
+\en{support} & \en{Ticket} & \en{ForeignKey} به \en{User} \\
+\hline
+\en{support} & \en{TicketMessage} & \en{ForeignKey} به \en{Ticket} و به \en{User} (فرستنده) \\
+\hline
+\en{notifications} & \en{Notification} & \en{ForeignKey} به \en{User}؛ نوع اعلان با
+\en{TextChoices} \\
+\hline
+\en{music} & \en{Album} & \en{ForeignKey} به \en{ArtistProfile}؛ نوع انتشار
+(\en{single/album}) \\
+\hline
+\en{music} & \en{Track} & \en{ForeignKey} به \en{Album}؛ \en{ManyToMany} با
+\en{ArtistProfile} (همکاران اثر) \\
+\hline
+\en{music} & \en{StreamEvent} & \en{ForeignKey} به \en{Track} و \en{User}؛ منبع واحد
+حقیقت برای آمار پخش \\
+\hline
+\en{playback} & \en{UserPreference} & \en{OneToOne} با \en{User}؛ تنظیمات همگام‌شونده
+بین دستگاه‌ها \\
+\hline
+\en{playlists} & \en{Playlist} & \en{ForeignKey} به \en{User} (مالک) \\
+\hline
+\en{playlists} & \en{PlaylistTrack} & جدول واسط \en{Playlist}$\times$\en{Track} با فیلد
+\en{position} برای حفظ ترتیب؛ یکتا بر (\en{playlist}, \en{track}) \\
+\hline
+\en{social} & \en{Follow} & خودارجاع بر \en{User} (\en{follower}/\en{followee})؛
+\en{CheckConstraint} برای جلوگیری از دنبال‌کردن خود \\
+\hline
+\end{tabularx}
+\end{center}
+
+\subsection{توجیه روابط کلیدی}
+
+\begin{itemize}[rightmargin=0pt]
+    \item \textbf{\en{User} در مرکز گراف مدل قرار دارد}: تقریباً همهٔ مدل‌های دیگر مستقیم یا
+    غیرمستقیم (از طریق \en{ArtistProfile}) به آن ارجاع می‌دهند. این طراحی طبیعی است چون هر
+    چهار نقش سامانه (شنونده، هنرمند، پشتیبان، مدیر) در واقع همان مدل \en{User} با مقدار
+    متفاوت فیلد \en{role} هستند نیازی به مدل جداگانه برای هر نقش نبود.
+    \item \textbf{\en{ArtistProfile} به‌جای افزودن فیلد به \en{User}}: به‌صورت
+    \en{OneToOneField} جدا نگه داشته شده چون فقط برای کاربران با \en{role=artist} معنا دارد
+    (وضعیت تأیید، نام هنری، پورتفولیو)؛ افزودن این فیلدها مستقیماً به \en{User} باعث می‌شد اکثر
+    شنوندگان مقادیر \en{null} بی‌مصرف داشته باشند.
+    \item \textbf{\en{PlaylistTrack} به‌عنوان جدول واسط صریح}: چون \en{ManyToManyField} سادهٔ
+    جنگو نمی‌تواند فیلد اضافی مثل \en{position} (ترتیب آهنگ در پلی‌لیست) را نگه دارد، یک مدل
+    واسط جداگانه تعریف شد.
+    \item \textbf{\en{Follow} خودارجاع}: چون هم شنونده می‌تواند شنونده را دنبال کند و هم
+    شنونده هنرمند را (هر دو یک \en{User} هستند)، یک مدل \en{Follow} کافی است و نیازی به مدل
+    جداگانهٔ \en{ArtistFollow} نبود.
+    \item \textbf{\en{PaymentTransaction} کلید خارجی اختیاری به \en{Subscription} دارد}: چون
+    یک تراکنش پرداخت ممکن است هرگز موفق نشود و بنابراین هرگز \en{Subscription} متناظری ساخته
+    نشود؛ اطلاعات سطح/مدت درخواستی موقتاً روی خود تراکنش (\en{plan\_tier}, \en{duration\_months})
+    نگه داشته می‌شود تا \en{callback} درگاه پرداخت بتواند بعداً \en{Subscription} را بسازد.
+\end{itemize}
+
+% =====================================================================
+\section{نقش هوش مصنوعی در توسعه پروژه}
+% =====================================================================
+
+% =====================================================================
+\section{نمونه کد تولیدشده با کمک هوش مصنوعی}
+% =====================================================================
+
+\subsection{فاز اول - فرانت‌اند: سیستم پیشنهاددهندهٔ آهنگ}
+
+فایل \en{app/api/suggest-songs/route.ts} یک \en{Route Handler} در \en{Next.js} است که
+تاریخچهٔ پخش و ژانرهای موردعلاقهٔ کاربر را می‌گیرد، یک \en{prompt} فارسی برای یک مدل زبانی
+می‌سازد و حداکثر سه پیشنهاد آهنگ همراه با دلیل کوتاه برمی‌گرداند. این فایل ابتدا به‌صورت
+اسکلت توسط هوش مصنوعی نوشته شد و سپس توسط ایلیا به صفحهٔ خانه متصل و به تاریخچهٔ پخش واقعی
+(\en{usePlayerStore}) وصل شد.
+
+\begin{latin}\begin{lstlisting}
+export async function POST(req: NextRequest) {
+  try {
+    const body: SuggestionRequest = await req.json();
+    const { recentlyPlayedIds, likedGenres, dislikedTrackIds = [], mood } = body;
+
+    // Only what the model needs is sent, never the raw catalog
+    const catalog = MOCK_TRACKS
+      .filter((t) => !dislikedTrackIds.includes(t.id))
+      .map((t) => ({
+        id: t.id,
+        title: t.title,
+        genre: t.genre ?? 'Unknown',
+        artists: t.artists.map((a) => a.stageName).join(', '),
+        streamCount: t.streamCount,
+      }));
+
+    // Prompt body is written in Persian in the actual source file;
+    // shown here in English for readability of this report.
+    const prompt = `
+You are a music recommendation system for Soundwave.
+...
+Task: suggest at most 3 tracks from the catalog above that
+match the user's taste and mood. Return exactly this JSON
+format, with no extra text:
+[{ "trackId": "t1", "reason": "short reason in Persian" }]
+`.trim();
+
+    const response = await fetch(
+      'https://api.groq.com/openai/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      }
+    );
+
+    const data = await response.json();
+    const clean = (data.choices?.[0]?.message?.content ?? '[]')
+      .replace(/```json|```/g, '')
+      .trim();
+    const suggestions: SuggestionResult[] = JSON.parse(clean);
+
+    const result = suggestions
+      .map((s) => {
+        const track = MOCK_TRACKS.find((t) => t.id === s.trackId);
+        return track ? { track, reason: s.reason } : null;
+      })
+      .filter(Boolean);
+
+    return NextResponse.json({ suggestions: result });
+  } catch (err) {
+    return NextResponse.json(
+      { error: 'error message in Persian' },
+      { status: 500 }
+    );
+  }
+}
+\end{lstlisting}\end{latin}
+
+نکته: با آنکه در طراحی اولیهٔ سند پروژه این ویژگی «مبتنی بر \en{Claude}» توصیف شده بود،
+پیاده‌سازی نهایی از \en{API} مکالمهٔ \en{Groq} با مدل \en{Llama 3.3 70B} استفاده می‌کند؛ رابط
+(\en{interface}) کد به‌گونه‌ای طراحی شده که تعویض ارائه‌دهندهٔ مدل زبانی صرفاً به تغییر این یک
+فایل محدود بماند.
+
+\subsection{فاز دوم - بک‌اند: لایهٔ انتزاعی درگاه پرداخت}
+
+فایل \en{apps/billing/gateways.py} یک نمونهٔ نمایندهٔ کد بک‌اند است که با کمک هوش مصنوعی و بر
+اساس مستندات \en{sandbox} درگاه \en{ZarinPal} (لینک‌شده در سند مشخصات پروژه) نوشته شد. طراحی
+آن عمداً پشت یک کلاس پایهٔ انتزاعی قرار گرفته تا \en{views.py} هرگز مستقیماً به جزئیات یک درگاه
+خاص وابسته نباشد:
+
+\begin{latin}\begin{lstlisting}[language=Python]
+class PaymentGateway:
+    def request_payment(self, *, amount, description, callback_url):
+        raise NotImplementedError
+
+    def verify_payment(self, *, reference_id, amount) -> bool:
+        raise NotImplementedError
+
+
+class ZarinPalGateway(PaymentGateway):
+    """https://www.zarinpal.com/docs/paymentGateway/sandBox.html"""
+
+    def __init__(self):
+        sandbox = settings.PAYMENT_GATEWAY_SANDBOX
+        self.start_pay_base = (
+            "https://sandbox.zarinpal.com" if sandbox
+            else "https://payment.zarinpal.com"
+        )
+        self.api_base = (
+            "https://sandbox.zarinpal.com" if sandbox
+            else "https://api.zarinpal.com"
+        )
+        self.merchant_id = settings.PAYMENT_GATEWAY_MERCHANT_ID
+
+    def request_payment(self, *, amount, description, callback_url):
+        response = requests.post(
+            f"{self.api_base}/pg/v4/payment/request.json",
+            json={
+                "merchant_id": self.merchant_id,
+                "amount": int(amount),
+                "description": description,
+                "callback_url": callback_url,
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
+        data = response.json().get("data") or {}
+        if data.get("code") != 100:
+            raise PaymentGatewayError(f"rejected: {response.json()}")
+        authority = data["authority"]
+        return f"{self.start_pay_base}/pg/StartPay/{authority}", authority
+
+    def verify_payment(self, *, reference_id, amount) -> bool:
+        response = requests.post(
+            f"{self.api_base}/pg/v4/payment/verify.json",
+            json={
+                "merchant_id": self.merchant_id,
+                "amount": int(amount),
+                "authority": reference_id,
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
+        data = response.json().get("data") or {}
+        # 100 = verified now, 101 = already verified (duplicate callback)
+        return data.get("code") in (100, 101)
+\end{lstlisting}\end{latin}
+
+% =====================================================================
+\section{نقاط قوت و ضعف هوش مصنوعی در توسعهٔ فرانت‌اند در برابر بک‌اند}
+% =====================================================================
+
+\subsection{فرانت‌اند}
+
+\textbf{نقاط قوت:}
+\begin{itemize}[rightmargin=0pt]
+    \item تولید سریع کامپوننت‌های تکراری اما با جزئیات زیاد (فرم‌های ثبت‌نام دوتب‌ه، جدول‌های
+    داشبورد، کارت‌های آلبوم/آهنگ) که ساختار مشابه اما فیلدهای متفاوت دارند.
+    \item نوشتن اسکیمای اعتبارسنجی \en{zod} مستقیماً از روی توضیحات فیلد در سند مشخصات، با
+    سرعت بسیار بالاتر از نوشتن دستی.
+    \item حفظ سازگاری با سیستم طراحی (استفاده از متغیرهای \en{CSS} به‌جای رنگ ثابت) وقتی
+    الگوی کامپوننت‌های قبلی به آن نشان داده می‌شد.
+    \item تولید تست‌های اولیهٔ \en{Jest} برای رفتارهای ساده (رندر شدن، تغییر حالت با کلیک).
+\end{itemize}
+
+\textbf{نقاط ضعف:}
+\begin{itemize}[rightmargin=0pt]
+    \item جزئیات ظریف تعامل کاربر (مثلاً کشیدن نوار پیشرفت پخش‌کننده برای \en{seek}، ژست
+    \en{swipe} برای بستن پلیر تمام‌صفحه در موبایل) نیاز به راهنمایی دقیق‌تر و بازبینی بصری
+    توسط انسان داشت کدی که در نگاه اول درست به نظر می‌رسید، در تست واقعی روی مرورگر رفتار
+    نامطلوب داشت.
+    \item هماهنگی وضعیت بین چند فروشگاه \en{Zustand} (مثلاً \en{playerStore} و
+    \en{authStore}) گاهی بدون بازبینی انسانی دچار وابستگی ضمنی یا رندر اضافه می‌شد.
+    \item بررسی واکنش‌گرایی (\en{responsive}) در پهنای صفحهٔ موبایل عملاً غیرقابل‌اعتماد بدون
+    مشاهدهٔ مستقیم در مرورگر بود؛ کد از نظر منطقی درست اما از نظر چیدمان بصری نیازمند اصلاح
+    دستی می‌شد.
+\end{itemize}
+
+\subsection{بک‌اند}
+
+\textbf{نقاط قوت:}
+\begin{itemize}[rightmargin=0pt]
+    \item ترجمهٔ سریع و دقیق بخش‌های مشخصات پروژه (که با شماره بند، مثل «spec §2.4»، در
+    کامنت‌های کد ارجاع داده شده‌اند) به الگوهای استاندارد \en{Django REST Framework}
+    (\en{Serializer}، \en{ViewSet}، کلاس‌های \en{Permission} سفارشی).
+    \item رعایت مداوم قید صریح مشخصات پروژه («فقط داده تجمیعی به فرانت‌اند برود، هرگز رکورد
+    خام») در تمام اندپوینت‌های گزارش‌گیری، وقتی این قید به‌صراحت در دستور کار قرار می‌گرفت.
+    \item تولید مجموعهٔ تست یکنواخت برای هشت اپ مختلف با ساختار مشابه (مجوز دسترسی، محدودیت
+    سطح اشتراک، روابط مالکیت) که نوشتن دستیِ تکراری آن‌ها زمان‌بر بود.
+    \item طراحی لایهٔ انتزاعی (مانند \en{PaymentGateway}) وقتی صراحتاً خواسته می‌شد کد به یک
+    ارائه‌دهندهٔ خاص وابسته نباشد.
+\end{itemize}
+
+\textbf{نقاط ضعف:}
+\begin{itemize}[rightmargin=0pt]
+    \item قوانین کسب‌وکاری که مشخصات پروژه عمداً باز گذاشته بود (مانند فرمول دقیق تسویه‌حساب
+    ماهانهٔ هنرمندان از \en{unique\_listeners}/\en{total\_streams}) نمی‌توانست توسط هوش
+    مصنوعی به‌تنهایی تصمیم‌گیری شود و نیازمند تصمیم صریح تیم بود.
+    \item ملاحظات امنیتی و همزمانی (\en{concurrency}) در مسیر بازگشتی درگاه پرداخت  مثل
+    برخورد با \en{callback} تکراری یا محافظت \en{merchant\_id} نیازمند بازبینی دقیق انسانی
+    بود؛ کد تولیدی اولیه این حالت‌های مرزی را همیشه پوشش نمی‌داد.
+    \item بدون تأکید صریح، کد پیش‌فرض تولیدشده گاهی به‌جای رعایت کامل اصل «جنگو-محور» (استفاده
+    از ابزارهای \en{DRF} به‌جای کد تکراری دستی)، الگوهای عمومی‌تر و کمتر بهینه پیشنهاد می‌داد
+    که نیاز به بازنویسی مطابق قراردادهای \en{DRF} داشت.
+\end{itemize}
+
+% =====================================================================
+\section{جمع‌بندی}
+% =====================================================================
+
+پروژهٔ \en{SoundWave} با تقسیم‌بندی دامنه‌محور ثابت بین فاز اول و دوم، قراردادهای مشخص
+نام‌گذاری/شاخه‌بندی/کامیت، و استفادهٔ هدفمند از هوش مصنوعی به‌عنوان دستیار (نه تصمیم‌گیرندهٔ
+نهایی) توسعه یافت. نتیجهٔ نهایی یک سرویس استریم موسیقی کامل با چهار نقش کاربری، سه سطح اشتراک
+قابل‌مدیریت از پنل مدیر، اتصال واقعی به درگاه پرداخت، و یک ویژگی امتیازی مبتنی بر مدل زبانی
+بزرگ برای پیشنهاد آهنگ است.
+
+\end{document}

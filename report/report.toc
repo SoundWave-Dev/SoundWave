@@ -1,0 +1,24 @@
+\contentsline {section}{\numberline {1}مقدمه و شرح کلی پروژه}{2}{section.1}%
+\contentsline {section}{\numberline {2}نقش و کارهای هر عضو در هر فاز}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}فاز اول - فرانت‌اند}{2}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}فاز دوم - بک‌اند}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}تست‌نویسی}{3}{subsection.2.3}%
+\contentsline {section}{\numberline {3}قوانین توسعه و فرآیند کار}{3}{section.3}%
+\contentsline {subsection}{\numberline {3.1}شاخه‌بندی گیت}{3}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}قالب پیام کامیت}{3}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}قراردادهای نام‌گذاری}{4}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}فرآیند ادغام فرانت‌اند و بک‌اند}{4}{subsection.3.4}%
+\contentsline {section}{\numberline {4}ساختار پروژه و توجیه آن}{4}{section.4}%
+\contentsline {subsection}{\numberline {4.1}ساختار فرانت‌اند}{4}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}ساختار بک‌اند}{5}{subsection.4.2}%
+\contentsline {section}{\numberline {5}توجیه نگهداری‌پذیری کد}{5}{section.5}%
+\contentsline {section}{\numberline {6}مدل‌های موجود در بک‌اند، روابط و توجیه آن‌ها}{6}{section.6}%
+\contentsline {subsection}{\numberline {6.1}توجیه روابط کلیدی}{8}{subsection.6.1}%
+\contentsline {section}{\numberline {7}نقش هوش مصنوعی در توسعه پروژه}{8}{section.7}%
+\contentsline {section}{\numberline {8}نمونه کد تولیدشده با کمک هوش مصنوعی}{8}{section.8}%
+\contentsline {subsection}{\numberline {8.1}فاز اول - فرانت‌اند: سیستم پیشنهاددهندهٔ آهنگ}{8}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}فاز دوم - بک‌اند: لایهٔ انتزاعی درگاه پرداخت}{9}{subsection.8.2}%
+\contentsline {section}{\numberline {9}نقاط قوت و ضعف هوش مصنوعی در توسعهٔ فرانت‌اند در برابر بک‌اند}{11}{section.9}%
+\contentsline {subsection}{\numberline {9.1}فرانت‌اند}{11}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}بک‌اند}{11}{subsection.9.2}%
+\contentsline {section}{\numberline {10}جمع‌بندی}{12}{section.10}%
