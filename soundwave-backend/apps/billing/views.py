@@ -3,7 +3,7 @@ import calendar
 from django.conf import settings
 from django.db import transaction as db_transaction
 from django.db.models import Count, Sum
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import generics, permissions, status, viewsets
@@ -23,6 +23,10 @@ from apps.billing.serializers import (
     SubscriptionSerializer,
 )
 from apps.notifications.models import Notification
+
+
+def _redirect_to_payment_result(payment_status):
+    return redirect(f"{settings.FRONTEND_URL}/payment/result?status={payment_status}")
 
 
 def _add_months(dt, months):
@@ -145,7 +149,7 @@ class PaymentCallbackView(APIView):
         payment = get_object_or_404(PaymentTransaction, pk=transaction_id)
 
         if payment.status != PaymentTransaction.Status.PENDING:
-            return Response({"status": payment.status})
+            return _redirect_to_payment_result(payment.status)
 
         # ZarinPal's own callback query params.
         gateway_status = request.query_params.get("Status")
@@ -154,7 +158,7 @@ class PaymentCallbackView(APIView):
         if gateway_status == "NOK":
             payment.status = PaymentTransaction.Status.FAILED
             payment.save(update_fields=["status"])
-            return Response({"status": payment.status})
+            return _redirect_to_payment_result(payment.status)
 
         try:
             verified = get_gateway().verify_payment(reference_id=authority, amount=payment.amount)
@@ -164,7 +168,7 @@ class PaymentCallbackView(APIView):
         if not verified:
             payment.status = PaymentTransaction.Status.FAILED
             payment.save(update_fields=["status"])
-            return Response({"status": payment.status})
+            return _redirect_to_payment_result(payment.status)
 
         with db_transaction.atomic():
             plan = get_object_or_404(SubscriptionPlan, tier=payment.plan_tier)
@@ -198,7 +202,7 @@ class PaymentCallbackView(APIView):
             payment.subscription = subscription
             payment.save(update_fields=["status", "gateway_ref_id", "subscription"])
 
-        return Response({"status": payment.status})
+        return _redirect_to_payment_result(payment.status)
 
 
 class PayoutViewSet(viewsets.ReadOnlyModelViewSet):

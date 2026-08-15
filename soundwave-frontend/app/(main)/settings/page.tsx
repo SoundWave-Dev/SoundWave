@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useAuthStore } from '@/lib/store/authStore';
 import { useLocaleStore, type Language } from '@/lib/store/localeStore';
 import { getMyPreferences, updateMyPreferences, type UserPreferences } from '@/lib/api/playback';
-import { SUBSCRIPTION_PLANS } from '@/lib/constants';
+import { SUBSCRIPTION_PLANS, ROUTES } from '@/lib/constants';
 import { Card, Checkbox, Select, Button, Modal } from '@/components/ui';
 import { ProfileForm } from '@/components/settings/ProfileForm';
 import { ChangePasswordForm } from '@/components/settings/ChangePasswordForm';
@@ -106,9 +107,9 @@ export default function SettingsPage() {
           </li>
         </ul>
 
-        <Button variant="secondary" disabled title={t('upgradeTooltip')}>
-          {t('upgradeButton')}
-        </Button>
+        <Link href={ROUTES.PAYMENT}>
+          <Button variant="secondary">{t('upgradeButton')}</Button>
+        </Link>
       </Card>
 
       <Card>

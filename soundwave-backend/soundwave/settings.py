@@ -124,6 +124,10 @@ SIMPLE_JWT = {
 
 CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",")
 
+# Where PaymentCallbackView sends the browser after the gateway redirects back —
+# the SPA's own result page, not this API's raw JSON (spec §3.6).
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
 # Forgot-password emails (apps.accounts) — console backend in dev so there's no SMTP
 # dependency; point EMAIL_BACKEND at a real backend via env for production.
 EMAIL_BACKEND = os.getenv(

@@ -135,6 +135,46 @@ class StreamingTests(APITestCase):
         detail = self.client.get(f"/api/v1/music/tracks/{track.id}/")
         self.assertIsNone(detail.data["unique_listeners"])
 
+    def test_owning_artist_sees_unique_listeners_without_a_subscription(self):
+        artist = _make_artist("owner-artist@example.com", "Owner Artist")
+        album = _make_album(artist)
+        track = Track.objects.create(title="Owner's Track", album=album, audio_file=_audio_file())
+
+        listener = _make_user("plain-listener@example.com")
+        self.client.force_authenticate(user=listener)
+        self.client.post(f"/api/v1/music/tracks/{track.id}/stream/")
+
+        # The artist has no Subscription at all (get_active_plan returns None) — they
+        # must still see their own track's stats.
+        self.client.force_authenticate(user=artist.user)
+        detail = self.client.get(f"/api/v1/music/tracks/{track.id}/")
+        self.assertEqual(detail.data["unique_listeners"], 1)
+
+    def test_collaborator_sees_unique_listeners_without_a_subscription(self):
+        owner = _make_artist("collab-owner@example.com", "Collab Owner")
+        collaborator = _make_artist("collab-artist@example.com", "Collaborator")
+        album = _make_album(owner)
+        track = Track.objects.create(title="Collab Track", album=album, audio_file=_audio_file())
+        track.collaborators.add(collaborator)
+
+        listener = _make_user("collab-listener@example.com")
+        self.client.force_authenticate(user=listener)
+        self.client.post(f"/api/v1/music/tracks/{track.id}/stream/")
+
+        self.client.force_authenticate(user=collaborator.user)
+        detail = self.client.get(f"/api/v1/music/tracks/{track.id}/")
+        self.assertEqual(detail.data["unique_listeners"], 1)
+
+    def test_non_owning_artist_without_gold_still_hidden(self):
+        artist = _make_artist("stats-artist@example.com", "Stats Artist")
+        other_artist = _make_artist("other-artist-viewer@example.com", "Other Artist Viewer")
+        album = _make_album(artist)
+        track = Track.objects.create(title="Someone Else's Track", album=album, audio_file=_audio_file())
+
+        self.client.force_authenticate(user=other_artist.user)
+        detail = self.client.get(f"/api/v1/music/tracks/{track.id}/")
+        self.assertIsNone(detail.data["unique_listeners"])
+
     def test_free_tier_user_blocked_after_daily_stream_limit(self):
         artist = _make_artist("limit-artist@example.com", "Limit Artist")
         album = _make_album(artist)

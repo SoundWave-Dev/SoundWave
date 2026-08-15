@@ -20,6 +20,16 @@ export async function updatePlanPrices(silverPrice: number, goldPrice: number): 
   await apiClient.patch('/billing/plans/price/', { silver_price: silverPrice, gold_price: goldPrice });
 }
 
+/** Kicks off a subscribe/renew/upgrade purchase. Returns the payment gateway's
+ * redirect URL — the caller is responsible for sending the browser there. */
+export async function subscribeToPlan(planTier: SubscriptionTier, durationMonths: 1 | 3 | 6 | 12): Promise<string> {
+  const { data } = await apiClient.post<{ redirect_url: string }>('/billing/subscribe/', {
+    plan_tier: planTier,
+    duration_months: durationMonths,
+  });
+  return data.redirect_url;
+}
+
 export async function getSubscriptionDistribution(): Promise<Record<SubscriptionTier, number>> {
   const { data } = await apiClient.get<Record<SubscriptionTier, number>>('/billing/reports/subscription-distribution/');
   return { free: data.free ?? 0, silver: data.silver ?? 0, gold: data.gold ?? 0 };

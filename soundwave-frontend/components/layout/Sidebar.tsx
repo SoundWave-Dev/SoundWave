@@ -9,19 +9,29 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, ListMusic, Library, Settings, Bell, LogOut } from 'lucide-react';
+import { Home, ListMusic, Library, Mic2, Settings, Bell, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { getNotifications } from '@/lib/api/notifications';
 import { getInitials } from '@/lib/utils';
 import { ROUTES } from '@/lib/constants';
 import { useTranslation } from '@/lib/i18n';
+import type { User } from '@/types';
 
-const NAV_LINKS = [
+const BASE_NAV_LINKS = [
   { href: ROUTES.HOME, labelKey: 'navHome', icon: Home },
   { href: ROUTES.PLAYLISTS, labelKey: 'navPlaylists', icon: ListMusic },
   { href: ROUTES.LIBRARY, labelKey: 'navLibrary', icon: Library },
-  { href: ROUTES.SETTINGS, labelKey: 'navSettings', icon: Settings },
 ] as const;
+
+const SETTINGS_LINK = { href: ROUTES.SETTINGS, labelKey: 'navSettings', icon: Settings } as const;
+const MANAGE_LINK = { href: ROUTES.ARTIST_MANAGE, labelKey: 'navManage', icon: Mic2 } as const;
+
+function getNavLinks(user: User | null) {
+  const links: (typeof BASE_NAV_LINKS[number] | typeof MANAGE_LINK | typeof SETTINGS_LINK)[] = [...BASE_NAV_LINKS];
+  if (user?.role === 'artist') links.push(MANAGE_LINK);
+  links.push(SETTINGS_LINK);
+  return links;
+}
 
 const TIER_BADGE_KEY: Record<string, { key: 'tierFree' | 'tierSilver' | 'tierGold'; color: string }> = {
   free: { key: 'tierFree', color: 'var(--color-text-muted)' },
@@ -50,6 +60,7 @@ export default function Sidebar() {
   }, [pathname, user]);
 
   const tierBadge = user ? TIER_BADGE_KEY[user.subscription] : null;
+  const navLinks = getNavLinks(user);
 
   return (
     <>
@@ -115,7 +126,7 @@ export default function Sidebar() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)', flex: 1 }}>
-          {NAV_LINKS.map(({ href, labelKey, icon: Icon }) => {
+          {navLinks.map(({ href, labelKey, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
               <Link
@@ -236,7 +247,7 @@ export default function Sidebar() {
         justifyContent: 'space-around',
         padding: 'var(--space-2) 0',
       }}>
-        {NAV_LINKS.map(({ href, labelKey, icon: Icon }) => {
+        {navLinks.map(({ href, labelKey, icon: Icon }) => {
           const active = isActive(pathname, href);
           return (
             <Link

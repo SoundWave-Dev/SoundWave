@@ -43,14 +43,24 @@ class TrackSerializer(serializers.ModelSerializer):
         return obj.stream_events.count()
 
     def get_unique_listeners(self, obj):
-        # spec §2.9: only Gold subscribers (SubscriptionPlan.can_view_artist_stats) see this.
+        # spec §2.9: Gold subscribers (SubscriptionPlan.can_view_artist_stats) see this on
+        # any track; the track's own artist/collaborators always see it on their own
+        # tracks regardless of their personal subscription tier (spec §2.10 stats panel).
         request = self.context.get("request")
         user = getattr(request, "user", None) if request else None
         if not (user and user.is_authenticated):
             return None
-        plan = get_active_plan(user)
-        if not (plan and plan.can_view_artist_stats):
-            return None
+
+        artist_profile = getattr(user, "artist_profile", None)
+        is_owner = artist_profile is not None and (
+            obj.album.artist_profile_id == artist_profile.id
+            or obj.collaborators.filter(pk=artist_profile.id).exists()
+        )
+        if not is_owner:
+            plan = get_active_plan(user)
+            if not (plan and plan.can_view_artist_stats):
+                return None
+
         if hasattr(obj, "annotated_unique_listeners"):
             return obj.annotated_unique_listeners
         return obj.stream_events.values("user").distinct().count()

@@ -1,0 +1,85 @@
+name: SoundWave — check & deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend-check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: soundwave
+          POSTGRES_USER: soundwave
+          POSTGRES_PASSWORD: soundwave
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U soundwave"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+        working-directory: soundwave-backend
+      - name: Django checks + migrations
+        working-directory: soundwave-backend
+        env:
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_NAME: soundwave
+          DB_USER: soundwave
+          DB_PASSWORD: soundwave
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci-only-secret
+        run: |
+          python manage.py check
+          python manage.py migrate
+
+  frontend-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: soundwave-frontend/package-lock.json
+      - run: npm ci
+        working-directory: soundwave-frontend
+      - run: npm run lint
+        working-directory: soundwave-frontend
+      - run: npm test
+        working-directory: soundwave-frontend
+      - run: npm run build
+        working-directory: soundwave-frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+
+  deploy:
+    # Only deploy on a real push to main, and only once both checks pass.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [backend-check, frontend-check]
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into server and redeploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            cd ${{ secrets.DEPLOY_PATH }}
+            git pull origin main
+            docker compose up -d --build
+            docker compose exec -T backend python manage.py migrate

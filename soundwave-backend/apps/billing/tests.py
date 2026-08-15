@@ -85,13 +85,33 @@ class SubscribeFlowTests(APITestCase):
                 f"/api/v1/billing/payment/callback/?transaction_id={payment_id}&Status=OK&Authority=fake-authority"
             )
 
-        self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
-        self.assertEqual(callback_response.data["status"], PaymentTransaction.Status.SUCCESS)
+        self.assertEqual(callback_response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(callback_response.url, f"http://localhost:3000/payment/result?status={PaymentTransaction.Status.SUCCESS}")
 
         subscription = Subscription.objects.get(user=listener)
         self.assertEqual(subscription.status, Subscription.Status.ACTIVE)
         self.assertEqual(subscription.plan, plan)
         self.assertEqual(subscription.duration_months, 3)
+
+    def test_user_cancelling_at_gateway_redirects_to_frontend_without_activating(self):
+        SubscriptionPlan.objects.create(tier=SubscriptionPlan.Tier.GOLD, monthly_price=90000)
+        listener = _make_user("cancelled-user@example.com")
+        self.client.force_authenticate(user=listener)
+
+        with patch("apps.billing.views.get_gateway", return_value=FakeGateway()):
+            self.client.post("/api/v1/billing/subscribe/", {"plan_tier": "gold", "duration_months": 1})
+        payment_id = PaymentTransaction.objects.get(user=listener).id
+
+        response = self.client.get(
+            f"/api/v1/billing/payment/callback/?transaction_id={payment_id}&Status=NOK&Authority=fake-authority"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.url, f"http://localhost:3000/payment/result?status={PaymentTransaction.Status.FAILED}")
+        self.assertEqual(
+            PaymentTransaction.objects.get(pk=payment_id).status, PaymentTransaction.Status.FAILED
+        )
+        self.assertFalse(Subscription.objects.filter(user=listener).exists())
 
     def test_failed_verification_marks_transaction_failed_without_activating(self):
         SubscriptionPlan.objects.create(tier=SubscriptionPlan.Tier.GOLD, monthly_price=90000)
@@ -107,7 +127,8 @@ class SubscribeFlowTests(APITestCase):
                 f"/api/v1/billing/payment/callback/?transaction_id={payment_id}&Status=OK&Authority=fake-authority"
             )
 
-        self.assertEqual(response.data["status"], PaymentTransaction.Status.FAILED)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.url, f"http://localhost:3000/payment/result?status={PaymentTransaction.Status.FAILED}")
         self.assertFalse(Subscription.objects.filter(user=listener).exists())
 
 

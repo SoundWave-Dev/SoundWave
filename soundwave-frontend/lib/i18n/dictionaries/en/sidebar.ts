@@ -2,6 +2,7 @@ export const sidebar = {
   navHome: 'Home',
   navPlaylists: 'Playlists',
   navLibrary: 'Library',
+  navManage: 'Manage',
   navSettings: 'Settings',
   tierFree: 'Free',
   tierSilver: 'Silver',

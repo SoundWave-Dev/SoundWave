@@ -26,6 +26,7 @@ import { miniPlayer } from './miniPlayer';
 import { notificationCard } from './notificationCard';
 import { notificationList } from './notificationList';
 import { offlinePage } from './offlinePage';
+import { paymentPage } from './paymentPage';
 import { payoutTable } from './payoutTable';
 import { player } from './player';
 import { playerPlaceholder } from './playerPlaceholder';
@@ -83,6 +84,7 @@ const fa = {
   notificationCard,
   notificationList,
   offlinePage,
+  paymentPage,
   payoutTable,
   player,
   playerPlaceholder,

@@ -2,6 +2,7 @@ export const sidebar = {
   navHome: 'خانه',
   navPlaylists: 'پلی‌لیست‌ها',
   navLibrary: 'کتابخانه',
+  navManage: 'مدیریت آثار',
   navSettings: 'تنظیمات',
   tierFree: 'رایگان',
   tierSilver: 'نقره‌ای',
