@@ -61,8 +61,9 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
     accepted_privacy_policy_at = models.DateTimeField(null=True, blank=True)
 
-    # TODO(Foad): daily stream usage is subscription-tier-limited (spec §2.4 table) —
-    # decide whether this is a rolling counter on User or derived from apps.music.StreamEvent.
+    # Daily stream usage (spec §2.4 table) is derived from apps.music.StreamEvent,
+    # not stored here — see MeSerializer.get_daily_stream_count / apps.music.views
+    # for the tier-limit enforcement on /tracks/{id}/stream/.
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

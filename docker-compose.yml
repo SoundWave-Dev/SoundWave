@@ -40,6 +40,8 @@ services:
     build: ./soundwave-frontend
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+      INTERNAL_API_URL: http://backend:8000/api/v1
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
     volumes:
       - ./soundwave-frontend:/app
       - /app/node_modules

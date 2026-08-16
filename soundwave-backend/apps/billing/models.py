@@ -118,6 +118,5 @@ class Payout(models.Model):
         unique_together = ["artist_profile", "period_month"]
         ordering = ["-period_month"]
 
-    # TODO(Foad): the payout formula (unique_listeners/total_streams -> amount) is
-    # intentionally left to Phase 2 design per spec §1 — implement in a management
-    # command / Celery task that runs monthly, not on-request.
+    # Payout formula (total_streams * settings.PAYOUT_RATE_PER_STREAM) runs monthly,
+    # not on-request — see apps.billing.management.commands.calculate_payouts.

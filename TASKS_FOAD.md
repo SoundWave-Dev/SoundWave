@@ -8,47 +8,47 @@
 
 ### Login Page (`app/(auth)/login/page.tsx`)
 
-- [ ] Login form with two fields: **email** and **password**
-- [ ] Validation using `zod` + `react-hook-form`:
+- [x] Login form with two fields: **email** and **password**
+- [x] Validation using `zod` + `react-hook-form`:
   - Email must be a valid email address
   - Password minimum 8 characters
-- [ ] Show inline validation errors below each field
-- [ ] Submit button disabled while loading
-- [ ] On successful login, redirect based on role:
+- [x] Show inline validation errors below each field
+- [x] Submit button disabled while loading
+- [x] On successful login, redirect based on role:
   - `listener` / `artist` → `/home`
   - `support` / `admin` → `/support`
-- [ ] "Forgot password" link → separate page/modal with email input
-- [ ] "Register" link that switches to the registration tab
-- [ ] Handle wrong credentials gracefully (clear error message to user)
+- [x] "Forgot password" link → separate page/modal with email input
+- [x] "Register" link that switches to the registration tab
+- [x] Handle wrong credentials gracefully (clear error message to user)
 
 ### Register Page (same page, separate tab)
 
-- [ ] **Listener tab:**
-  - [ ] Display name (`displayName`)
-  - [ ] Email
-  - [ ] Password + confirm password (must match)
-  - [ ] Date of birth
-  - [ ] Gender (dropdown: male / female / other / prefer not to say)
-  - [ ] Privacy policy checkbox — clicking "privacy policy" text opens a modal with the full text
-- [ ] **Artist tab:**
-  - [ ] Email + password
-  - [ ] Stage name (`stageName`)
-  - [ ] Portfolio upload (Phase 1: UI only, no real upload)
-  - [ ] After submission: show "Your request is pending review" message
-- [ ] Full `zod` validation on all fields
+- [x] **Listener tab:**
+  - [x] Display name (`displayName`)
+  - [x] Email
+  - [x] Password + confirm password (must match)
+  - [x] Date of birth
+  - [x] Gender (dropdown: male / female / other / prefer not to say)
+  - [x] Privacy policy checkbox — clicking "privacy policy" text opens a modal with the full text
+- [x] **Artist tab:**
+  - [x] Email + password
+  - [x] Stage name (`stageName`)
+  - [x] Portfolio upload (Phase 1: UI only, no real upload)
+  - [x] After submission: show "Your request is pending review" message
+- [x] Full `zod` validation on all fields
 
 ---
 
 ## 🔔 Notifications Page (`app/(main)/notifications/page.tsx`)
 
-- [ ] Render list of notifications from `mockGetNotifications()`
-- [ ] Unread notifications visually distinct (e.g. colored border or faint background tint)
-- [ ] "Mark as read" button on each notification card
-- [ ] "Delete" button on each notification card
-- [ ] "Mark all as read" button at the top of the panel
-- [ ] Empty state when there are no notifications
-- [ ] Clickable notifications (those with `actionUrl`) navigate to the relevant page
-- [ ] Show relative timestamps using `timeAgo()` from `lib/utils`
+- [x] Render list of notifications from `mockGetNotifications()`
+- [x] Unread notifications visually distinct (e.g. colored border or faint background tint)
+- [x] "Mark as read" button on each notification card
+- [x] "Delete" button on each notification card
+- [x] "Mark all as read" button at the top of the panel
+- [x] Empty state when there are no notifications
+- [x] Clickable notifications (those with `actionUrl`) navigate to the relevant page
+- [x] Show relative timestamps using `timeAgo()` from `lib/utils`
 
 ---
 
@@ -56,19 +56,19 @@
 
 > Only visible to users with `role === 'artist'` AND `status === 'approved'`
 
-- [ ] List of the artist's published works
-- [ ] "Upload new track" button → modal/form with fields:
-  - [ ] Track title
-  - [ ] Audio file (MP3 / WAV / FLAC) — Phase 1: UI only, no actual upload
-  - [ ] Cover image — Phase 1: UI only
-  - [ ] Lyrics (optional textarea)
-  - [ ] Genre
-  - [ ] Release year
-  - [ ] Type: "Single" or "Album"
-  - [ ] Collaborating artists (optional)
-- [ ] Edit an existing published work
-- [ ] Delete a work (with confirmation dialog)
-- [ ] Per-work stats: listener count, stream count, estimated earnings
+- [x] List of the artist's published works
+- [x] "Upload new track" button → modal/form with fields:
+  - [x] Track title
+  - [x] Audio file (MP3 / WAV / FLAC) — Phase 1: UI only, no actual upload
+  - [x] Cover image — Phase 1: UI only
+  - [x] Lyrics (optional textarea)
+  - [x] Genre
+  - [x] Release year
+  - [x] Type: "Single" or "Album"
+  - [x] Collaborating artists (optional)
+- [x] Edit an existing published work
+- [x] Delete a work (with confirmation dialog)
+- [x] Per-work stats: listener count, stream count, estimated earnings
 
 ---
 
@@ -78,46 +78,46 @@
 
 ### Tab 1 — Artist Verification Requests
 
-- [ ] Table with columns: stage name, email, registration date, status
-- [ ] "View portfolio" button on each row
-- [ ] "Approve" button → sets artist status to `approved`, sends notification
-- [ ] "Reject" button → modal with a "reason for rejection" text field
+- [x] Table with columns: stage name, email, registration date, status
+- [x] "View portfolio" button on each row
+- [x] "Approve" button → sets artist status to `approved`, sends notification
+- [x] "Reject" button → modal with a "reason for rejection" text field
 
 ### Tab 2 — Support Tickets
 
-- [ ] Table with columns: ticket ID, username, subject, date, status
-- [ ] Clicking a ticket opens a chatbox-style page
-- [ ] Support agent can type and send a reply
+- [x] Table with columns: ticket ID, username, subject, date, status
+- [x] Clicking a ticket opens a chatbox-style page
+- [x] Support agent can type and send a reply
 
 ### Tab 3 — Accounting (admin only)
 
-- [ ] Monthly payout table for artists
-- [ ] Columns: name, unique listeners, total streams, payout amount, payment status
-- [ ] "Confirm settlement" button (admin only) — toggles status to "Paid"
+- [x] Monthly payout table for artists
+- [x] Columns: name, unique listeners, total streams, payout amount, payment status
+- [x] "Confirm settlement" button (admin only) — toggles status to "Paid"
 
 ### Tab 4 — Subscription Management (admin only)
 
-- [ ] Form with two number inputs to update Silver and Gold subscription prices
-- [ ] Pie chart showing user distribution across Free / Silver / Gold tiers
+- [x] Form with two number inputs to update Silver and Gold subscription prices
+- [x] Pie chart showing user distribution across Free / Silver / Gold tiers
   (use plain SVG or a lightweight chart library — no heavy deps)
-- [ ] Revenue summary cards for the current month
+- [x] Revenue summary cards for the current month
 
 ---
 
 ## 🌐 PWA (Progressive Web App) — Bonus
 
-- [ ] Generate app icons and place them in `public/icons/`:
+- [x] Generate app icons and place them in `public/icons/`:
   - Sizes needed: 72, 96, 128, 144, 152, 192, 384, 512 px
   - Use [realfavicongenerator.net](https://realfavicongenerator.net) to generate all sizes at once
-- [ ] Review `public/manifest.json` (already created — just needs the real icons)
-- [ ] Add `<PWAInstallPrompt />` to `app/(main)/layout.tsx`:
+- [x] Review `public/manifest.json` (already created — just needs the real icons)
+- [x] Add `<PWAInstallPrompt />` to `app/(main)/layout.tsx`:
   ```tsx
   import { PWAInstallPrompt } from '@/components/pwa/PWAInstallPrompt';
   // Place just before the closing </div> of app-shell:
   <PWAInstallPrompt />
   ```
-- [ ] Verify in production: `npm run build && npm start` → Chrome DevTools → Application → Manifest
-- [ ] Confirm the offline page (`/offline`) renders correctly when network is unavailable
+- [x] Verify in production: `npm run build && npm start` → Chrome DevTools → Application → Manifest
+- [x] Confirm the offline page (`/offline`) renders correctly when network is unavailable
 
 **Files already scaffolded (just needs icons + wiring):**
 - `public/manifest.json` ✅
@@ -129,12 +129,12 @@
 
 ## 🧪 Tests — Foad's Minimum: 4 tests
 
-- [ ] `__tests__/components/LoginForm.test.tsx`
-  - [ ] Email and password fields render
-  - [ ] Validation error appears when form is submitted empty
-- [ ] `__tests__/components/Notifications.test.tsx`
-  - [ ] Notification list renders
-  - [ ] After clicking "mark as read", the notification updates
+- [x] `__tests__/components/LoginForm.test.tsx`
+  - [x] Email and password fields render
+  - [x] Validation error appears when form is submitted empty
+- [x] `__tests__/components/Notifications.test.tsx`
+  - [x] Notification list renders
+  - [x] After clicking "mark as read", the notification updates
 
 ---
 

@@ -5,13 +5,21 @@
 // Takes user's listening history + preferences and returns
 // a list of suggested track IDs with reasoning.
 //
-// In Phase 1: uses mock tracks as the catalog.
-// In Phase 2: replace MOCK_TRACKS with a real DB query.
+// Catalog comes from the real Django track catalog (public,
+// unauthenticated `GET /music/tracks/`) so suggestions hydrate
+// into playable tracks, not Phase-1 mock data.
 // ============================================================
 
 import { NextRequest, NextResponse } from 'next/server';
-import { MOCK_TRACKS } from '@/lib/mock/data';
+import { mapTrack, type ApiTrack } from '@/lib/api/mappers';
 import type { Track } from '@/types';
+
+// Server-side fetch (this route runs on the Next.js server, not the browser),
+// so in Docker it must hit the backend container's hostname, not "localhost".
+// INTERNAL_API_URL overrides that for docker-compose; falls back to the
+// browser-facing URL for plain `npm run dev`, where both run on localhost.
+const API_BASE_URL =
+  process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 interface SuggestionRequest {
   recentlyPlayedIds: string[];   // tracks user played recently
@@ -25,13 +33,22 @@ interface SuggestionResult {
   reason: string;   // short Persian explanation why this was suggested
 }
 
+async function getCatalog(): Promise<Track[]> {
+  const res = await fetch(`${API_BASE_URL}/music/tracks/?page_size=200`, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`Failed to load track catalog: ${res.status}`);
+  const data: { results: ApiTrack[] } = await res.json();
+  return data.results.map(mapTrack);
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body: SuggestionRequest = await req.json();
     const { recentlyPlayedIds, likedGenres, dislikedTrackIds = [], mood } = body;
 
+    const allTracks = await getCatalog();
+
     // Build a catalog summary for the model (only what it needs)
-    const catalog = MOCK_TRACKS
+    const catalog = allTracks
       .filter((t) => !dislikedTrackIds.includes(t.id))
       .map((t) => ({
         id: t.id,
@@ -41,9 +58,9 @@ export async function POST(req: NextRequest) {
         streamCount: t.streamCount,
       }));
 
-    const recentlyPlayed = MOCK_TRACKS
+    const recentlyPlayed = allTracks
       .filter((t) => recentlyPlayedIds.includes(t.id))
-      .map((t) => `${t.title} (${t.genre ?? 'Unknown'}) - ${t.artists.map(a => a.stageName).join(', ')}`);
+      .map((t) => `${t.title} (${t.genre ?? 'Unknown'}) - ${t.artists.map((a) => a.stageName).join(', ')}`);
 
     const prompt = `
 تو یک سیستم پیشنهاددهنده موسیقی هستی برای یک سرویس استریم موسیقی ایرانی به نام Soundwave.
@@ -93,7 +110,7 @@ ${JSON.stringify(catalog, null, 2)}
     // Hydrate with full track data
     const result = suggestions
       .map((s) => {
-        const track = MOCK_TRACKS.find((t) => t.id === s.trackId);
+        const track = allTracks.find((t) => t.id === s.trackId);
         if (!track) return null;
         return { track, reason: s.reason };
       })

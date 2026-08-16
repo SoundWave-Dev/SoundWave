@@ -10,7 +10,7 @@ from apps.music.models import StreamEvent
 class Command(BaseCommand):
     """Calculates each approved artist's payout for the previous calendar month from
     their StreamEvents (spec §2.11.2). Run monthly via cron/Celery beat — never
-    on-request, per the Payout model's TODO.
+    on-request.
     """
 
     help = "Calculate artist payouts for the previous calendar month."

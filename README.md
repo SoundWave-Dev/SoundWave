@@ -6,6 +6,10 @@
 **Instructor:** Ali Abrishami  
 **Team:** Foad · Iliya · Rayan
 
+**Status:** Phase 1 (frontend) and Phase 2 (backend) both complete — 38 frontend
+tests and 54 backend tests passing. See each person's `TASKS_*.md` for the
+full per-feature checklist.
+
 ---
 
 ## 📦 Repository Structure
@@ -40,6 +44,7 @@ each person's `TASKS_*.md` (Phase 2 section).
 ```bash
 cd soundwave-frontend
 npm install
+cp .env.local.example .env.local   # point NEXT_PUBLIC_API_URL at the backend; add a GROQ_API_KEY for the AI suggester
 npm run dev        # http://localhost:3000
 npm test           # run tests
 ```
@@ -56,15 +61,21 @@ python manage.py migrate
 python manage.py runserver  # http://localhost:8000
 ```
 
-Base project structure, models, and URL routing already exist — see `apps/`
-below. Views/serializers are stubbed with `TODO(<owner>)` comments for each
-person to fill in.
+Optional: `python manage.py seed_demo_data` (and `seed_real_artists`) populate
+sample listeners/artists/tracks so the frontend has real data to render
+immediately.
 
-### Full Stack with Docker *(optional bonus — see Docker section below)*
+### Full Stack with Docker
 
 ```bash
 docker compose up
 ```
+
+Spins up Postgres, Redis, the Django backend (migrates on boot,
+`localhost:8000`), and the Next.js frontend (`localhost:3000`) together —
+see `docker-compose.yml`. The frontend container still needs its own
+`GROQ_API_KEY` for the AI Song Suggester; pass it via a `.env` file next to
+`docker-compose.yml` or export it in your shell before `docker compose up`.
 
 ---
 
@@ -120,7 +131,7 @@ SoundWave is a Spotify-like music streaming platform. Users can stream music, ma
 ### Bonus Features
 
 - **PWA** — installable as a native-like app (Foad)
-- **AI Song Suggester** — Claude-powered recommendations by mood & genre (Iliya)
+- **AI Song Suggester** — LLM-powered recommendations by mood & genre, drawing from the real track catalog (Iliya)
 
 ### Design System
 
