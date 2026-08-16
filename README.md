@@ -247,16 +247,3 @@ Detailed per-person checklists are in the root of the repo:
 - [`TASKS_RAYAN.md`](./TASKS_RAYAN.md)
 
 ---
-
-## 📄 Final Report
-
-A PDF report is required at the end of Phase 2. It must include:
-
-- Each member's contributions per phase
-- Development rules and process (naming, branching, code style)
-- Project structure and justification
-- Backend model design and relationships
-- Role of AI tools in development
-- One AI-generated code sample from each phase
-- Strengths and weaknesses of AI in frontend vs backend development
-
